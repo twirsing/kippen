@@ -1,0 +1,83 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".KippenCollectingActivity" >
+
+    <TextView
+        android:id="@+id/lblMotion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:text="@string/lblMotion"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/lblXAcc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/lblMotion"
+        android:layout_below="@+id/lblMotion"
+        android:layout_marginTop="5dp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/lblYAcc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/lblMotion"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/lblZAcc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/lblMotion"
+        android:layout_marginRight="5dp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/lblWifi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lblMotion"
+        android:layout_alignLeft="@+id/lblMotion"
+        android:layout_marginTop="35dp"
+        android:text="@string/lblWifi"
+        android:textStyle="bold" />
+
+    <TableLayout
+        android:id="@+id/tblWifi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/lblWifi"
+        android:layout_below="@+id/lblWifi"
+        android:layout_marginTop="16dp" >
+
+        <TableRow
+            android:id="@+id/tableWifiHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+            
+            <TextView
+           		android:text="@string/lblWifiHeaderAP"
+            	android:padding="3dp"
+            	android:textStyle="bold" />
+
+            <TextView
+                android:padding="3dp"
+                android:text="@string/lblWifiHeaderSignal"
+                android:textStyle="bold" />
+
+        </TableRow>
+        
+    </TableLayout>
+
+</RelativeLayout>
