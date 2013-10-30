@@ -58,7 +58,7 @@ public class WifiSensingTableOutput extends BroadcastReceiver implements ISensor
 		
 		// for each scan results make an entry and store the signal level
 		for (ScanResult result : results) {
-			if(!result.SSID.equals(config.getConfig(SensorConfigType.CENTER_AP_ESSID))) {
+			if(!result.SSID.equals(config.getConfig(SensorConfigType.MEASURE_AP_ESSID))) {
 				continue;
 			}
 			

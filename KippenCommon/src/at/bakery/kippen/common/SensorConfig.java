@@ -6,8 +6,7 @@ import java.util.Map;
 public class SensorConfig {
 	
 	public enum SensorConfigType {
-		CENTER_AP_ESSID,
-		TRI_AP_ESSID,
+		MEASURE_AP_ESSID,
 		OID
 	}
 	

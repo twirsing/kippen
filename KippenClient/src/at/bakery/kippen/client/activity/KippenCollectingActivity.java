@@ -10,8 +10,10 @@ import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -67,13 +69,32 @@ public class KippenCollectingActivity extends Activity {
 		}
 		wifiMan = (WifiManager)tmpMan;
 		
-		// TODO here, connect to pre-defined network
+		// connect to host network
+		WifiConfiguration wc = new WifiConfiguration(); 
+	    wc.SSID = "\"seepark\""; 
+	    wc.preSharedKey  = "\"\"";
+	    wc.status = WifiConfiguration.Status.ENABLED;         
+	    wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP); 
+	    wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP); 
+	    wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK); 
+	    wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP); 
+	    wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP); 
+	    wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+	    wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+
+	    // add and enable might fail e.g., in case it exists already in the manager
+	    wifiMan.enableNetwork(wifiMan.addNetwork(wc), true);         
+	    if(!wifiMan.reconnect()) {
+	    	showErrorDialog("The device was not able to connect to the host network. Please check your AP and client-side wifi configurations! Quit for now ...");
+			this.finish();
+	    }
+		
 		// TODO protocol as follows: [action (from which side)]
 		// TODO connect (c) -> receive UID/config (s) -> send data (c)
 		
 		/* FIXME test data */
 		config = new SensorConfig();
-		config.setConfig(SensorConfigType.CENTER_AP_ESSID, "seepark");
+		config.setConfig(SensorConfigType.MEASURE_AP_ESSID, "seepark");
 		
 		// the battery status measurement
 		registerReceiver(new BatterySensingNoOutput(), new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
