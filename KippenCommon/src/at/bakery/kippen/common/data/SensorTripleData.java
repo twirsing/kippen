@@ -1,5 +1,7 @@
 package at.bakery.kippen.common.data;
 
+import java.text.DecimalFormat;
+
 public class SensorTripleData implements IData {
 	
 	private static final long serialVersionUID = -2311126585385429938L;
@@ -12,5 +14,11 @@ public class SensorTripleData implements IData {
 		this.x = x;
 		this.y = y;
 		this.z = z;
+	}
+
+	@Override
+	public String toString() {
+		DecimalFormat f = new DecimalFormat("###.##");
+		return "SENSOR x = " + f.format(x) + ", y = " + f.format(y) + ", z = " + f.format(z);
 	}
 }

@@ -19,4 +19,9 @@ public class BatteryData implements IData {
 	public float getLevel() {
 		return level;
 	}
+
+	@Override
+	public String toString() {
+		return "BATTERY " + (!charging ? "dis" : "") + "charging @ " + (level * 100.0) + "%";
+	}
 }

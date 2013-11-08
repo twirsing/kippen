@@ -34,7 +34,6 @@ public class NetworkingTask extends Thread implements INetworking {
 	@Override
 	public void run() {
 		while(!quit) {
-			
 			try {
 				flush.acquire();
 			} catch (InterruptedException e1) {}

@@ -9,12 +9,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.widget.TextView;
+import at.bakery.kippen.client.activity.INetworking;
 import at.bakery.kippen.common.DataWithTimestamp;
 import at.bakery.kippen.common.data.SensorTripleData;
 
 public class AccSensingTextOutput implements SensorEventListener {
 
-	private static final int MEASURE_COUNT = 10;
+	private static final int MEASURE_COUNT = 50;
 	
 	private TextView lblXAccId, lblYAccId, lblZAccId;
 	
@@ -28,10 +29,14 @@ public class AccSensingTextOutput implements SensorEventListener {
 	
 	private Lock updateLock = new ReentrantLock();
 	
-	public AccSensingTextOutput(TextView lblXAccId, TextView lblYAccId, TextView lblZAccId) {
+	private INetworking net;
+	
+	public AccSensingTextOutput(TextView lblXAccId, TextView lblYAccId, TextView lblZAccId, INetworking net) {
 		this.lblXAccId = lblXAccId;
 		this.lblYAccId = lblYAccId;
 		this.lblZAccId = lblZAccId;
+		
+		this.net = net;
 	}
 	
 	@Override
@@ -81,7 +86,9 @@ public class AccSensingTextOutput implements SensorEventListener {
 		
 		updateTime = System.nanoTime();
 		
-		new DataWithTimestamp(avgValue, updateTime);
+		net.sendPackets(new DataWithTimestamp(
+				new SensorTripleData(avgValue.x / values.size(), avgValue.x / values.size(), avgValue.x / values.size()), 
+				updateTime));
 		
 		updateLock.unlock();
 	}

@@ -35,14 +35,15 @@ public class KippenCollectingActivity extends Activity {
 	private Sensor accSense;
 	private SensorEventListener accSensorListener;
 	
-	// used for battery measurements
-//	private PowerManager powerMan;
-	
 	// used for audio measurements
 //	private AudioManager audioMan;
 	
 	// used for Wifi based measurements and for server connection
 	private WifiManager wifiMan;
+	private WifiSensingTableOutput wifiReceiver;
+	
+	// used for battery based measurements
+	private BatterySensingNoOutput batteryReceiver;
 	
 	// helper for building alert messages for the front end
 	private static AlertDialog.Builder alertBuilder;
@@ -103,32 +104,39 @@ public class KippenCollectingActivity extends Activity {
 		config.setConfig(SensorConfigType.MEASURE_AP_ESSID, "JulesWinnfield");
 		
 		// the battery status measurement
-		registerReceiver(new BatterySensingNoOutput(networkTask), new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+		batteryReceiver = new BatterySensingNoOutput(networkTask);
 		
 		// the accelerometer and its GUI component
 		accSense = senseMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		accSensorListener = new AccSensingTextOutput(
 				(TextView)findViewById(R.id.lblXAcc),
 				(TextView)findViewById(R.id.lblYAcc),
-				(TextView)findViewById(R.id.lblZAcc));
+				(TextView)findViewById(R.id.lblZAcc),
+				networkTask);
 		
 		// the wifi and its GUI component
 		wifiMan.setWifiEnabled(true);
-		registerReceiver(new WifiSensingTableOutput(wifiMan, (TableLayout)findViewById(R.id.tblWifi), config, networkTask), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-		wifiMan.startScan();
+		wifiReceiver = new WifiSensingTableOutput(wifiMan, (TableLayout)findViewById(R.id.tblWifi), config, networkTask);
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
 		senseMan.registerListener(accSensorListener, accSense, Sensor.TYPE_ACCELEROMETER);
+		registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		wifiMan.startScan();
+		registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
 		senseMan.unregisterListener(accSensorListener);
+		unregisterReceiver(wifiReceiver);
+		unregisterReceiver(batteryReceiver);
 	}
+	
+	
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

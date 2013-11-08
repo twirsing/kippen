@@ -79,16 +79,22 @@ public class WifiSensingTableOutput extends BroadcastReceiver {
 			resRow.addView(level);
 			
 			table.addView(resRow);
-			wifiLevels.put(result.SSID, result.level);
+			
+			// add the BSSID as SSID is not unique
+			wifiLevels.put(result.BSSID, result.level);
 		}
 		updateTime = System.nanoTime();
 		
 		net.sendPackets(new DataWithTimestamp(wifiLevels, updateTime));
 		
 		updateLock.unlock();
-						
+			
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {}
+		
 		// initiate the next scan
 		wifiMan.startScan();	 // FIXME do this periodically in main!!			
 	}
-
+	
 }
