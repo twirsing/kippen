@@ -40,7 +40,7 @@ public class NetworkingTask extends Thread implements INetworking {
 			
 			if(socket == null) {
 				try {
-					socket = new Socket(InetAddress.getByName("192.168.1.141"), 10000);
+					socket = new Socket(InetAddress.getByName("192.168.1.12"), 10000);
 					oos = new ObjectOutputStream(socket.getOutputStream());
 				} catch (Exception e) {
 					return;

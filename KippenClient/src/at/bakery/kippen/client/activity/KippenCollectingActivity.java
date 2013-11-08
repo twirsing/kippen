@@ -73,8 +73,8 @@ public class KippenCollectingActivity extends Activity {
 		
 		// connect to host network
 		WifiConfiguration wc = new WifiConfiguration(); 
-	    wc.SSID = "\"JulesWinnfield\""; 
-	    wc.preSharedKey  = "\"wuzikrabuzi\"";
+	    wc.SSID = "\"StockEINS\""; 
+	    wc.preSharedKey  = "\"IchBinEinLustigesPasswort\"";
 	    wc.status = WifiConfiguration.Status.ENABLED;         
 	    wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP); 
 	    wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP); 
@@ -101,7 +101,7 @@ public class KippenCollectingActivity extends Activity {
 		
 		/* FIXME test data */
 		config = new SensorConfig();
-		config.setConfig(SensorConfigType.MEASURE_AP_ESSID, "JulesWinnfield");
+		config.setConfig(SensorConfigType.MEASURE_AP_ESSID, "StockEINS");
 		
 		// the battery status measurement
 		batteryReceiver = new BatterySensingNoOutput(networkTask);

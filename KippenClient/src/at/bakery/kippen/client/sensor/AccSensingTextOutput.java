@@ -86,9 +86,9 @@ public class AccSensingTextOutput implements SensorEventListener {
 		
 		updateTime = System.nanoTime();
 		
-		net.sendPackets(new DataWithTimestamp(
-				new SensorTripleData(avgValue.x / values.size(), avgValue.x / values.size(), avgValue.x / values.size()), 
-				updateTime));
+		//net.sendPackets(new DataWithTimestamp(
+		//		new SensorTripleData(avgValue.x / values.size(), avgValue.x / values.size(), avgValue.x / values.size()), 
+		//		updateTime));
 		
 		updateLock.unlock();
 	}
