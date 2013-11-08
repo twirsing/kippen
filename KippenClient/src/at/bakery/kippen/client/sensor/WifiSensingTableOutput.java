@@ -1,24 +1,26 @@
 package at.bakery.kippen.client.sensor;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import at.bakery.kippen.common.ISensorData;
+import at.bakery.kippen.client.R;
+import at.bakery.kippen.client.activity.INetworking;
+import at.bakery.kippen.common.DataWithTimestamp;
 import at.bakery.kippen.common.SensorConfig;
 import at.bakery.kippen.common.SensorConfig.SensorConfigType;
+import at.bakery.kippen.common.data.WifiLevelsData;
 
-public class WifiSensingTableOutput extends BroadcastReceiver implements ISensorData {
+public class WifiSensingTableOutput extends BroadcastReceiver {
 
 	// used for accessing Wifi scan results
 	private WifiManager wifiMan;
@@ -30,19 +32,22 @@ public class WifiSensingTableOutput extends BroadcastReceiver implements ISensor
 	private SensorConfig config;
 	
 	// the measurements, here its Wifi and its corresponding timestamp (i.e. scan time)
-	private Map<String, Integer> wifiLevels = new HashMap<String, Integer>();
+	private WifiLevelsData wifiLevels;
 	private long updateTime = -1;
 	
 	private Lock updateLock = new ReentrantLock();
 	
-	public WifiSensingTableOutput(WifiManager wifiMan, TableLayout table) {
-		this(wifiMan, table, new SensorConfig());
+	private INetworking net;
+	
+	public WifiSensingTableOutput(WifiManager wifiMan, TableLayout table, INetworking net) {
+		this(wifiMan, table, new SensorConfig(), net);
 	}
 	
-	public WifiSensingTableOutput(WifiManager wifiMan, TableLayout table, SensorConfig config) {
+	public WifiSensingTableOutput(WifiManager wifiMan, TableLayout table, SensorConfig config, INetworking net) {
 		this.wifiMan = wifiMan;
 		this.table = table;
 		this.config = config;
+		this.net = net;
 	}
 	
 	@Override
@@ -52,7 +57,7 @@ public class WifiSensingTableOutput extends BroadcastReceiver implements ISensor
 		
 		// remove all table contents (except the header row) and measurements
 		table.removeViews(1, table.getChildCount()-1);
-		wifiLevels.clear();
+		wifiLevels = new WifiLevelsData();
 		
 		updateLock.lock();
 		
@@ -75,23 +80,15 @@ public class WifiSensingTableOutput extends BroadcastReceiver implements ISensor
 			
 			table.addView(resRow);
 			wifiLevels.put(result.SSID, result.level);
-			updateTime = System.nanoTime();
 		}
+		updateTime = System.nanoTime();
+		
+		net.sendPackets(new DataWithTimestamp(wifiLevels, updateTime));
 		
 		updateLock.unlock();
 						
 		// initiate the next scan
-		wifiMan.startScan();				
+		wifiMan.startScan();	 // FIXME do this periodically in main!!			
 	}
 
-	@Override
-	public DataWithTimestamp getData() {
-		updateLock.lock();
-		
-		DataWithTimestamp ret = new DataWithTimestamp(wifiLevels, updateTime);
-		
-		updateLock.unlock();
-		
-		return ret;
-	}
 }

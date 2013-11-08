@@ -13,7 +13,6 @@ import android.hardware.SensorManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -21,8 +20,10 @@ import at.bakery.kippen.client.R;
 import at.bakery.kippen.client.sensor.AccSensingTextOutput;
 import at.bakery.kippen.client.sensor.BatterySensingNoOutput;
 import at.bakery.kippen.client.sensor.WifiSensingTableOutput;
+import at.bakery.kippen.common.DataWithTimestamp;
 import at.bakery.kippen.common.SensorConfig;
 import at.bakery.kippen.common.SensorConfig.SensorConfigType;
+import at.bakery.kippen.common.data.PingData;
 
 public class KippenCollectingActivity extends Activity {
 	
@@ -71,8 +72,8 @@ public class KippenCollectingActivity extends Activity {
 		
 		// connect to host network
 		WifiConfiguration wc = new WifiConfiguration(); 
-	    wc.SSID = "\"seepark\""; 
-	    wc.preSharedKey  = "\"\"";
+	    wc.SSID = "\"JulesWinnfield\""; 
+	    wc.preSharedKey  = "\"wuzikrabuzi\"";
 	    wc.status = WifiConfiguration.Status.ENABLED;         
 	    wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP); 
 	    wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP); 
@@ -89,15 +90,20 @@ public class KippenCollectingActivity extends Activity {
 			this.finish();
 	    }
 		
+	    NetworkingTask networkTask = new NetworkingTask();
+	    networkTask.start();
+	    
+	    networkTask.sendPackets(new DataWithTimestamp(new PingData()));
+	    
 		// TODO protocol as follows: [action (from which side)]
 		// TODO connect (c) -> receive UID/config (s) -> send data (c)
 		
 		/* FIXME test data */
 		config = new SensorConfig();
-		config.setConfig(SensorConfigType.MEASURE_AP_ESSID, "seepark");
+		config.setConfig(SensorConfigType.MEASURE_AP_ESSID, "JulesWinnfield");
 		
 		// the battery status measurement
-		registerReceiver(new BatterySensingNoOutput(), new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+		registerReceiver(new BatterySensingNoOutput(networkTask), new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 		
 		// the accelerometer and its GUI component
 		accSense = senseMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -108,7 +114,7 @@ public class KippenCollectingActivity extends Activity {
 		
 		// the wifi and its GUI component
 		wifiMan.setWifiEnabled(true);
-		registerReceiver(new WifiSensingTableOutput(wifiMan, (TableLayout)findViewById(R.id.tblWifi), config), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		registerReceiver(new WifiSensingTableOutput(wifiMan, (TableLayout)findViewById(R.id.tblWifi), config, networkTask), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		wifiMan.startScan();
 	}
 	

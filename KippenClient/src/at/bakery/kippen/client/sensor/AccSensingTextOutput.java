@@ -9,22 +9,22 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.widget.TextView;
-import at.bakery.kippen.common.ISensorData;
-import at.bakery.kippen.common.data.Triple;
+import at.bakery.kippen.common.DataWithTimestamp;
+import at.bakery.kippen.common.data.SensorTripleData;
 
-public class AccSensingTextOutput implements SensorEventListener, ISensorData {
+public class AccSensingTextOutput implements SensorEventListener {
 
 	private static final int MEASURE_COUNT = 10;
 	
 	private TextView lblXAccId, lblYAccId, lblZAccId;
 	
-	private Queue<Triple> values = new LinkedList<Triple>();
-	private Triple avgValue = new Triple(0, 0, 0);
+	private Queue<SensorTripleData> values = new LinkedList<SensorTripleData>();
+	private SensorTripleData avgValue = new SensorTripleData(0, 0, 0);
 	private long updateTime = -1;
 	
-	private Triple measureStart = new Triple(0, 0, 0);
-	private Triple measureEnd = new Triple(0, 0, 0);
-	private Triple measureRef = measureStart;
+	private SensorTripleData measureStart = new SensorTripleData(0, 0, 0);
+	private SensorTripleData measureEnd = new SensorTripleData(0, 0, 0);
+	private SensorTripleData measureRef = measureStart;
 	
 	private Lock updateLock = new ReentrantLock();
 	
@@ -58,7 +58,7 @@ public class AccSensingTextOutput implements SensorEventListener, ISensorData {
 			measureRef = measureStart;
 		}
 				
-		Triple t = new Triple(measureEnd.x - measureStart.x, measureEnd.y - measureStart.y, measureEnd.z - measureStart.z);
+		SensorTripleData t = new SensorTripleData(measureEnd.x - measureStart.x, measureEnd.y - measureStart.y, measureEnd.z - measureStart.z);
 		values.offer(t);
 		
 		updateLock.lock();
@@ -68,7 +68,7 @@ public class AccSensingTextOutput implements SensorEventListener, ISensorData {
 		avgValue.z += t.z;
 		
 		if(values.size() > MEASURE_COUNT) {
-			Triple rem = values.poll();
+			SensorTripleData rem = values.poll();
 			
 			avgValue.x -= rem.x;
 			avgValue.y -= rem.y;
@@ -81,17 +81,8 @@ public class AccSensingTextOutput implements SensorEventListener, ISensorData {
 		
 		updateTime = System.nanoTime();
 		
-		updateLock.unlock();
-	}
-
-	@Override
-	public DataWithTimestamp getData() {
-		updateLock.lock();
-		
-		DataWithTimestamp ret = new DataWithTimestamp(avgValue, updateTime);
+		new DataWithTimestamp(avgValue, updateTime);
 		
 		updateLock.unlock();
-		
-		return ret;
 	}
 }

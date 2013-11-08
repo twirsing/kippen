@@ -7,11 +7,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.BatteryManager;
-import android.util.Log;
-import at.bakery.kippen.common.ISensorData;
+import at.bakery.kippen.client.activity.INetworking;
+import at.bakery.kippen.common.DataWithTimestamp;
 import at.bakery.kippen.common.data.BatteryData;
 
-public class BatterySensingNoOutput extends BroadcastReceiver implements ISensorData {
+public class BatterySensingNoOutput extends BroadcastReceiver {
 
 	private float capacity = -1;
 	private boolean charging = false;
@@ -20,19 +20,12 @@ public class BatterySensingNoOutput extends BroadcastReceiver implements ISensor
 	
 	private Lock updateLock = new ReentrantLock();
 	
-	@Override
-	public DataWithTimestamp getData() {
-		updateLock.lock();
-		
-		DataWithTimestamp ret = new DataWithTimestamp(
-				new BatteryData(charging, capacity), 
-				updateTime);
-		
-		updateLock.unlock();
-		
-		return ret;
+	private INetworking net;
+	
+	public BatterySensingNoOutput(INetworking net) {
+		this.net = net;
 	}
-
+	
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		int lvl = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
@@ -44,6 +37,10 @@ public class BatterySensingNoOutput extends BroadcastReceiver implements ISensor
 		charging = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) > 0;
 		
 		updateTime = System.nanoTime();
+		
+		net.sendPackets(new DataWithTimestamp(
+				new BatteryData(charging, capacity), 
+				updateTime));
 		
 		updateLock.unlock();
 	}

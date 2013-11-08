@@ -1,6 +1,8 @@
 package at.bakery.kippen.common.data;
 
-public class BatteryData {
+public class BatteryData implements IData {
+
+	private static final long serialVersionUID = -7605416261325422492L;
 
 	private boolean charging;
 	private float level;
