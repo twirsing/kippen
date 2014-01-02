@@ -2,6 +2,8 @@ package at.bakery.kippen.common.data;
 
 import java.text.DecimalFormat;
 
+import at.bakery.kippen.common.IData;
+
 public class SensorTripleData implements IData {
 	
 	private static final long serialVersionUID = -2311126585385429938L;

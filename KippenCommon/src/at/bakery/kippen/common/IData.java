@@ -1,4 +1,4 @@
-package at.bakery.kippen.common.data;
+package at.bakery.kippen.common;
 
 import java.io.Serializable;
 

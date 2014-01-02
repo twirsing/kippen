@@ -5,4 +5,5 @@ import at.bakery.kippen.common.DataWithTimestamp;
 public interface INetworking {
 	
 	public void sendPackets(DataWithTimestamp ... packets);
+//	public DataWithTimestamp receivePacket();
 }

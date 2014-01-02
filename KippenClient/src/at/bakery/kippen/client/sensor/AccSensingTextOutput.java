@@ -11,17 +11,20 @@ import android.hardware.SensorEventListener;
 import android.widget.TextView;
 import at.bakery.kippen.client.activity.INetworking;
 import at.bakery.kippen.common.DataWithTimestamp;
+import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.SensorTripleData;
 
 public class AccSensingTextOutput implements SensorEventListener {
 
 	private static final int MEASURE_COUNT = 50;
+	private static final int MEASURE_SEND_INTERVAL = 20;
 	
 	private TextView lblXAccId, lblYAccId, lblZAccId;
 	
 	private Queue<SensorTripleData> values = new LinkedList<SensorTripleData>();
 	private SensorTripleData avgValue = new SensorTripleData(0, 0, 0);
 	private long updateTime = -1;
+	private int interval = 0;
 	
 	private SensorTripleData measureStart = new SensorTripleData(0, 0, 0);
 	private SensorTripleData measureEnd = new SensorTripleData(0, 0, 0);
@@ -80,16 +83,21 @@ public class AccSensingTextOutput implements SensorEventListener {
 			avgValue.z -= rem.z;
 		}
 		
-		lblXAccId.setText("" + avgValue.x / values.size());
-		lblYAccId.setText("" + avgValue.y / values.size());
-		lblZAccId.setText("" + avgValue.z / values.size());
-		
 		updateTime = System.nanoTime();
 		
-		//net.sendPackets(new DataWithTimestamp(
-		//		new SensorTripleData(avgValue.x / values.size(), avgValue.x / values.size(), avgValue.x / values.size()), 
-		//		updateTime));
+		interval++;
+		if(interval > MEASURE_SEND_INTERVAL) {
+			lblXAccId.setText("" + avgValue.x / values.size());
+			lblYAccId.setText("" + avgValue.y / values.size());
+			lblZAccId.setText("" + avgValue.z / values.size());
+			
+			net.sendPackets(new DataWithTimestamp(
+					new AccelerationData(avgValue.x / values.size(), avgValue.x / values.size(), avgValue.x / values.size()), 
+					updateTime));
+			interval = 0;
+		}
 		
 		updateLock.unlock();
 	}
+	
 }

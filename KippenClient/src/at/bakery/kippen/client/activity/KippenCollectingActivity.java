@@ -1,5 +1,8 @@
 package at.bakery.kippen.client.activity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -14,26 +17,42 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.OrientationEventListener;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import at.bakery.kippen.client.R;
 import at.bakery.kippen.client.sensor.AccSensingTextOutput;
 import at.bakery.kippen.client.sensor.BatterySensingNoOutput;
+import at.bakery.kippen.client.sensor.OrientationSensingNoOutput;
+import at.bakery.kippen.client.sensor.OrientationSensingNoOutputSimple;
 import at.bakery.kippen.client.sensor.WifiSensingTableOutput;
 import at.bakery.kippen.common.DataWithTimestamp;
-import at.bakery.kippen.common.SensorConfig;
-import at.bakery.kippen.common.SensorConfig.SensorConfigType;
+import at.bakery.kippen.common.data.ClientConfigData;
+import at.bakery.kippen.common.data.ClientConfigData.ConfigType;
 import at.bakery.kippen.common.data.PingData;
 
 public class KippenCollectingActivity extends Activity {
 	
+	// the WIFI to which the server is connected and the server IP 
+	private static final String WIFI_ESSID = "INTELLINET_AP"; //StockEINS
+	private static final String WIFI_PWD = null; //IchBinEinLustigesPasswort
+	private static final String SERVER_IP = "10.21.11.102"; //server ip
+	
 	// the client config as sent by the server
-	private SensorConfig config;
+	private ClientConfigData config;
 
 	// used for accelerometer based measurements
 	private SensorManager senseMan;
+	
 	private Sensor accSense;
 	private SensorEventListener accSensorListener;
+	
+	// the orientation 3D
+	private Sensor orientSense;
+	private SensorEventListener orientSensorListener;
+	
+	// the simple orientation without flat phone detection
+	private OrientationEventListener orientSensorListenerSimple;
 	
 	// used for audio measurements
 //	private AudioManager audioMan;
@@ -73,16 +92,18 @@ public class KippenCollectingActivity extends Activity {
 		
 		// connect to host network
 		WifiConfiguration wc = new WifiConfiguration(); 
-	    wc.SSID = "\"StockEINS\""; 
-	    wc.preSharedKey  = "\"IchBinEinLustigesPasswort\"";
-	    wc.status = WifiConfiguration.Status.ENABLED;         
-	    wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP); 
-	    wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP); 
-	    wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK); 
-	    wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP); 
-	    wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP); 
-	    wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-	    wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+	    wc.SSID = "\"" + WIFI_ESSID + "\"";
+	    if(WIFI_PWD != null) {
+		    wc.preSharedKey  = "\"" + WIFI_PWD + "\"";
+		    wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP); 
+		    wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP); 
+		    wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK); 
+		    wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP); 
+		    wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP); 
+		    wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+		    wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+	    }
+	    wc.status = WifiConfiguration.Status.ENABLED;       
 
 	    // add and enable might fail e.g., in case it exists already in the manager
 	    wifiMan.enableNetwork(wifiMan.addNetwork(wc), true);         
@@ -91,18 +112,20 @@ public class KippenCollectingActivity extends Activity {
 			this.finish();
 	    }
 		
-	    NetworkingTask networkTask = new NetworkingTask();
+	    // create the client socket for data transmission
+	    NetworkingTask networkTask = new NetworkingTask(SERVER_IP, 10000);
 	    networkTask.start();
 	    
+	    // the config which is send to each client, i.e. all wifi's to measure
+	    ClientConfigData config = new ClientConfigData();
+	    Set<String> essids = new HashSet<String>();
+	    essids.add(WIFI_ESSID); // measure this wifi ...
+	    //essids.add("OpenWrt"); // ... measure that wifi ...
+	    config.setConfig(ConfigType.MEASURE_AP_ESSID, essids);
+	    
+	    // send a simple ping to the server to notify about our presence
 	    networkTask.sendPackets(new DataWithTimestamp(new PingData()));
 	    
-		// TODO protocol as follows: [action (from which side)]
-		// TODO connect (c) -> receive UID/config (s) -> send data (c)
-		
-		/* FIXME test data */
-		config = new SensorConfig();
-		config.setConfig(SensorConfigType.MEASURE_AP_ESSID, "StockEINS");
-		
 		// the battery status measurement
 		batteryReceiver = new BatterySensingNoOutput(networkTask);
 		
@@ -114,6 +137,13 @@ public class KippenCollectingActivity extends Activity {
 				(TextView)findViewById(R.id.lblZAcc),
 				networkTask);
 		
+		// magnetic field
+		orientSense = senseMan.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+		orientSensorListener = new OrientationSensingNoOutput(networkTask);
+		
+		// ... simple one
+		orientSensorListenerSimple = new OrientationSensingNoOutputSimple(getApplicationContext(), networkTask);
+		
 		// the wifi and its GUI component
 		wifiMan.setWifiEnabled(true);
 		wifiReceiver = new WifiSensingTableOutput(wifiMan, (TableLayout)findViewById(R.id.tblWifi), config, networkTask);
@@ -123,20 +153,22 @@ public class KippenCollectingActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		senseMan.registerListener(accSensorListener, accSense, Sensor.TYPE_ACCELEROMETER);
+		orientSensorListenerSimple.enable();
+//		senseMan.registerListener(orientSensorListener, orientSense, Sensor.TYPE_ROTATION_VECTOR);
 		registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		wifiMan.startScan();
 		registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 	}
-
+	
 	@Override
 	protected void onPause() {
+		// do nothing on pause
 		super.onPause();
-		senseMan.unregisterListener(accSensorListener);
+		/*senseMan.unregisterListener(accSensorListener);
+		senseMan.unregisterListener(orientSensorListener);
 		unregisterReceiver(wifiReceiver);
-		unregisterReceiver(batteryReceiver);
+		unregisterReceiver(batteryReceiver);*/
 	}
-	
-	
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
