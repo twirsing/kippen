@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.Executor;
@@ -27,6 +28,11 @@ import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.data.WifiLevelsData;
 
 public class KippenServer extends JFrame {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public static void main(String args[]) {
 		try {
@@ -60,11 +66,17 @@ public class KippenServer extends JFrame {
 					@Override
 					public void run() {
 						try {
+							
+							//HashMap<String, AbstractKippObject> KippObjects = new HashMap<String, AbstractKippObject>();
+					
+							//CsvKippOutlet csvOutlet = new CsvKippOutlet("user.home", "kipp.csv");
+							
+							
 							ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
 							ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
 							
 							// TODO move into own plugin classes
-							Queue<WifiLevelsData> avgWifiLevel = new LinkedList<>();
+							Queue<WifiLevelsData> avgWifiLevel = new LinkedList();
 							double lastAvgWifiLevel = -1;
 							Boolean hasMoved = true;
 							SensorTripleData lastAccData = new SensorTripleData(0, 0, 0);
@@ -77,6 +89,7 @@ public class KippenServer extends JFrame {
 								IData d = data.getData();
 								
 								// WIFI
+								// TODO move to kippobjects
 								if(d instanceof WifiLevelsData) {
 									WifiLevelsData wd = (WifiLevelsData)d;
 									
@@ -114,6 +127,7 @@ public class KippenServer extends JFrame {
 									}
 									
 								// ACCELERATION
+								// TODO move to kippobjects
 								} else if(d instanceof AccelerationData) {
 									SensorTripleData sd = (SensorTripleData)d;
 									
@@ -127,12 +141,14 @@ public class KippenServer extends JFrame {
 									if(isMoving) hasMoved = true;
 									
 								// COMPLEX ORIENTATION
+								// TODO move to kippobjects
 								} else if(d instanceof OrientationData) {
 									SensorTripleData sd = (SensorTripleData)d;
 									
 									orientText.setText(sd.x + ", " + sd.y + ", " + sd.z);
 									
 								// SIMPLE (CUBE) ORIENTATION
+								// TODO move to kippobjects
 								} else if(d instanceof OrientationSimpleData) {
 									SensorSingleData sd = (SensorSingleData)d;
 									int deg = (int)sd.value;

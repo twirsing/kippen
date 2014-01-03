@@ -89,9 +89,7 @@ public class WifiSensingTableOutput extends BroadcastReceiver {
 		
 		if(wifiLevels.getNetworks().size() > 0) {
 			updateTime = System.nanoTime();
-			
 			net.sendPackets(new DataWithTimestamp(wifiLevels, updateTime));
-			
 			updateLock.unlock();
 		}
 			

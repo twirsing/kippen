@@ -36,7 +36,7 @@ public class KippenCollectingActivity extends Activity {
 	// the WIFI to which the server is connected and the server IP 
 	private static final String WIFI_ESSID = "INTELLINET_AP"; //StockEINS
 	private static final String WIFI_PWD = null; //IchBinEinLustigesPasswort
-	private static final String SERVER_IP = "10.21.11.102"; //server ip
+	private static final String SERVER_IP = "10.21.11.101"; //server ip
 	
 	// the client config as sent by the server
 	private ClientConfigData config;
@@ -120,7 +120,7 @@ public class KippenCollectingActivity extends Activity {
 	    ClientConfigData config = new ClientConfigData();
 	    Set<String> essids = new HashSet<String>();
 	    essids.add(WIFI_ESSID); // measure this wifi ...
-	    //essids.add("OpenWrt"); // ... measure that wifi ...
+	    essids.add("OpenWrt"); // ... measure that wifi ...
 	    config.setConfig(ConfigType.MEASURE_AP_ESSID, essids);
 	    
 	    // send a simple ping to the server to notify about our presence
