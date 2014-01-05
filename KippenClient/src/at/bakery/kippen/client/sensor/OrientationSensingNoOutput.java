@@ -9,7 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import at.bakery.kippen.client.activity.INetworking;
-import at.bakery.kippen.common.DataWithTimestamp;
+import at.bakery.kippen.common.DataWithTimestampAndMac;
 import at.bakery.kippen.common.data.OrientationData;
 import at.bakery.kippen.common.data.SensorTripleData;
 
@@ -21,8 +21,11 @@ public class OrientationSensingNoOutput implements SensorEventListener {
 	
 	private INetworking net;
 	
-	public OrientationSensingNoOutput(INetworking net) {
+	private String macAddress;
+	
+	public OrientationSensingNoOutput(INetworking net, String macAddress) {
 		this.net = net;
+		this.macAddress = macAddress;
 	}
 	
 	@Override
@@ -55,7 +58,7 @@ public class OrientationSensingNoOutput implements SensorEventListener {
 		
 		updateTime = System.nanoTime();
 			
-		net.sendPackets(new DataWithTimestamp(t, updateTime));
+		net.sendPackets(new DataWithTimestampAndMac(t, updateTime, macAddress));
 		
 		updateLock.unlock();
 		

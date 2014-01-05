@@ -6,7 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import android.content.Context;
 import android.view.OrientationEventListener;
 import at.bakery.kippen.client.activity.INetworking;
-import at.bakery.kippen.common.DataWithTimestamp;
+import at.bakery.kippen.common.DataWithTimestampAndMac;
 import at.bakery.kippen.common.data.OrientationSimpleData;
 import at.bakery.kippen.common.data.SensorSingleData;
 
@@ -18,9 +18,12 @@ public class OrientationSensingNoOutputSimple extends OrientationEventListener {
 	
 	private INetworking net;
 	
-	public OrientationSensingNoOutputSimple(Context context, INetworking net) {
+	private String macAddress;
+	
+	public OrientationSensingNoOutputSimple(Context context, INetworking net, String macAddress) {
 		super(context);
 		this.net = net;
+		this.macAddress = macAddress;
 	}
 
 	@Override
@@ -31,7 +34,7 @@ public class OrientationSensingNoOutputSimple extends OrientationEventListener {
 		
 		updateTime = System.nanoTime();
 			
-		net.sendPackets(new DataWithTimestamp(t, updateTime));
+		net.sendPackets(new DataWithTimestampAndMac(t, updateTime, macAddress));
 		
 		updateLock.unlock();
 	}

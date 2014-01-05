@@ -26,7 +26,7 @@ import at.bakery.kippen.client.sensor.BatterySensingNoOutput;
 import at.bakery.kippen.client.sensor.OrientationSensingNoOutput;
 import at.bakery.kippen.client.sensor.OrientationSensingNoOutputSimple;
 import at.bakery.kippen.client.sensor.WifiSensingTableOutput;
-import at.bakery.kippen.common.DataWithTimestamp;
+import at.bakery.kippen.common.DataWithTimestampAndMac;
 import at.bakery.kippen.common.data.ClientConfigData;
 import at.bakery.kippen.common.data.ClientConfigData.ConfigType;
 import at.bakery.kippen.common.data.PingData;
@@ -34,9 +34,9 @@ import at.bakery.kippen.common.data.PingData;
 public class KippenCollectingActivity extends Activity {
 	
 	// the WIFI to which the server is connected and the server IP 
-	private static final String WIFI_ESSID = "INTELLINET_AP"; //StockEINS
-	private static final String WIFI_PWD = null; //IchBinEinLustigesPasswort
-	private static final String SERVER_IP = "10.21.11.101"; //server ip
+	private static final String WIFI_ESSID = "UPC014580"; //StockEINS
+	private static final String WIFI_PWD = "wirsinggo"; //IchBinEinLustigesPasswort
+	private static final String SERVER_IP = "192.168.0.11"; //server ip
 	
 	// the client config as sent by the server
 	private ClientConfigData config;
@@ -124,10 +124,10 @@ public class KippenCollectingActivity extends Activity {
 	    config.setConfig(ConfigType.MEASURE_AP_ESSID, essids);
 	    
 	    // send a simple ping to the server to notify about our presence
-	    networkTask.sendPackets(new DataWithTimestamp(new PingData()));
+	    networkTask.sendPackets(new DataWithTimestampAndMac(new PingData(), wifiMan.getConnectionInfo().getMacAddress()));
 	    
 		// the battery status measurement
-		batteryReceiver = new BatterySensingNoOutput(networkTask);
+		batteryReceiver = new BatterySensingNoOutput(networkTask, wifiMan.getConnectionInfo().getMacAddress());
 		
 		// the accelerometer and its GUI component
 		accSense = senseMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -135,14 +135,15 @@ public class KippenCollectingActivity extends Activity {
 				(TextView)findViewById(R.id.lblXAcc),
 				(TextView)findViewById(R.id.lblYAcc),
 				(TextView)findViewById(R.id.lblZAcc),
-				networkTask);
+				networkTask,
+				wifiMan.getConnectionInfo().getMacAddress());
 		
 		// magnetic field
 		orientSense = senseMan.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-		orientSensorListener = new OrientationSensingNoOutput(networkTask);
+		orientSensorListener = new OrientationSensingNoOutput(networkTask, wifiMan.getConnectionInfo().getMacAddress());
 		
 		// ... simple one
-		orientSensorListenerSimple = new OrientationSensingNoOutputSimple(getApplicationContext(), networkTask);
+		orientSensorListenerSimple = new OrientationSensingNoOutputSimple(getApplicationContext(), networkTask, wifiMan.getConnectionInfo().getMacAddress());
 		
 		// the wifi and its GUI component
 		wifiMan.setWifiEnabled(true);

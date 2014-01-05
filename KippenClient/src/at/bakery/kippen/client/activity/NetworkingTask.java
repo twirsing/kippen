@@ -9,7 +9,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
-import at.bakery.kippen.common.DataWithTimestamp;
+import at.bakery.kippen.common.DataWithTimestampAndMac;
 
 public class NetworkingTask extends Thread implements INetworking {
 
@@ -17,8 +17,8 @@ public class NetworkingTask extends Thread implements INetworking {
 	private ObjectOutputStream oos;
 	private ObjectInputStream ois;
 	
-	private DataWithTimestamp txPackets[] = new DataWithTimestamp[0];
-	private DataWithTimestamp rxPacket;
+	private DataWithTimestampAndMac txPackets[] = new DataWithTimestampAndMac[0];
+	private DataWithTimestampAndMac rxPacket;
 	
 	private boolean quit = false;
 	
@@ -34,7 +34,7 @@ public class NetworkingTask extends Thread implements INetworking {
 	}
 	
 	@Override
-	public void sendPackets(DataWithTimestamp ... packets) {
+	public void sendPackets(DataWithTimestampAndMac ... packets) {
 		try {
 			wait.acquire();
 		} catch (InterruptedException e) {}
@@ -84,7 +84,7 @@ public class NetworkingTask extends Thread implements INetworking {
 			}
 			
 			// send packets and reset TX
-			for(DataWithTimestamp packet : txPackets) {
+			for(DataWithTimestampAndMac packet : txPackets) {
 				try {
 					oos.writeObject(packet);
 				} catch(Exception ex) {

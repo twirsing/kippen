@@ -18,7 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import at.bakery.kippen.common.DataWithTimestamp;
+import at.bakery.kippen.common.DataWithTimestampAndMac;
 import at.bakery.kippen.common.IData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.OrientationData;
@@ -84,7 +84,7 @@ public class KippenServer extends JFrame {
 							
 							while(true) {
 						
-								DataWithTimestamp data = (DataWithTimestamp)ois.readObject();
+								DataWithTimestampAndMac data = (DataWithTimestampAndMac)ois.readObject();
 								
 								IData d = data.getData();
 								
