@@ -35,7 +35,7 @@ public class KippenCollectingActivity extends Activity {
 	
 	// the WIFI to which the server is connected and the server IP 
 	private static final String WIFI_ESSID = "UPC014580"; //StockEINS
-	private static final String WIFI_PWD = "wirsinggo"; //IchBinEinLustigesPasswort
+	private static final String WIFI_PWD = "CBZZVGQI"; //IchBinEinLustigesPasswort
 	private static final String SERVER_IP = "192.168.0.11"; //server ip
 	
 	// the client config as sent by the server

@@ -3,6 +3,8 @@
  */
 package at.bakery.kippen.server;
 
+import java.util.Map;
+
 /**
  * @author thomasw
  *
@@ -18,6 +20,7 @@ public abstract class AbstractKippOutlet {
 	}
 	
 	/**
+	 * @param outputdata 
 	 */
 	abstract public void output();
 	
