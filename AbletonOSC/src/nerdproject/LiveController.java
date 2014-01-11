@@ -1,57 +1,113 @@
 package nerdproject;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Properties;
 
-public class LiveController extends AbstractLiveController {
+import com.illposed.osc.OSCMessage;
+import com.illposed.osc.OSCPortIn;
+import com.illposed.osc.OSCPortOut;
 
+public class LiveController {
+	private static LiveController instance = null;
+	private OSCPortIn receiver;
+	private OSCPortOut sender;
 
-	public LiveController()	throws SocketException, UnknownHostException {
-		super();
+	private LiveController(InetAddress liveOSCAddress, int liveOSCPort,
+			int listeningPort) {
+		try {
+			receiver = new OSCPortIn(listeningPort);
+			sender = new OSCPortOut(liveOSCAddress, liveOSCPort);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
-	
-	public LiveController(int liveOSCPort, int listeningPort)
-			throws SocketException, UnknownHostException {
-		super(liveOSCPort, listeningPort);
+
+	public void play() throws AbletonCommunicationException {
+		this.sendMessage("/live/play");
 	}
 
-	public LiveController(InetAddress liveOSCAddress, int liveOSCPort,
-			int listeningPort) throws SocketException, UnknownHostException {
-		super(liveOSCAddress, liveOSCPort, listeningPort);
+	public void stop() throws AbletonCommunicationException {
+		this.sendMessage("/live/stop");
 	}
 
-	
-	public void play()throws AbletonCommunicationException {
+	public void playClip(int trackNumber, int clipNumber) {
+		this.sendMessage(
+				"/live/play/clip",
+				new Object[] { String.valueOf(trackNumber),
+						String.valueOf(clipNumber) });
+	}
+
+	public void setTrackVolume(int trackNum, float volume) {
+		this.sendMessage("/live/volume", new Object[] { String.valueOf(trackNum),String.valueOf(volume)});
+	}
+
+	// ##############################################################
+
+	private void sendMessage(String message, Object... params) {
+		Collection<Object> arrayList = new ArrayList<>();
+		if (params == null) {
+			params = new Object[] {};
+		}
+		arrayList.addAll(Arrays.asList(params));
+		OSCMessage oscMessage = new OSCMessage(message, arrayList);
+		
+		System.out.println("Sending params: " + arrayList);
+		try {
+			sender.send(oscMessage);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private Object sendReceive(String message, Object... params) {
+		OSCMessage oscMessage = new OSCMessage(message, params);
+		return null;
+	}
+
+	public static LiveController getInstance() {
+		if (instance == null) {
+			 System.out.println("Working Directory = " +
+		              System.getProperty("user.dir"));
+			Properties properties = new Properties();
+			BufferedInputStream stream;
+			int incommingPort;
+			int liveOSCPort;
+			String hostIP;
+			InetAddress hostAddress;
 			try {
-				this.sendMessage("/live/play", new Object[] {});
-			} catch (IOException e) {
-				throw new AbletonCommunicationException(e);
-			}
-	}
-	
-	public void stop()throws AbletonCommunicationException {
-		try {
-			this.sendMessage("/live/stop", new Object[] {});
-		} catch (IOException e) {
-			throw new AbletonCommunicationException(e);
-		}
-}
+				stream = new BufferedInputStream(new FileInputStream(
+						"configuration.properties"));
 
-	
-	/**
-	 * Start clip of track starting from number 1.
-	 * 
-	 * @throws
-	 */
-	public void playClip(int trackNumber, int clipNumber)
-			throws AbletonCommunicationException {
-		try {
-			this.sendMessage("/live/play/clip", new Object[] { String.valueOf(trackNumber),
-					String.valueOf(clipNumber)});
-		} catch (IOException e) {
-			throw new AbletonCommunicationException(e);
+				properties.load(stream);
+				stream.close();
+				incommingPort = Integer.valueOf(properties
+						.getProperty("incommingPort"));
+				liveOSCPort = Integer.valueOf(properties
+						.getProperty("liveOSCPort"));
+				hostIP = properties.getProperty("hostIP");
+
+				if (hostIP == "localhost") {
+					hostAddress = InetAddress.getLocalHost();
+				} else {
+					hostAddress = InetAddress.getByName(hostIP);
+				}
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new RuntimeException("properties file cannot be read");
+			}
+			LiveController.instance =  new LiveController(hostAddress, liveOSCPort, incommingPort);
+			return LiveController.instance;
 		}
+		return instance;
 	}
 }
