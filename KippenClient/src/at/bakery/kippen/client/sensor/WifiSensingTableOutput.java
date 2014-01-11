@@ -15,7 +15,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import at.bakery.kippen.client.activity.INetworking;
-import at.bakery.kippen.common.DataWithTimestamp;
+import at.bakery.kippen.common.DataWithTimestampAndMac;
 import at.bakery.kippen.common.data.ClientConfigData;
 import at.bakery.kippen.common.data.ClientConfigData.ConfigType;
 import at.bakery.kippen.common.data.WifiLevelsData;
@@ -38,6 +38,7 @@ public class WifiSensingTableOutput extends BroadcastReceiver {
 	private Lock updateLock = new ReentrantLock();
 	
 	private INetworking net;
+
 	
 	public WifiSensingTableOutput(WifiManager wifiMan, TableLayout table, INetworking net) {
 		this(wifiMan, table, new ClientConfigData(), net);
@@ -89,7 +90,7 @@ public class WifiSensingTableOutput extends BroadcastReceiver {
 		
 		if(wifiLevels.getNetworks().size() > 0) {
 			updateTime = System.nanoTime();
-			net.sendPackets(new DataWithTimestamp(wifiLevels, updateTime));
+			net.sendPackets(new DataWithTimestampAndMac(wifiLevels, updateTime, wifiMan.getConnectionInfo().getMacAddress()));
 			updateLock.unlock();
 		}
 			

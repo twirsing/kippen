@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.BatteryManager;
 import at.bakery.kippen.client.activity.INetworking;
-import at.bakery.kippen.common.DataWithTimestamp;
+import at.bakery.kippen.common.DataWithTimestampAndMac;
 import at.bakery.kippen.common.data.BatteryData;
 
 public class BatterySensingNoOutput extends BroadcastReceiver {
@@ -22,8 +22,12 @@ public class BatterySensingNoOutput extends BroadcastReceiver {
 	
 	private INetworking net;
 	
-	public BatterySensingNoOutput(INetworking net) {
+	private String macAddress;
+	
+	public BatterySensingNoOutput(INetworking net, String macAddress) {
 		this.net = net;
+		
+		this.macAddress = macAddress;
 	}
 	
 	@Override
@@ -38,9 +42,9 @@ public class BatterySensingNoOutput extends BroadcastReceiver {
 		
 		updateTime = System.nanoTime();
 		
-		net.sendPackets(new DataWithTimestamp(
+		net.sendPackets(new DataWithTimestampAndMac(
 				new BatteryData(charging, capacity), 
-				updateTime));
+				updateTime, macAddress));
 		
 		updateLock.unlock();
 	}

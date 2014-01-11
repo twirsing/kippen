@@ -10,7 +10,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.widget.TextView;
 import at.bakery.kippen.client.activity.INetworking;
-import at.bakery.kippen.common.DataWithTimestamp;
+import at.bakery.kippen.common.DataWithTimestampAndMac;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.SensorTripleData;
 
@@ -33,13 +33,16 @@ public class AccSensingTextOutput implements SensorEventListener {
 	private Lock updateLock = new ReentrantLock();
 	
 	private INetworking net;
+	private String macAddress;
 	
-	public AccSensingTextOutput(TextView lblXAccId, TextView lblYAccId, TextView lblZAccId, INetworking net) {
+	public AccSensingTextOutput(TextView lblXAccId, TextView lblYAccId, TextView lblZAccId, INetworking net, String macAddress) {
 		this.lblXAccId = lblXAccId;
 		this.lblYAccId = lblYAccId;
 		this.lblZAccId = lblZAccId;
 		
 		this.net = net;
+		
+		this.macAddress = macAddress;
 	}
 	
 	@Override
@@ -91,9 +94,9 @@ public class AccSensingTextOutput implements SensorEventListener {
 			lblYAccId.setText("" + avgValue.y / values.size());
 			lblZAccId.setText("" + avgValue.z / values.size());
 			
-			net.sendPackets(new DataWithTimestamp(
+			net.sendPackets(new DataWithTimestampAndMac(
 					new AccelerationData(avgValue.x / values.size(), avgValue.x / values.size(), avgValue.x / values.size()), 
-					updateTime));
+					updateTime, macAddress));
 			interval = 0;
 		}
 		
