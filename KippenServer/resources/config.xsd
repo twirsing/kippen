@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.bakery.at/kippen" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://www.bakery.at/kippen">
+	<element name="configuration" type="tns:configuration"></element>
+
+	<complexType name="configuration">
+		<sequence>
+			<element name="ableton" type="tns:ableton" maxOccurs="1"
+				minOccurs="1">
+			</element>
+			<element name="objects" type="tns:KippenObjectConfig"
+				maxOccurs="unbounded" minOccurs="1"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="ableton">
+		<sequence>
+			<element name="ip" type="string"></element>
+			<element name="port" type="int"></element>
+		</sequence>
+	</complexType>
+
+
+	<complexType name="eventsConfig">
+		<sequence maxOccurs="unbounded" minOccurs="0">
+			<element name="commands" type="tns:commandList"></element>
+		</sequence>
+		<attribute name="eventType" type="string"></attribute>
+	</complexType>
+
+	<complexType name="commandList">
+		<sequence maxOccurs="unbounded" minOccurs="0">
+			<element name="command" type="tns:command"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="KippenObjectConfig">
+		<sequence>
+			<element name="mac" type="string"></element>
+			<element name="events" type="tns:eventsConfig" maxOccurs="unbounded" minOccurs="0"></element>
+			<element name="type" type="tns:typeEnum"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="play">
+		<attribute name="track" type="int"></attribute>
+	</complexType>
+
+	<complexType name="stopTrack">
+		<attribute name="track" type="int"></attribute>
+	</complexType>
+
+    <simpleType name="typeEnum">
+    <restriction base="string">
+      <enumeration value="cube"/>
+    </restriction>
+  </simpleType>
+
+    <complexType name="command">
+    	<sequence>
+    		<element name="commandParams" type="tns:commandParams"></element>
+    	</sequence>
+    	<attribute name="commandType" type="string"></attribute>
+    </complexType>
+    
+    <complexType name="commandParams">
+    	<attribute name="key" type="string"></attribute>
+    	<attribute name="value" type="string"></attribute>
+    </complexType>
+
+
+</schema>

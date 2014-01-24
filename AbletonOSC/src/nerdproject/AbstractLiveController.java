@@ -66,6 +66,7 @@ public class AbstractLiveController {
 				stream = new BufferedInputStream(new FileInputStream(
 						"configuration.properties"));
 
+				//TODO also read from xml
 				properties.load(stream);
 				stream.close();
 				incommingPort = Integer.valueOf(properties
