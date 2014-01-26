@@ -7,13 +7,18 @@ import nerdproject.LiveController;
 public class AbletonPlayCommand extends Command {
 	private int trackNumber;
 
-	AbletonPlayCommand(int trackNumber) {
+	public AbletonPlayCommand(int trackNumber) {
 		this.trackNumber = trackNumber;
 	}
 
+	public AbletonPlayCommand(String trackNumber) {
+		this.trackNumber = Integer.valueOf(trackNumber);
+	}
+
 	@Override
-	void execute(Map<String, Object> params) {
-		LiveController.getInstance().playClip(trackNumber, (Integer) params.get("clipNumber"));
+	public void execute(Map<String, String> params) {
+		LiveController.getInstance().playClip(trackNumber,
+				Integer.valueOf(params.get("clipNumber")));
 	}
 
 }

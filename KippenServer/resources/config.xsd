@@ -8,8 +8,8 @@
 			<element name="ableton" type="tns:ableton" maxOccurs="1"
 				minOccurs="1">
 			</element>
-			<element name="objects" type="tns:KippenObjectConfig"
-				maxOccurs="unbounded" minOccurs="1"></element>
+			<element name="objects" type="tns:ObjectsElement"
+				maxOccurs="1" minOccurs="1"></element>
 		</sequence>
 	</complexType>
 
@@ -21,36 +21,25 @@
 	</complexType>
 
 
-	<complexType name="eventsConfig">
-		<sequence maxOccurs="unbounded" minOccurs="0">
-			<element name="commands" type="tns:commandList"></element>
+	<complexType name="eventConfig">
+		<sequence>
+			<element name="commands" type="tns:CommandElement"
+				maxOccurs="1" minOccurs="1">
+			</element>
 		</sequence>
 		<attribute name="eventType" type="string"></attribute>
 	</complexType>
 
-	<complexType name="commandList">
-		<sequence maxOccurs="unbounded" minOccurs="0">
-			<element name="command" type="tns:command"
-				maxOccurs="unbounded" minOccurs="0">
-			</element>
-		</sequence>
-	</complexType>
 
-	<complexType name="KippenObjectConfig">
+	<complexType name="ObjectConfig">
 		<sequence>
 			<element name="mac" type="string"></element>
-			<element name="events" type="tns:eventsConfig" maxOccurs="unbounded" minOccurs="0"></element>
+			<element name="events" type="tns:eventsElement" maxOccurs="1" minOccurs="1"></element>
 			<element name="type" type="tns:typeEnum"></element>
 		</sequence>
 	</complexType>
 
-	<complexType name="play">
-		<attribute name="track" type="int"></attribute>
-	</complexType>
 
-	<complexType name="stopTrack">
-		<attribute name="track" type="int"></attribute>
-	</complexType>
 
     <simpleType name="typeEnum">
     <restriction base="string">
@@ -58,16 +47,36 @@
     </restriction>
   </simpleType>
 
-    <complexType name="command">
+    <complexType name="CommandConfig">
     	<sequence>
-    		<element name="commandParams" type="tns:commandParams"></element>
+    		<element name="param" type="tns:param" maxOccurs="unbounded" minOccurs="0"></element>
     	</sequence>
     	<attribute name="commandType" type="string"></attribute>
     </complexType>
     
-    <complexType name="commandParams">
+    <complexType name="param">
     	<attribute name="key" type="string"></attribute>
     	<attribute name="value" type="string"></attribute>
+    </complexType>
+
+
+
+    <complexType name="ObjectsElement">
+    	<sequence>
+    		<element name="objectConfig" type="tns:ObjectConfig" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="eventsElement">
+    	<sequence>
+    		<element name="eventConfig" type="tns:eventConfig" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="CommandElement">
+    	<sequence>
+    		<element name="CommandConfig" type="tns:CommandConfig" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
     </complexType>
 
 

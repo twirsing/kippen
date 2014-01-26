@@ -30,11 +30,11 @@ public class LiveController {
 		}
 	}
 
-	public void play() throws AbletonCommunicationException {
+	public void playAll() throws AbletonCommunicationException {
 		this.sendMessage("/live/play");
 	}
 
-	public void stop() throws AbletonCommunicationException {
+	public void stopAll() throws AbletonCommunicationException {
 		this.sendMessage("/live/stop");
 	}
 
@@ -45,8 +45,15 @@ public class LiveController {
 						String.valueOf(clipNumber) });
 	}
 
+	public void stopTrack(int trackNumber) {
+		this.sendMessage("/live/stop/track",
+				new Object[] { String.valueOf(trackNumber) });
+	}
+
 	public void setTrackVolume(int trackNum, float volume) {
-		this.sendMessage("/live/volume", new Object[] { String.valueOf(trackNum),String.valueOf(volume)});
+		this.sendMessage(
+				"/live/volume",
+				new Object[] { String.valueOf(trackNum), String.valueOf(volume) });
 	}
 
 	// ##############################################################
@@ -58,7 +65,7 @@ public class LiveController {
 		}
 		arrayList.addAll(Arrays.asList(params));
 		OSCMessage oscMessage = new OSCMessage(message, arrayList);
-		
+
 		System.out.println("Sending params: " + arrayList);
 		try {
 			sender.send(oscMessage);
@@ -74,8 +81,8 @@ public class LiveController {
 
 	public static LiveController getInstance() {
 		if (instance == null) {
-			 System.out.println("Working Directory = " +
-		              System.getProperty("user.dir"));
+			System.out.println("Working Directory = "
+					+ System.getProperty("user.dir"));
 			Properties properties = new Properties();
 			BufferedInputStream stream;
 			int incommingPort;
@@ -105,7 +112,8 @@ public class LiveController {
 				e.printStackTrace();
 				throw new RuntimeException("properties file cannot be read");
 			}
-			LiveController.instance =  new LiveController(hostAddress, liveOSCPort, incommingPort);
+			LiveController.instance = new LiveController(hostAddress,
+					liveOSCPort, incommingPort);
 			return LiveController.instance;
 		}
 		return instance;
