@@ -26,6 +26,7 @@ import at.bakery.kippen.client.sensor.BatterySensingNoOutput;
 import at.bakery.kippen.client.sensor.OrientationSensingNoOutput;
 import at.bakery.kippen.client.sensor.OrientationSensingNoOutputSimple;
 import at.bakery.kippen.client.sensor.WifiSensingTableOutput;
+import at.bakery.kippen.client.sensor.ShakeDetector;
 import at.bakery.kippen.common.DataWithTimestampAndMac;
 import at.bakery.kippen.common.data.ClientConfigData;
 import at.bakery.kippen.common.data.ClientConfigData.ConfigType;
@@ -63,6 +64,9 @@ public class KippenCollectingActivity extends Activity {
 	
 	// used for battery based measurements
 	private BatterySensingNoOutput batteryReceiver;
+	
+	// used for shake detection
+//	private ShakeDetector shakeDetectorListener;
 	
 	// helper for building alert messages for the front end
 	private static AlertDialog.Builder alertBuilder;
@@ -148,6 +152,9 @@ public class KippenCollectingActivity extends Activity {
 		// the wifi and its GUI component
 		wifiMan.setWifiEnabled(true);
 		wifiReceiver = new WifiSensingTableOutput(wifiMan, (TableLayout)findViewById(R.id.tblWifi), config, networkTask);
+		
+		// TODO: switch on and test
+//		shakeDetectorListener = new ShakeDetector((TextView)findViewById(R.id.lblShake));
 	}
 	
 	@Override
