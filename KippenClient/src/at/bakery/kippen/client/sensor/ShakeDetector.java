@@ -2,11 +2,17 @@ package at.bakery.kippen.client.sensor;
 
 // by http://teamtreehouse.com/library/build-a-simple-android-app/shaking-things-up/adding-a-shake-detector
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.widget.TextView;
 import at.bakery.kippen.client.activity.INetworking;
+import at.bakery.kippen.common.DataWithTimestampAndMac;
+import at.bakery.kippen.common.data.BatteryData;
+import at.bakery.kippen.common.data.EventData;
 
 public class ShakeDetector implements SensorEventListener {
 
@@ -30,6 +36,14 @@ public class ShakeDetector implements SensorEventListener {
 
 	private TextView lblShake;
 	
+	private INetworking net;
+	
+	private String macAddress;
+	
+	private long updateTime = -1;
+	
+	private Lock updateLock = new ReentrantLock();
+	
 	// Start time for the shake detection
 	long startTime = 0;
 	
@@ -38,7 +52,9 @@ public class ShakeDetector implements SensorEventListener {
     
 	// TODO: add broadcasting ability INetworking net, String macAddress, ...
 	// Constructor that sets the shake listener
-    public ShakeDetector(TextView lblShake) {
+    public ShakeDetector(TextView lblShake, INetworking net, String macAddress) {
+		this.net = net;
+		this.macAddress = macAddress;
     	this.lblShake = lblShake;
     }
 
@@ -67,6 +83,7 @@ public class ShakeDetector implements SensorEventListener {
         	if (elapsedTime > MAX_SHAKE_DURATION) {
         		// Too much time has passed. Start over!
         		resetShakeDetection();
+        		lblShake.setText("Shake me...");
         	}
         	else {
         		// Keep track of all the movements
@@ -76,7 +93,15 @@ public class ShakeDetector implements SensorEventListener {
         		if (moveCount > MIN_MOVEMENTS) {
         			// It's a shake! Notify the listener.
         			lblShake.setText("Shaken!!");
-        			// TODO: add broadcasting ability INetworking net, String macAddress, ...
+        			
+        			updateTime = System.nanoTime();
+        			
+        			net.sendPackets(new DataWithTimestampAndMac(
+        					new EventData("shaken"), 
+        					updateTime, macAddress));
+        			
+        			updateLock.unlock();
+        			
         			// Reset for the next one!
         			resetShakeDetection();
         		}
@@ -144,7 +169,7 @@ public class ShakeDetector implements SensorEventListener {
      * into it's own .java file, but I included it here for quick reference
      * and to make it easier to include this file in our project.
      */
-    public interface OnShakeListener {
-    	public void onShake();
-    }
+//    public interface OnShakeListener {
+//    	public void onShake();
+//    }
 }

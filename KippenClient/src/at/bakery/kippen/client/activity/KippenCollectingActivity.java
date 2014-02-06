@@ -35,9 +35,17 @@ import at.bakery.kippen.common.data.PingData;
 public class KippenCollectingActivity extends Activity {
 	
 	// the WIFI to which the server is connected and the server IP 
-	private static final String WIFI_ESSID = "UPC014580"; //StockEINS
-	private static final String WIFI_PWD = "CBZZVGQI"; //IchBinEinLustigesPasswort
-	private static final String SERVER_IP = "192.168.0.11"; //server ip
+	
+	
+	// setting tomw 01
+//		private static final String WIFI_ESSID = "UPC014580"; //StockEINS
+//		private static final String WIFI_PWD = "CBZZVGQI"; //IchBinEinLustigesPasswort
+//		private static final String SERVER_IP = "192.168.0.11"; //server ip
+	
+	// setting tomw 02
+	private static final String WIFI_ESSID = "WirsingRouter5"; //StockEINS
+	private static final String WIFI_PWD = "wirsinggo"; //IchBinEinLustigesPasswort
+	private static final String SERVER_IP = "192.168.20.90"; //server ip
 	
 	// the client config as sent by the server
 	private ClientConfigData config;
@@ -66,7 +74,7 @@ public class KippenCollectingActivity extends Activity {
 	private BatterySensingNoOutput batteryReceiver;
 	
 	// used for shake detection
-//	private ShakeDetector shakeDetectorListener;
+	private ShakeDetector shakeDetectorListener;
 	
 	// helper for building alert messages for the front end
 	private static AlertDialog.Builder alertBuilder;
@@ -154,12 +162,14 @@ public class KippenCollectingActivity extends Activity {
 		wifiReceiver = new WifiSensingTableOutput(wifiMan, (TableLayout)findViewById(R.id.tblWifi), config, networkTask);
 		
 		// TODO: switch on and test
-//		shakeDetectorListener = new ShakeDetector((TextView)findViewById(R.id.lblShake));
+		shakeDetectorListener = new ShakeDetector((TextView)findViewById(R.id.lblShake), networkTask, wifiMan.getConnectionInfo().getMacAddress());
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
+		senseMan.registerListener(shakeDetectorListener, accSense, Sensor.TYPE_ACCELEROMETER);
+		
 		senseMan.registerListener(accSensorListener, accSense, Sensor.TYPE_ACCELEROMETER);
 		orientSensorListenerSimple.enable();
 //		senseMan.registerListener(orientSensorListener, orientSense, Sensor.TYPE_ROTATION_VECTOR);
