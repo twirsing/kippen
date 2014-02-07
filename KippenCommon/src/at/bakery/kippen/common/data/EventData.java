@@ -4,7 +4,7 @@ import at.bakery.kippen.common.IData;
 
 public class EventData implements IData {
 
-	private static final long serialVersionUID = -1520878341062188979L;
+//	private static final long serialVersionUID = -1520878341062188979L;
 
 	public String value;
 	

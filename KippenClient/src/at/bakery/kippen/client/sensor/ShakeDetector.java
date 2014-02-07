@@ -11,7 +11,6 @@ import android.hardware.SensorEventListener;
 import android.widget.TextView;
 import at.bakery.kippen.client.activity.INetworking;
 import at.bakery.kippen.common.DataWithTimestampAndMac;
-import at.bakery.kippen.common.data.BatteryData;
 import at.bakery.kippen.common.data.EventData;
 
 public class ShakeDetector implements SensorEventListener {
@@ -20,10 +19,10 @@ public class ShakeDetector implements SensorEventListener {
     private static final int MIN_SHAKE_ACCELERATION = 5;
     
     // Minimum number of movements to register a shake
-    private static final int MIN_MOVEMENTS = 2;
+    private static final int MIN_MOVEMENTS = 8;
     
     // Maximum time (in milliseconds) for the whole shake to occur
-    private static final int MAX_SHAKE_DURATION = 500;
+    private static final int MAX_SHAKE_DURATION = 400;
 	
     // Arrays to store gravity and linear acceleration values
 	private float[] mGravity = { 0.0f, 0.0f, 0.0f };
@@ -33,8 +32,6 @@ public class ShakeDetector implements SensorEventListener {
 	private static final int X = 0;
 	private static final int Y = 1;
 	private static final int Z = 2;
-
-	private TextView lblShake;
 	
 	private INetworking net;
 	
@@ -50,12 +47,11 @@ public class ShakeDetector implements SensorEventListener {
 	// Counter for shake movements
 	int moveCount = 0;
     
-	// TODO: add broadcasting ability INetworking net, String macAddress, ...
+
 	// Constructor that sets the shake listener
-    public ShakeDetector(TextView lblShake, INetworking net, String macAddress) {
+    public ShakeDetector(INetworking net, String macAddress) {
 		this.net = net;
 		this.macAddress = macAddress;
-    	this.lblShake = lblShake;
     }
 
     @Override
@@ -78,24 +74,24 @@ public class ShakeDetector implements SensorEventListener {
         	}
         	
         	long elapsedTime = now - startTime;
-        	
         	// Check if we're still in the shake window we defined
         	if (elapsedTime > MAX_SHAKE_DURATION) {
         		// Too much time has passed. Start over!
         		resetShakeDetection();
-        		lblShake.setText("Shake me...");
         	}
         	else {
         		// Keep track of all the movements
         		moveCount++;
-        		
+
         		// Check if enough movements have been made to qualify as a shake
         		if (moveCount > MIN_MOVEMENTS) {
         			// It's a shake! Notify the listener.
-        			lblShake.setText("Shaken!!");
+        			// System.out.println("Shaken");
+        			
+        			
+        			updateLock.lock();
         			
         			updateTime = System.nanoTime();
-        			
         			net.sendPackets(new DataWithTimestampAndMac(
         					new EventData("shaken"), 
         					updateTime, macAddress));

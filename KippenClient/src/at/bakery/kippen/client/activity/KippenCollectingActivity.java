@@ -74,6 +74,7 @@ public class KippenCollectingActivity extends Activity {
 	private BatterySensingNoOutput batteryReceiver;
 	
 	// used for shake detection
+	private Sensor shakeSense;
 	private ShakeDetector shakeDetectorListener;
 	
 	// helper for building alert messages for the front end
@@ -132,7 +133,7 @@ public class KippenCollectingActivity extends Activity {
 	    ClientConfigData config = new ClientConfigData();
 	    Set<String> essids = new HashSet<String>();
 	    essids.add(WIFI_ESSID); // measure this wifi ...
-	    essids.add("OpenWrt"); // ... measure that wifi ...
+	    essids.add("WirsingRouter5"); // ... measure that wifi ...
 	    config.setConfig(ConfigType.MEASURE_AP_ESSID, essids);
 	    
 	    // send a simple ping to the server to notify about our presence
@@ -162,20 +163,21 @@ public class KippenCollectingActivity extends Activity {
 		wifiReceiver = new WifiSensingTableOutput(wifiMan, (TableLayout)findViewById(R.id.tblWifi), config, networkTask);
 		
 		// TODO: switch on and test
-		shakeDetectorListener = new ShakeDetector((TextView)findViewById(R.id.lblShake), networkTask, wifiMan.getConnectionInfo().getMacAddress());
+		shakeSense = senseMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		shakeDetectorListener = new ShakeDetector(networkTask, wifiMan.getConnectionInfo().getMacAddress());
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		senseMan.registerListener(shakeDetectorListener, accSense, Sensor.TYPE_ACCELEROMETER);
-		
+		System.out.println(wifiMan.getConnectionInfo().getMacAddress());
+		senseMan.registerListener(shakeDetectorListener, shakeSense, Sensor.TYPE_ACCELEROMETER);
 		senseMan.registerListener(accSensorListener, accSense, Sensor.TYPE_ACCELEROMETER);
 		orientSensorListenerSimple.enable();
-//		senseMan.registerListener(orientSensorListener, orientSense, Sensor.TYPE_ROTATION_VECTOR);
+//		//senseMan.registerListener(orientSensorListener, orientSense, Sensor.TYPE_ROTATION_VECTOR);
 		registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		wifiMan.startScan();
-		registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+//		registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 	}
 	
 	@Override
