@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:configuration xmlns:tns="http://www.bakery.at/kippen"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.bakery.at/kippen config.xsd ">
+	<ableton>
+		<ip>ip</ip>
+		<port>0</port>
+	</ableton>
+	<objects>
+		<objectConfig>
+			<mac>88:30:8A:38:53:05</mac>
+			<events>
+				<eventConfig eventType="shake">
+					<commands>
+						<CommandConfig commandType="TOSTRING">
+							<param key="string" value="the shake" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+				<eventConfig eventType="sideChange">
+				    		<CommandConfig commandType="TOSTRING">
+							<param key="string" value="the sidechange" />
+						</CommandConfig>
+				</eventConfig>
+			</events>
+			<type>cube</type>
+		</objectConfig>
+	</objects>
+</tns:configuration>
