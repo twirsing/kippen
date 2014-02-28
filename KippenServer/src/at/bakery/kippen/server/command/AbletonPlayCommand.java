@@ -4,7 +4,7 @@ import java.util.Map;
 
 import nerdproject.LiveController;
 
-public class AbletonPlayCommand extends Command {
+public class AbletonPlayCommand implements Command {
 	private int trackNumber;
 
 	public AbletonPlayCommand(int trackNumber) {

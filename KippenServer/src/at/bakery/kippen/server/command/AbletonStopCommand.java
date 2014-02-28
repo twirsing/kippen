@@ -4,7 +4,7 @@ import java.util.Map;
 
 import nerdproject.LiveController;
 
-public class AbletonStopCommand extends Command {
+public class AbletonStopCommand implements Command {
 	private int trackNumber;
 
 	public AbletonStopCommand(int trackNumber) {

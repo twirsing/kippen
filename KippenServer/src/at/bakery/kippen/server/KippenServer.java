@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -32,11 +34,14 @@ import at.bakery.kippen.config.TypeEnum;
 import at.bakery.kippen.server.command.AbletonPlayCommand;
 import at.bakery.kippen.server.command.AbletonStopCommand;
 import at.bakery.kippen.server.command.Command;
+import at.bakery.kippen.server.command.ToStringCommand;
 import at.bakery.kippen.server.objects.AbstractKippObject;
 import at.bakery.kippen.server.objects.CubeKippObject;
 import at.bakery.kippen.server.outlets.JframeKippOutlet;
 
 public class KippenServer extends JFrame {
+	static Logger log =  Logger.getLogger(KippenServer.class.getName());
+	
 	private JLabel infoLabel = new JLabel("Info: ");
 	private JLabel infoText = new JLabel("- - -");
 
@@ -81,7 +86,7 @@ public class KippenServer extends JFrame {
 
 		Executor workerExecutor = Executors.newCachedThreadPool();
 		final ServerSocket serverSock = new ServerSocket(10000);
-
+		log.info("server is runnning");
 		try {
 			while (true) {
 				final Socket client = serverSock.accept();
@@ -95,12 +100,12 @@ public class KippenServer extends JFrame {
 									client.getInputStream());
 							ObjectOutputStream oos = new ObjectOutputStream(
 									client.getOutputStream());
-
 							while (true) {
 								DataWithTimestampAndMac data = (DataWithTimestampAndMac) ois
 										.readObject();
-
+								
 								IData d = data.getData();
+							
 								String macAddress = data.getMacAddress();
 
 								objectMap.get(macAddress).processData(d);
@@ -122,7 +127,7 @@ public class KippenServer extends JFrame {
 		// read XML config file
 
 		// set and register objects
-		CubeKippObject cube1 = new CubeKippObject("88:30:8A:38:53:05");
+//		CubeKippObject cube1 = new CubeKippObject("88:30:8A:38:53:05");
 
 		HashMap<String, JLabel> jlabels = new HashMap<String, JLabel>();
 		jlabels.put("info", infoText);
@@ -132,8 +137,8 @@ public class KippenServer extends JFrame {
 		jlabels.put("distance", metricDistanceText);
 
 		JframeKippOutlet Jfoutlet = new JframeKippOutlet(jlabels);
-		cube1.addOutlet(Jfoutlet);
-		this.objectMap.put(cube1.getId(), cube1);
+//		cube1.addOutlet(Jfoutlet);
+//		this.objectMap.put(cube1.getId(), cube1);
 	}
 
 	private void initObjects() {
@@ -143,20 +148,26 @@ public class KippenServer extends JFrame {
 		for (ObjectConfig obj : config.getObjects().getObjectConfig()) {
 			//if its a cube
 			if (obj.getType() == TypeEnum.CUBE) {
-				
+				String mac = obj.getMac();
+				log.log(Level.INFO,"Found CUBE with MAC: " + mac);
 				//make new kippen object
-				CubeKippObject cubeKippObject = new CubeKippObject(obj.getMac());
+				CubeKippObject cubeKippObject = new CubeKippObject(mac);
 				
 				//add the new object to the server object map
 				objectMap.put(obj.getMac(), cubeKippObject);
 				
 				//for all events the object reacts to
 				for (EventConfig e : obj.getEvents().getEventConfig()) {
-					List<Command> makeCommands = makeCommands(e.getCommands().getCommandConfig());
+					List<Command> commands = makeCommands(e.getCommands().getCommandConfig());
 					
 					switch (e.getEventType()) {
-					case "sideChange":
-						cubeKippObject.setCommandsForEvents("sideChange", makeCommands);
+					case EventTypes.SIDECHANGE:
+						log.log(Level.INFO,"Found event side change event");
+						cubeKippObject.setCommandsForEvents(EventTypes.SIDECHANGE, commands);
+						break;
+					case EventTypes.SHAKE:
+						log.log(Level.INFO,"Found shake side change event");
+						cubeKippObject.setCommandsForEvents(EventTypes.SHAKE, commands);
 						break;
 					//add other events here	
 					default:
@@ -173,19 +184,25 @@ public class KippenServer extends JFrame {
 		for (CommandConfig c : configList) {
 			switch (c.getCommandType()) {
 			case "ABLETONPLAY":
+				log.log(Level.INFO,"Found ABLETONPLAY command");
 				commandList.add(new AbletonPlayCommand(getCommandParamValue(
 						"trackNumber", c.getParam())));
 				break;
 			case "ABLETONSTOP":
+				log.log(Level.INFO,"Found ABLETONSTOP command");
 				commandList.add(new AbletonStopCommand(getCommandParamValue(
 						"trackNumber", c.getParam())));
+				break;
+			case "TOSTRING":
+				log.log(Level.INFO,"Found TO STRING command");
+				commandList.add(new ToStringCommand());
 				break;
 
 			default:
 				break;
 			}
 		}
-		return null;
+		return commandList;
 	}
 
 	private String getCommandParamValue(String key,
@@ -198,6 +215,8 @@ public class KippenServer extends JFrame {
 	}
 
 	private void showGUI() {
+		init();
+		initObjects();
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 		addWindowListener(new WindowAdapter() {

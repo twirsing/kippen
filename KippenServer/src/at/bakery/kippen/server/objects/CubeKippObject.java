@@ -6,24 +6,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.logging.Logger;
 
 import at.bakery.kippen.common.IData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BatteryData;
+import at.bakery.kippen.common.data.EventData;
 import at.bakery.kippen.common.data.OrientationData;
 import at.bakery.kippen.common.data.OrientationSimpleData;
 import at.bakery.kippen.common.data.SensorSingleData;
 import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.data.WifiLevelsData;
+import at.bakery.kippen.server.KippenServer;
 import at.bakery.kippen.server.command.Command;
 import at.bakery.kippen.server.outlets.AbstractKippOutlet;
 import at.bakery.kippen.server.outlets.CsvKippOutlet;
 import at.bakery.kippen.server.outlets.JframeKippOutlet;
 
 public class CubeKippObject extends AbstractKippObject {
+	static Logger log =  Logger.getLogger(CubeKippObject.class.getName());
 
 	HashMap<String, List<Command>> eventMap = new HashMap<String, List<Command>>();
-
 
 	private String lastOrientation;
 	private double lastEffAcc;
@@ -44,12 +47,11 @@ public class CubeKippObject extends AbstractKippObject {
 		// TODO Auto-generated method stub
 
 	}
-	
-	//sets the commands for a specific events
-	public void setCommandsForEvents(String eventID, List<Command> commandList){
+
+	// sets the commands for a specific events
+	public void setCommandsForEvents(String eventID, List<Command> commandList) {
 		this.eventMap.put(eventID, commandList);
 	}
-	
 
 	@Override
 	protected void output() {
@@ -90,17 +92,36 @@ public class CubeKippObject extends AbstractKippObject {
 			processAccelerationData((AccelerationData) d);
 
 			// COMPLEX ORIENTATION
-		} else if (d instanceof OrientationSimpleData) {
-			SensorTripleData sd = (SensorTripleData) d;
+		} // else if (d instanceof OrientationSimpleData) {
+			// SensorTripleData sd = (SensorTripleData) d;
 
-			// orientText.setText(sd.x + ", " + sd.y + ", " + sd.z);
+		// orientText.setText(sd.x + ", " + sd.y + ", " + sd.z);
 
-			// SIMPLE (CUBE) ORIENTATION
-		} else if (d instanceof OrientationSimpleData) {
+		// SIMPLE (CUBE) ORIENTATION
+		// }
+		else if (d instanceof OrientationSimpleData) {
 			processOrientationData((OrientationSimpleData) d);
+		} else if (d instanceof EventData) {
+			processEventData(d);
 		}
 
 		output();
+	}
+
+	private void processEventData(IData d) {
+		EventData event = (EventData) d;
+		executeShakeEvent();
+
+	}
+
+	private void executeShakeEvent() {
+		log.info("Executing change event");
+		HashMap<String, String> paramMap = new HashMap<String, String>();
+		
+		log.info(eventMap.toString());
+		for (Command c : eventMap.get("shake")) {
+			c.execute(paramMap);
+		}
 	}
 
 	@Override
@@ -158,7 +179,7 @@ public class CubeKippObject extends AbstractKippObject {
 		if (deg != -1) {
 			if (deg >= 315 || deg < 45) {
 				lastOrientation = "1";
-				
+
 			} else if (deg >= 45 && deg < 135) {
 				lastOrientation = "2";
 			} else if (deg >= 135 && deg < 225) {
@@ -175,20 +196,23 @@ public class CubeKippObject extends AbstractKippObject {
 				lastOrientation = "6";
 			}
 		}
-		
-		//execute the side change commands
+
+		// execute the side change commands
 		executeSideChange(lastOrientation);
 
 	}
-	
-	private void executeSideChange(String side){
+
+	private void executeSideChange(String side) {
 		HashMap<String, String> paramMap = new HashMap<String, String>();
-		paramMap.put("clipNumer", side);
+		paramMap.put("clipNumber", side);
+		List<Command> sideChangeEvents = eventMap.get("sideChange");
 		
-		for(Command c: eventMap.get("sideChange")){
-			c.execute(paramMap);
+		if (sideChangeEvents != null) {
+			for (Command c : sideChangeEvents) {
+				c.execute(paramMap);
+			}
 		}
-		
+
 	}
 
 	@Override
