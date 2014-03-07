@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import at.bakery.kippen.common.IData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BatteryData;
-import at.bakery.kippen.common.data.EventData;
+import at.bakery.kippen.common.data.ShakeData;
 import at.bakery.kippen.common.data.OrientationData;
 import at.bakery.kippen.common.data.OrientationSimpleData;
 import at.bakery.kippen.common.data.SensorSingleData;
@@ -81,9 +81,10 @@ public class CubeKippObject extends AbstractKippObject {
 	@Override
 	public void processData(IData d) {
 		// TODO Auto-generated method stub
-
+		log.info("got data " + d);
 		super.processData(d);
 
+		
 		if (d instanceof WifiLevelsData) {
 			processWifiData((WifiLevelsData) d);
 
@@ -92,16 +93,11 @@ public class CubeKippObject extends AbstractKippObject {
 			processAccelerationData((AccelerationData) d);
 
 			// COMPLEX ORIENTATION
-		} // else if (d instanceof OrientationSimpleData) {
-			// SensorTripleData sd = (SensorTripleData) d;
-
-		// orientText.setText(sd.x + ", " + sd.y + ", " + sd.z);
-
-		// SIMPLE (CUBE) ORIENTATION
-		// }
+		} 
 		else if (d instanceof OrientationSimpleData) {
+			log.info("found orientation data");
 			processOrientationData((OrientationSimpleData) d);
-		} else if (d instanceof EventData) {
+		} else if (d instanceof ShakeData) {
 			processEventData(d);
 		}
 
@@ -109,13 +105,13 @@ public class CubeKippObject extends AbstractKippObject {
 	}
 
 	private void processEventData(IData d) {
-		EventData event = (EventData) d;
+		ShakeData event = (ShakeData) d;
 		executeShakeEvent();
 
 	}
 
 	private void executeShakeEvent() {
-		log.info("Executing change event");
+		log.info("Executing shake event");
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		
 		log.info(eventMap.toString());
@@ -203,9 +199,10 @@ public class CubeKippObject extends AbstractKippObject {
 	}
 
 	private void executeSideChange(String side) {
+		log.info("Executing side change with side " + side);
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("clipNumber", side);
-		List<Command> sideChangeEvents = eventMap.get("sideChange");
+		List<Command> sideChangeEvents = eventMap.get("cubeSideChange");
 		
 		if (sideChangeEvents != null) {
 			for (Command c : sideChangeEvents) {

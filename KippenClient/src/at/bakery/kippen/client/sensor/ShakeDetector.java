@@ -11,7 +11,7 @@ import android.hardware.SensorEventListener;
 import android.widget.TextView;
 import at.bakery.kippen.client.activity.INetworking;
 import at.bakery.kippen.common.DataWithTimestampAndMac;
-import at.bakery.kippen.common.data.EventData;
+import at.bakery.kippen.common.data.ShakeData;;
 
 public class ShakeDetector implements SensorEventListener {
 
@@ -93,7 +93,7 @@ public class ShakeDetector implements SensorEventListener {
         			
         			updateTime = System.nanoTime();
         			net.sendPackets(new DataWithTimestampAndMac(
-        					new EventData("shaken"), 
+        					new ShakeData("shaken"), 
         					updateTime, macAddress));
         			
         			updateLock.unlock();

@@ -144,6 +144,8 @@ public class KippenServer extends JFrame {
 	private void initObjects() {
 		Configuration config = JAXB.unmarshal(new File("config.xml"),
 				Configuration.class);
+		
+		
 		//for each object set the commands and events
 		for (ObjectConfig obj : config.getObjects().getObjectConfig()) {
 			//if its a cube
@@ -162,11 +164,11 @@ public class KippenServer extends JFrame {
 					
 					switch (e.getEventType()) {
 					case EventTypes.SIDECHANGE:
-						log.log(Level.INFO,"Found event side change event");
+						log.log(Level.INFO,"Found  side change event");
 						cubeKippObject.setCommandsForEvents(EventTypes.SIDECHANGE, commands);
 						break;
 					case EventTypes.SHAKE:
-						log.log(Level.INFO,"Found shake side change event");
+						log.log(Level.INFO,"Found shake event");
 						cubeKippObject.setCommandsForEvents(EventTypes.SHAKE, commands);
 						break;
 					//add other events here	

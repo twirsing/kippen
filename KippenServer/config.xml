@@ -8,7 +8,9 @@
 	</ableton>
 	<objects>
 		<objectConfig>
-			<mac>88:30:8A:38:53:05</mac>
+			<!-- tom <mac>88:30:8A:38:53:05</mac>  -->
+			<!-- tommy  <mac>c4:43:8f:46:34:32</mac> -->
+			<mac>10:68:3f:49:25:4e</mac>  
 			<events>
 				<eventConfig eventType="shake">
 					<commands>
@@ -17,10 +19,12 @@
 						</CommandConfig>
 					</commands>
 				</eventConfig>
-				<eventConfig eventType="sideChange">
-				    		<CommandConfig commandType="TOSTRING">
+				<eventConfig eventType="cubeSideChange">
+					<commands>
+						<CommandConfig commandType="TOSTRING">
 							<param key="string" value="the sidechange" />
 						</CommandConfig>
+					</commands>
 				</eventConfig>
 			</events>
 			<type>cube</type>
