@@ -1,9 +1,11 @@
 package at.bakery.kippen.common.data;
 
-import at.bakery.kippen.common.IData;
+import at.bakery.kippen.common.AbstractData;
 
-public class PingData implements IData {
-
-	private static final long serialVersionUID = 6195207412432588623L;
+public class PingData extends AbstractData {
 	
+	@Override
+	public String toString() {
+		return "SENSOR ping";
+	}
 }

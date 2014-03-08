@@ -1,23 +1,21 @@
 package at.bakery.kippen.server.objects;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.logging.Logger;
 
-import at.bakery.kippen.common.IData;
+import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BatteryData;
-import at.bakery.kippen.common.data.ShakeData;
-import at.bakery.kippen.common.data.OrientationData;
-import at.bakery.kippen.common.data.OrientationSimpleData;
+import at.bakery.kippen.common.data.DirectionOrientationData;
 import at.bakery.kippen.common.data.SensorSingleData;
 import at.bakery.kippen.common.data.SensorTripleData;
+import at.bakery.kippen.common.data.ShakeData;
 import at.bakery.kippen.common.data.WifiLevelsData;
-import at.bakery.kippen.server.KippenServer;
 import at.bakery.kippen.server.command.Command;
 import at.bakery.kippen.server.outlets.AbstractKippOutlet;
 import at.bakery.kippen.server.outlets.CsvKippOutlet;
@@ -79,33 +77,27 @@ public class CubeKippObject extends AbstractKippObject {
 	}
 
 	@Override
-	public void processData(IData d) {
-		// TODO Auto-generated method stub
-		log.info("got data " + d);
+	public void processData(AbstractData d) {
+		// log event
+		log.info(d.toString());
+		
 		super.processData(d);
-
 		
 		if (d instanceof WifiLevelsData) {
 			processWifiData((WifiLevelsData) d);
-
-			// ACCELERATION
 		} else if (d instanceof AccelerationData) {
 			processAccelerationData((AccelerationData) d);
-
-			// COMPLEX ORIENTATION
 		} 
-		else if (d instanceof OrientationSimpleData) {
-			log.info("found orientation data");
-			processOrientationData((OrientationSimpleData) d);
+		else if (d instanceof DirectionOrientationData) {
+			processOrientationData((DirectionOrientationData) d);
 		} else if (d instanceof ShakeData) {
-			processEventData(d);
+			processshakeData();
 		}
 
 		output();
 	}
 
-	private void processEventData(IData d) {
-		ShakeData event = (ShakeData) d;
+	private void processshakeData() {
 		executeShakeEvent();
 
 	}
@@ -124,8 +116,6 @@ public class CubeKippObject extends AbstractKippObject {
 	protected void processWifiData(WifiLevelsData data) {
 		WifiLevelsData wd = (WifiLevelsData) data;
 
-		// wifiDistanceText.setText(wd.toString());
-
 		// add the current measurement to the list
 		avgWifiLevel.offer(wd);
 
@@ -138,12 +128,12 @@ public class CubeKippObject extends AbstractKippObject {
 				double innerAvgLevel = 0;
 
 				// for each measured wifi in the item ...
-				for (Integer val : w.getNetworks().values()) {
-					innerAvgLevel += val;
+				for (Entry<String, Object> val : w.getNetworks()) {
+					innerAvgLevel += (double)val.getValue();
 				}
 
 				// ... compute average
-				avgLevel += (innerAvgLevel / w.getNetworks().values().size());
+				avgLevel += (innerAvgLevel / w.getNetworks().size());
 			}
 			avgLevel /= avgWifiLevel.size();
 
@@ -167,9 +157,9 @@ public class CubeKippObject extends AbstractKippObject {
 	}
 
 	@Override
-	protected void processOrientationData(OrientationSimpleData data) {
-		SensorSingleData sd = (SensorSingleData) data;
-		int deg = (int) sd.value;
+	protected void processOrientationData(DirectionOrientationData data) {
+		SensorSingleData sd = (SensorSingleData)data;
+		int deg = (int)sd.getValue();
 
 		// it is NOT flat on the ground
 		if (deg != -1) {
@@ -186,7 +176,7 @@ public class CubeKippObject extends AbstractKippObject {
 		}
 		// it IS flat on the ground
 		else {
-			if (lastAccData.z < 0) {
+			if (lastAccData.getZ() < 0) {
 				lastOrientation = "5";
 			} else {
 				lastOrientation = "6";
@@ -216,7 +206,7 @@ public class CubeKippObject extends AbstractKippObject {
 	protected void processAccelerationData(AccelerationData data) {
 		SensorTripleData sd = (SensorTripleData) data;
 		lastAccData = sd;
-		lastEffAcc = Math.sqrt(sd.x * sd.x + sd.y * sd.y + sd.z + sd.z);
+		lastEffAcc = Math.sqrt(sd.getX() * sd.getX() + sd.getY() * sd.getY() + sd.getZ() + sd.getZ());
 
 	}
 

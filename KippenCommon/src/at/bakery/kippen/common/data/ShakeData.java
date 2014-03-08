@@ -1,20 +1,19 @@
 package at.bakery.kippen.common.data;
 
-import at.bakery.kippen.common.IData;
+import at.bakery.kippen.common.AbstractData;
 
-public class ShakeData implements IData {
+public class ShakeData extends AbstractData {
 
-//	private static final long serialVersionUID = -1520878341062188979L;
-
-	public String value;
+	public ShakeData() {
+		this(System.nanoTime());
+	}
 	
-	public ShakeData(String value) {
-		this.value = value;
+	public ShakeData(long timestamp) {
+		super(timestamp);
 	}
 
 	@Override
 	public String toString() {
-		
-		return "SENSOR val = " + value;
+		return "SENSOR shaking";
 	}
 }

@@ -3,30 +3,20 @@ package at.bakery.kippen.client.sensor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import at.bakery.kippen.client.activity.INetworking;
-import at.bakery.kippen.common.DataWithTimestampAndMac;
-import at.bakery.kippen.common.data.OrientationData;
+import at.bakery.kippen.client.activity.NetworkingTask;
+import at.bakery.kippen.common.data.AnalogOrientationData;
 import at.bakery.kippen.common.data.SensorTripleData;
 
 public class OrientationSensingNoOutput implements SensorEventListener {
 
 	private Lock updateLock = new ReentrantLock();
 	
-	private long updateTime = -1;
-	
-	private INetworking net;
-	
-	private String macAddress;
-	
-	public OrientationSensingNoOutput(INetworking net, String macAddress) {
-		this.net = net;
-		this.macAddress = macAddress;
-	}
+	private INetworking net = NetworkingTask.getInstance();
 	
 	@Override
 	public void onSensorChanged(SensorEvent se) {
@@ -52,13 +42,11 @@ public class OrientationSensingNoOutput implements SensorEventListener {
 		
 		SensorManager.getOrientation(rotMat, orientMat);
 		
-		SensorTripleData t = new OrientationData(orientMat[0]/**180/(float)Math.PI*/, orientMat[1], orientMat[2]);
+		SensorTripleData t = new AnalogOrientationData(orientMat[0]/**180/(float)Math.PI*/, orientMat[1], orientMat[2]);
 		
 		updateLock.lock();
 		
-		updateTime = System.nanoTime();
-			
-		net.sendPackets(new DataWithTimestampAndMac(t, updateTime, macAddress));
+		net.sendPackets(t);
 		
 		updateLock.unlock();
 		

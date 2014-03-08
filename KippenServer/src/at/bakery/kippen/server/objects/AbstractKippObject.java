@@ -6,11 +6,10 @@ package at.bakery.kippen.server.objects;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import at.bakery.kippen.common.IData;
+import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BatteryData;
-import at.bakery.kippen.common.data.OrientationData;
-import at.bakery.kippen.common.data.OrientationSimpleData;
+import at.bakery.kippen.common.data.DirectionOrientationData;
 import at.bakery.kippen.common.data.WifiLevelsData;
 import at.bakery.kippen.server.outlets.AbstractKippOutlet;
 
@@ -24,7 +23,8 @@ public abstract class AbstractKippObject {
 
 	protected HashSet<AbstractKippOutlet> outletObjects = new HashSet<AbstractKippOutlet>();
 	
-	protected HashMap<String, IData> dataObjects = new HashMap<String, IData>();
+	// FIXME instead of String, Class<AbstractData> could potentially be used !?
+	protected HashMap<String, AbstractData> dataObjects = new HashMap<String, AbstractData>();
 
 	/**
 	 * @param id usually mac address
@@ -39,15 +39,14 @@ public abstract class AbstractKippObject {
 	
 	protected abstract void output();
 	
-	public void processData(IData d){
-		
-		dataObjects.put(d.getClass().toString(), d);
+	public void processData(AbstractData data){
+		dataObjects.put(data.getClass().toString(), data);
 		
 	}
 	
 	protected abstract void processWifiData(WifiLevelsData data);
 	protected abstract void processBatteryData(BatteryData data);
-	protected abstract void processOrientationData(OrientationSimpleData data);
+	protected abstract void processOrientationData(DirectionOrientationData data);
 	protected abstract void processAccelerationData(AccelerationData data);
 	
 	public String getId() {

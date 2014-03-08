@@ -8,10 +8,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.widget.TextView;
 import at.bakery.kippen.client.activity.INetworking;
-import at.bakery.kippen.common.DataWithTimestampAndMac;
-import at.bakery.kippen.common.data.ShakeData;;
+import at.bakery.kippen.client.activity.NetworkingTask;
+import at.bakery.kippen.common.data.ShakeData;
 
 public class ShakeDetector implements SensorEventListener {
 
@@ -33,11 +32,7 @@ public class ShakeDetector implements SensorEventListener {
 	private static final int Y = 1;
 	private static final int Z = 2;
 	
-	private INetworking net;
-	
-	private String macAddress;
-	
-	private long updateTime = -1;
+	private INetworking net = NetworkingTask.getInstance();
 	
 	private Lock updateLock = new ReentrantLock();
 	
@@ -46,13 +41,6 @@ public class ShakeDetector implements SensorEventListener {
 	
 	// Counter for shake movements
 	int moveCount = 0;
-    
-
-	// Constructor that sets the shake listener
-    public ShakeDetector(INetworking net, String macAddress) {
-		this.net = net;
-		this.macAddress = macAddress;
-    }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -91,10 +79,7 @@ public class ShakeDetector implements SensorEventListener {
         			
         			updateLock.lock();
         			
-        			updateTime = System.nanoTime();
-        			net.sendPackets(new DataWithTimestampAndMac(
-        					new ShakeData("shaken"), 
-        					updateTime, macAddress));
+        			net.sendPackets(new ShakeData());
         			
         			updateLock.unlock();
         			

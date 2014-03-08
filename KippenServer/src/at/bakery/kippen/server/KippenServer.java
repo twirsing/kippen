@@ -3,9 +3,10 @@ package at.bakery.kippen.server;
 import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -22,10 +23,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.xml.bind.JAXB;
 
-import at.bakery.kippen.common.DataWithTimestampAndMac;
-import at.bakery.kippen.common.IData;
+import at.bakery.kippen.common.AbstractData;
+import at.bakery.kippen.common.json.JSONDataSerializer;
 import at.bakery.kippen.config.CommandConfig;
-import at.bakery.kippen.config.CommandElement;
 import at.bakery.kippen.config.Configuration;
 import at.bakery.kippen.config.EventConfig;
 import at.bakery.kippen.config.ObjectConfig;
@@ -80,6 +80,7 @@ public class KippenServer extends JFrame {
 		}
 	}
 
+	// FIXME no real exit condition
 	private boolean quit = false;
 
 	public void start() throws Exception {
@@ -96,19 +97,17 @@ public class KippenServer extends JFrame {
 					@Override
 					public void run() {
 						try {
-							ObjectInputStream ois = new ObjectInputStream(
-									client.getInputStream());
-							ObjectOutputStream oos = new ObjectOutputStream(
-									client.getOutputStream());
-							while (true) {
-								DataWithTimestampAndMac data = (DataWithTimestampAndMac) ois
-										.readObject();
+							BufferedReader ois = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF8"));
+							// TODO if TX is needed
+							// OutputStream oos = client.getOutputStream();
+							while(true) {
+								// first line is canonical class name of event
+								String dataType = ois.readLine(); 
 								
-								IData d = data.getData();
+								// second line is JSON data
+								AbstractData data = JSONDataSerializer.deserialize(dataType, ois.readLine());
 							
-								String macAddress = data.getMacAddress();
-
-								objectMap.get(macAddress).processData(d);
+								objectMap.get(data.getClientId()).processData(data);
 
 							}
 						} catch (Exception ex) {

@@ -1,29 +1,30 @@
 package at.bakery.kippen.common.data;
 
-import at.bakery.kippen.common.IData;
+import at.bakery.kippen.common.AbstractData;
 
-public class BatteryData implements IData {
+public class BatteryData extends AbstractData {
 
-	private static final long serialVersionUID = -7605416261325422492L;
-
-	private boolean charging;
-	private float level;
+	public BatteryData(boolean charging, double level) {
+		this(System.nanoTime(), charging, level);
+	}
 	
-	public BatteryData(boolean charging, float level) {
-		this.charging = charging;
-		this.level = level;
+	public BatteryData(long ts, boolean charging, double level) {
+		super(ts);
+		
+		setBoolean("charging", charging);
+		setDouble("level", level);
 	}
 
 	public boolean isCharging() {
-		return charging;
+		return (Boolean)getValue("charging");
 	}
 
-	public float getLevel() {
-		return level;
+	public double getLevel() {
+		return (Double)getValue("level");
 	}
 
 	@Override
 	public String toString() {
-		return "BATTERY " + (!charging ? "dis" : "") + "charging @ " + (level * 100.0) + "%";
+		return "SENSOR battery " + (!isCharging() ? "dis" : "") + "charging @ " + (getLevel() * 100.0) + "%";
 	}
 }

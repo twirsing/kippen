@@ -2,7 +2,6 @@ package at.bakery.kippen.client.sensor;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -15,7 +14,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import at.bakery.kippen.client.activity.INetworking;
-import at.bakery.kippen.common.DataWithTimestampAndMac;
+import at.bakery.kippen.client.activity.NetworkingTask;
 import at.bakery.kippen.common.data.ClientConfigData;
 import at.bakery.kippen.common.data.ClientConfigData.ConfigType;
 import at.bakery.kippen.common.data.WifiLevelsData;
@@ -33,22 +32,20 @@ public class WifiSensingTableOutput extends BroadcastReceiver {
 	
 	// the measurements, here its Wifi and its corresponding timestamp (i.e. scan time)
 	private WifiLevelsData wifiLevels;
-	private long updateTime = -1;
 	
 	private Lock updateLock = new ReentrantLock();
 	
-	private INetworking net;
+	private INetworking net = NetworkingTask.getInstance();
 
 	
-	public WifiSensingTableOutput(WifiManager wifiMan, TableLayout table, INetworking net) {
-		this(wifiMan, table, new ClientConfigData(), net);
+	public WifiSensingTableOutput(WifiManager wifiMan, TableLayout table) {
+		this(wifiMan, table, new ClientConfigData());
 	}
 	
-	public WifiSensingTableOutput(WifiManager wifiMan, TableLayout table, ClientConfigData config, INetworking net) {
+	public WifiSensingTableOutput(WifiManager wifiMan, TableLayout table, ClientConfigData config) {
 		this.wifiMan = wifiMan;
 		this.table = table;
 		this.config = config;
-		this.net = net;
 	}
 	
 	@Override
@@ -85,14 +82,14 @@ public class WifiSensingTableOutput extends BroadcastReceiver {
 			table.addView(resRow);
 			
 			// add the BSSID as SSID is not unique
-			wifiLevels.getNetworks().put(result.BSSID, result.level);
+			wifiLevels.setNetwork(result.BSSID, result.level);
 		}
 		
-		if(wifiLevels.getNetworks().size() > 0) {
-			updateTime = System.nanoTime();
-			net.sendPackets(new DataWithTimestampAndMac(wifiLevels, updateTime, wifiMan.getConnectionInfo().getMacAddress()));
-			updateLock.unlock();
+		if(wifiLevels.hasNetworks()) {
+			net.sendPackets(wifiLevels);
 		}
+		
+		updateLock.unlock();
 			
 		try {
 			Thread.sleep(100);

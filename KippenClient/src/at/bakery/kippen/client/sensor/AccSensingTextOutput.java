@@ -10,7 +10,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.widget.TextView;
 import at.bakery.kippen.client.activity.INetworking;
-import at.bakery.kippen.common.DataWithTimestampAndMac;
+import at.bakery.kippen.client.activity.NetworkingTask;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.SensorTripleData;
 
@@ -23,7 +23,6 @@ public class AccSensingTextOutput implements SensorEventListener {
 	
 	private Queue<SensorTripleData> values = new LinkedList<SensorTripleData>();
 	private SensorTripleData avgValue = new SensorTripleData(0, 0, 0);
-	private long updateTime = -1;
 	private int interval = 0;
 	
 	private SensorTripleData measureStart = new SensorTripleData(0, 0, 0);
@@ -32,17 +31,12 @@ public class AccSensingTextOutput implements SensorEventListener {
 	
 	private Lock updateLock = new ReentrantLock();
 	
-	private INetworking net;
-	private String macAddress;
+	private INetworking net = NetworkingTask.getInstance();
 	
-	public AccSensingTextOutput(TextView lblXAccId, TextView lblYAccId, TextView lblZAccId, INetworking net, String macAddress) {
+	public AccSensingTextOutput(TextView lblXAccId, TextView lblYAccId, TextView lblZAccId) {
 		this.lblXAccId = lblXAccId;
 		this.lblYAccId = lblYAccId;
 		this.lblZAccId = lblZAccId;
-		
-		this.net = net;
-		
-		this.macAddress = macAddress;
 	}
 	
 	@Override
@@ -58,9 +52,7 @@ public class AccSensingTextOutput implements SensorEventListener {
 			return;
 		}
 		
-		measureRef.x = se.values[0];
-		measureRef.y = se.values[1];
-		measureRef.z = se.values[2];
+		measureRef.setXYZ(se.values[0], se.values[1], se.values[2]);
 		
 		if(measureRef == measureStart) {
 			measureRef = measureEnd;
@@ -69,34 +61,29 @@ public class AccSensingTextOutput implements SensorEventListener {
 			measureRef = measureStart;
 		}
 				
-		SensorTripleData t = new SensorTripleData(measureEnd.x - measureStart.x, measureEnd.y - measureStart.y, measureEnd.z - measureStart.z);
+		SensorTripleData t = new SensorTripleData(
+				measureEnd.getX() - measureStart.getX(), 
+				measureEnd.getY() - measureStart.getY(), 
+				measureEnd.getZ() - measureStart.getZ());
 		values.offer(t);
 		
 		updateLock.lock();
 		
-		avgValue.x += t.x;
-		avgValue.y += t.y;
-		avgValue.z += t.z;
+		avgValue.incrementXYZ(t.getX(), t.getY(), t.getZ());
 		
 		if(values.size() > MEASURE_COUNT) {
 			SensorTripleData rem = values.poll();
 			
-			avgValue.x -= rem.x;
-			avgValue.y -= rem.y;
-			avgValue.z -= rem.z;
+			avgValue.incrementXYZ(-rem.getX(), -rem.getY(), -rem.getZ());
 		}
-		
-		updateTime = System.nanoTime();
 		
 		interval++;
 		if(interval > MEASURE_SEND_INTERVAL) {
-			lblXAccId.setText("" + avgValue.x / values.size());
-			lblYAccId.setText("" + avgValue.y / values.size());
-			lblZAccId.setText("" + avgValue.z / values.size());
+			lblXAccId.setText("" + avgValue.getX() / values.size());
+			lblYAccId.setText("" + avgValue.getY() / values.size());
+			lblZAccId.setText("" + avgValue.getZ() / values.size());
 			
-			net.sendPackets(new DataWithTimestampAndMac(
-					new AccelerationData(avgValue.x / values.size(), avgValue.x / values.size(), avgValue.x / values.size()), 
-					updateTime, macAddress));
+			net.sendPackets(new AccelerationData(avgValue.getX() / values.size(), avgValue.getY() / values.size(), avgValue.getZ() / values.size()));
 			interval = 0;
 		}
 		

@@ -8,9 +8,9 @@
 	</ableton>
 	<objects>
 		<objectConfig>
-			<!-- tom <mac>88:30:8A:38:53:05</mac>  -->
-			<!-- tommy  <mac>c4:43:8f:46:34:32</mac> -->
-			<mac>10:68:3f:49:25:4e</mac>  
+			<!-- tomw <mac>88:30:8A:38:53:05</mac>  -->
+			<mac>c4:43:8f:46:34:32</mac>
+			<!-- matthias <mac>10:68:3f:49:25:4e</mac> -->  
 			<events>
 				<eventConfig eventType="shake">
 					<commands>

@@ -1,24 +1,21 @@
 package at.bakery.kippen.client.activity;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
-import at.bakery.kippen.common.DataWithTimestampAndMac;
+import at.bakery.kippen.common.AbstractData;
+import at.bakery.kippen.common.json.JSONDataSerializer;
 
 public class NetworkingTask extends Thread implements INetworking {
 
 	private Socket socket;
-	private ObjectOutputStream oos;
-	private ObjectInputStream ois;
+	private OutputStream oos;
+//	private ObjectInputStream ois;
 	
-	private DataWithTimestampAndMac txPackets[] = new DataWithTimestampAndMac[0];
-	private DataWithTimestampAndMac rxPacket;
+	private AbstractData txPackets[] = new AbstractData[0];
+	private AbstractData rxPacket;
 	
 	private boolean quit = false;
 	
@@ -27,14 +24,32 @@ public class NetworkingTask extends Thread implements INetworking {
 	
 	private String host;
 	private int port;
+	private String clientId;
 	
-	public NetworkingTask(String host, int port) {
+	// singleton instance
+	private static NetworkingTask instance;
+	
+	protected static void setup(String host, int port, String clientId) {
+		instance = new NetworkingTask(host, port, clientId);
+	}
+	
+	public static NetworkingTask getInstance() {
+		if(instance == null) {
+			System.err.println("It is likely that you failed setup IP and port, using default localhost:8080");
+			setup("127.0.0.1", 8080, "anonymousClient");
+		}
+		
+		return instance;
+	}
+	
+	private NetworkingTask(String host, int port, String clientId) {
 		this.host = host;
 		this.port = port;
+		this.clientId = clientId;
 	}
 	
 	@Override
-	public void sendPackets(DataWithTimestampAndMac ... packets) {
+	public void sendPackets(AbstractData ... packets) {
 		try {
 			wait.acquire();
 		} catch (InterruptedException e) {}
@@ -76,32 +91,28 @@ public class NetworkingTask extends Thread implements INetworking {
 			if(socket == null) {
 				try {
 					socket = new Socket(InetAddress.getByName(host), port);
-					oos = new ObjectOutputStream(socket.getOutputStream());
-//					ois = new ObjectInputStream(socket.getInputStream());
+					oos = socket.getOutputStream();
+					// TODO establish input stream if RX needed
 				} catch (Exception e) {
 					return;
 				}
 			}
 			
 			// send packets and reset TX
-			for(DataWithTimestampAndMac packet : txPackets) {
+			for(AbstractData packet : txPackets) {
 				try {
-					oos.writeObject(packet);
+					// set clientId
+					packet.setClientId(clientId);
+					
+					// JSON serialize and send packet
+					oos.write(JSONDataSerializer.serialize(packet));
 				} catch(Exception ex) {
 					ex.printStackTrace();
 					System.err.println("Failed to send packets");
 				}
 			}
-//			txPackets = new DataWithTimestamp[0];
 			
-			// try to RX a packet
-//			try {
-//				rxPacket = (DataWithTimestamp)ois.readObject();
-//			} catch(EOFException eofex) {
-//				// ignore, there's simple nothing to be read
-//			} catch (Exception e) {
-//				System.err.println("Failed to receive packet");
-//			}
+			// TODO try to RX a packet
 			
 			wait.release();
 		}
