@@ -11,7 +11,7 @@ import at.bakery.kippen.client.activity.INetworking;
 import at.bakery.kippen.client.activity.NetworkingTask;
 import at.bakery.kippen.common.data.BatteryData;
 
-public class BatterySensingNoOutput extends BroadcastReceiver {
+public class BatterySensing extends BroadcastReceiver {
 
 	private float capacity = -1;
 	private boolean charging = false;

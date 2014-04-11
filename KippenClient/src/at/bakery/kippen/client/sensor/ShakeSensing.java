@@ -12,7 +12,7 @@ import at.bakery.kippen.client.activity.INetworking;
 import at.bakery.kippen.client.activity.NetworkingTask;
 import at.bakery.kippen.common.data.ShakeData;
 
-public class ShakeDetector implements SensorEventListener {
+public class ShakeSensing implements SensorEventListener {
 
 	// Minimum acceleration needed to count as a shake movement
     private static final int MIN_SHAKE_ACCELERATION = 5;

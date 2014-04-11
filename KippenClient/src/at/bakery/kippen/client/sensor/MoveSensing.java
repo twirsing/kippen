@@ -12,7 +12,7 @@ import at.bakery.kippen.client.activity.NetworkingTask;
 import at.bakery.kippen.common.data.AnalogOrientationData;
 import at.bakery.kippen.common.data.SensorTripleData;
 
-public class OrientationSensingNoOutput implements SensorEventListener {
+public class MoveSensing implements SensorEventListener {
 
 	private Lock updateLock = new ReentrantLock();
 	
@@ -38,7 +38,7 @@ public class OrientationSensingNoOutput implements SensorEventListener {
 		//SensorManager.getRotationMatrix(rotMat, incMat, new float[]{0, 0, SensorManager.GRAVITY_EARTH}, new float[]{0, (float)magField, 0});
 		SensorManager.getRotationMatrixFromVector(rotMat, se.values);
 		
-		SensorManager.remapCoordinateSystem(rotMat, SensorManager.AXIS_X, SensorManager.AXIS_Z, rotMat);
+		//SensorManager.remapCoordinateSystem(rotMat, SensorManager.AXIS_X, SensorManager.AXIS_Z, rotMat);
 		
 		SensorManager.getOrientation(rotMat, orientMat);
 		

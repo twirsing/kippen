@@ -8,18 +8,16 @@ import java.util.concurrent.locks.ReentrantLock;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.widget.TextView;
 import at.bakery.kippen.client.activity.INetworking;
 import at.bakery.kippen.client.activity.NetworkingTask;
+import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.SensorTripleData;
 
-public class AccSensingTextOutput implements SensorEventListener {
+public class AccelerationSensing implements SensorEventListener, ISensorDataCache {
 
-	private static final int MEASURE_COUNT = 50;
-	private static final int MEASURE_SEND_INTERVAL = 20;
-	
-	private TextView lblXAccId, lblYAccId, lblZAccId;
+	private static final int MEASURE_COUNT = 5;
+	private static final int MEASURE_SEND_INTERVAL = 10;
 	
 	private Queue<SensorTripleData> values = new LinkedList<SensorTripleData>();
 	private SensorTripleData avgValue = new SensorTripleData(0, 0, 0);
@@ -32,12 +30,6 @@ public class AccSensingTextOutput implements SensorEventListener {
 	private Lock updateLock = new ReentrantLock();
 	
 	private INetworking net = NetworkingTask.getInstance();
-	
-	public AccSensingTextOutput(TextView lblXAccId, TextView lblYAccId, TextView lblZAccId) {
-		this.lblXAccId = lblXAccId;
-		this.lblYAccId = lblYAccId;
-		this.lblZAccId = lblZAccId;
-	}
 	
 	@Override
 	public void onAccuracyChanged(Sensor s, int a) {}
@@ -79,15 +71,22 @@ public class AccSensingTextOutput implements SensorEventListener {
 		
 		interval++;
 		if(interval > MEASURE_SEND_INTERVAL) {
-			lblXAccId.setText("" + avgValue.getX() / values.size());
-			lblYAccId.setText("" + avgValue.getY() / values.size());
-			lblZAccId.setText("" + avgValue.getZ() / values.size());
+			AccelerationData accData = new AccelerationData(avgValue.getX() / values.size(), avgValue.getY() / values.size(), avgValue.getZ() / values.size());
 			
-			net.sendPackets(new AccelerationData(avgValue.getX() / values.size(), avgValue.getY() / values.size(), avgValue.getZ() / values.size()));
+			cachedData = accData;
+			net.sendPackets(accData);
+			
 			interval = 0;
 		}
 		
 		updateLock.unlock();
+	}
+
+	private AccelerationData cachedData;
+	
+	@Override
+	public AbstractData getCacheData() {
+		return cachedData;
 	}
 	
 }

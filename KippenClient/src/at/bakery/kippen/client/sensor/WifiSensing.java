@@ -19,13 +19,10 @@ import at.bakery.kippen.common.data.ClientConfigData;
 import at.bakery.kippen.common.data.ClientConfigData.ConfigType;
 import at.bakery.kippen.common.data.WifiLevelsData;
 
-public class WifiSensingTableOutput extends BroadcastReceiver {
+public class WifiSensing extends BroadcastReceiver {
 
 	// used for accessing Wifi scan results
 	private WifiManager wifiMan;
-	
-	// the table for user interface output
-	private TableLayout table;
 	
 	// the (optional) config object
 	private ClientConfigData config;
@@ -38,13 +35,12 @@ public class WifiSensingTableOutput extends BroadcastReceiver {
 	private INetworking net = NetworkingTask.getInstance();
 
 	
-	public WifiSensingTableOutput(WifiManager wifiMan, TableLayout table) {
-		this(wifiMan, table, new ClientConfigData());
+	public WifiSensing(WifiManager wifiMan) {
+		this(wifiMan, new ClientConfigData());
 	}
 	
-	public WifiSensingTableOutput(WifiManager wifiMan, TableLayout table, ClientConfigData config) {
+	public WifiSensing(WifiManager wifiMan, ClientConfigData config) {
 		this.wifiMan = wifiMan;
-		this.table = table;
 		this.config = config;
 	}
 	
@@ -52,9 +48,6 @@ public class WifiSensingTableOutput extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		// get the results
 		List<ScanResult> results = wifiMan.getScanResults();
-		
-		// remove all table contents (except the header row) and measurements
-		table.removeViews(1, table.getChildCount()-1);
 		
 		updateLock.lock();
 		
@@ -78,8 +71,6 @@ public class WifiSensingTableOutput extends BroadcastReceiver {
 			
 			resRow.addView(essid);
 			resRow.addView(level);
-			
-			table.addView(resRow);
 			
 			// add the BSSID as SSID is not unique
 			wifiLevels.setNetwork(result.BSSID, result.level);

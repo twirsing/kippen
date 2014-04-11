@@ -22,7 +22,6 @@ public class JSONDataSerializer {
 	
 	@SuppressWarnings("unchecked")
 	public static AbstractData deserialize(String canonicalClass, String json) throws Exception {
-		System.out.println(canonicalClass + ": " + json);
 		Class cls = Class.forName(canonicalClass);
 		AbstractData data = new Gson().fromJson(json, cls);
 		

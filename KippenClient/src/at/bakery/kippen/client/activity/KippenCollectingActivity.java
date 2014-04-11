@@ -20,12 +20,15 @@ import android.view.OrientationEventListener;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import at.bakery.kippen.client.R;
-import at.bakery.kippen.client.sensor.AccSensingTextOutput;
-import at.bakery.kippen.client.sensor.BatterySensingNoOutput;
-import at.bakery.kippen.client.sensor.OrientationSensingNoOutput;
-import at.bakery.kippen.client.sensor.OrientationSensingNoOutputSimple;
-import at.bakery.kippen.client.sensor.ShakeDetector;
-import at.bakery.kippen.client.sensor.WifiSensingTableOutput;
+import at.bakery.kippen.client.sensor.AccelerationSensing;
+import at.bakery.kippen.client.sensor.BatterySensing;
+import at.bakery.kippen.client.sensor.ISensorDataCache;
+import at.bakery.kippen.client.sensor.MoveSensing;
+import at.bakery.kippen.client.sensor.OrientationSensing;
+import at.bakery.kippen.client.sensor.CubeOrientationSensing;
+import at.bakery.kippen.client.sensor.ShakeSensing;
+import at.bakery.kippen.client.sensor.WifiSensing;
+import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.ClientConfigData;
 import at.bakery.kippen.common.data.ClientConfigData.ConfigType;
 import at.bakery.kippen.common.data.PingData;
@@ -40,24 +43,29 @@ public class KippenCollectingActivity extends Activity {
 	// private static final String WIFI_PWD = "CBZZVGQI"; //IchBinEinLustigesPasswort
 	// private static final String SERVER_IP = "192.168.0.11"; //server ip
 	
-	// setting bakey
+	// setting bakery
 	// private static final String WIFI_ESSID = "StockEINS"; //StockEINS
 	// private static final String WIFI_PWD = "IchBinEinLustigesPasswort"; //IchBinEinLustigesPasswort
 	// private static final String SERVER_IP = "192.168.1.16"; //server ip
 	
+	// setting bakery, reset router
+	 private static final String WIFI_ESSID = "INTELLINET_AP";
+	 private static final String WIFI_PWD = null;
+	 private static final String SERVER_IP = "10.21.11.108";
+	
 	// setting tomt
-	private static final String WIFI_ESSID = "JulesWinnfield";
-	private static final String WIFI_PWD = "wuzikrabuzi";
-	private static final String SERVER_IP = "192.168.1.141";
+//	private static final String WIFI_ESSID = "JulesWinnfield";
+//	private static final String WIFI_PWD = "wuzikrabuzi";
+//	private static final String SERVER_IP = "192.168.1.141";
 	
 	// the client config as sent by the server
-	private ClientConfigData config;
+//	private ClientConfigData config;
 
 	// used for accelerometer based measurements
 	private SensorManager senseMan;
 	
 	private Sensor accSense;
-	private SensorEventListener accSensorListener;
+	private static AccelerationSensing accSensorListener;
 	
 	// the orientation 3D
 	private Sensor orientSense;
@@ -71,18 +79,29 @@ public class KippenCollectingActivity extends Activity {
 	
 	// used for Wifi based measurements and for server connection
 	private WifiManager wifiMan;
-	private WifiSensingTableOutput wifiReceiver;
+	private WifiSensing wifiReceiver;
 	
 	// used for battery based measurements
-	private BatterySensingNoOutput batteryReceiver;
+	private BatterySensing batteryReceiver;
 	
 	// used for shake detection
 	private Sensor shakeSense;
-	private ShakeDetector shakeDetectorListener;
+	private ShakeSensing shakeDetectorListener;
+	
+	// move measurements
+	private MoveSensing moveSensorListener;
 	
 	// helper for building alert messages for the front end
 	private static AlertDialog.Builder alertBuilder;
 
+	public static AbstractData getCachedSensorData(Class<? extends ISensorDataCache> cache) {
+		if(cache == accSensorListener.getClass()) {
+			return accSensorListener.getCacheData();
+		}
+		
+		return null;
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -149,36 +168,38 @@ public class KippenCollectingActivity extends Activity {
 	    networkTask.sendPackets(new PingData());
 	    
 		// the battery status measurement
-		batteryReceiver = new BatterySensingNoOutput();
+		batteryReceiver = new BatterySensing();
 		
 		// the accelerometer and its GUI component
 		accSense = senseMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		accSensorListener = new AccSensingTextOutput(
-				(TextView)findViewById(R.id.lblXAcc),
-				(TextView)findViewById(R.id.lblYAcc),
-				(TextView)findViewById(R.id.lblZAcc));
+		accSensorListener = new AccelerationSensing();
 		
-		// magnetic field
+		// orientation field
 		orientSense = senseMan.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-		orientSensorListener = new OrientationSensingNoOutput();
+		//orientSensorListener = new OrientationSensing();
+		
+		// move sensing via orientation and acceleration (TODO)
+		moveSensorListener = new MoveSensing();
 		
 		// ... simple one
-		orientSensorListenerSimple = new OrientationSensingNoOutputSimple(getApplicationContext());
+		orientSensorListenerSimple = new CubeOrientationSensing(getApplicationContext());
 		
 		// the wifi and its GUI component
 		wifiMan.setWifiEnabled(true);
-		wifiReceiver = new WifiSensingTableOutput(wifiMan, (TableLayout)findViewById(R.id.tblWifi), config);
+		wifiReceiver = new WifiSensing(wifiMan, config);
 		
 		// the shake detector
 		// TODO: switch on and test
 		shakeSense = senseMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		shakeDetectorListener = new ShakeDetector();
+		shakeDetectorListener = new ShakeSensing();
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
 		System.out.println(wifiMan.getConnectionInfo().getMacAddress());
+		
 		senseMan.registerListener(shakeDetectorListener, shakeSense, Sensor.TYPE_ACCELEROMETER);
 		senseMan.registerListener(accSensorListener, accSense, Sensor.TYPE_ACCELEROMETER);
 		orientSensorListenerSimple.enable();

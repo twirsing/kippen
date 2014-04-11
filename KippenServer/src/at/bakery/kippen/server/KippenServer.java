@@ -24,6 +24,7 @@ import javax.swing.SwingUtilities;
 import javax.xml.bind.JAXB;
 
 import at.bakery.kippen.common.AbstractData;
+import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.json.JSONDataSerializer;
 import at.bakery.kippen.config.CommandConfig;
 import at.bakery.kippen.config.Configuration;
@@ -107,7 +108,12 @@ public class KippenServer extends JFrame {
 								// second line is JSON data
 								AbstractData data = JSONDataSerializer.deserialize(dataType, ois.readLine());
 							
-								objectMap.get(data.getClientId()).processData(data);
+								// FIXME debug
+								if(data instanceof SensorTripleData) {
+									System.out.println(data);
+								}
+								
+								//objectMap.get(data.getClientId()).processData(data);
 
 							}
 						} catch (Exception ex) {
