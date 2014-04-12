@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BatteryData;
+import at.bakery.kippen.common.data.CubeOrientationData;
 import at.bakery.kippen.common.data.DirectionOrientationData;
 import at.bakery.kippen.common.data.SensorSingleData;
 import at.bakery.kippen.common.data.SensorTripleData;
@@ -78,8 +79,8 @@ public class CubeKippObject extends AbstractKippObject {
 
 	@Override
 	public void processData(AbstractData d) {
-		// log event
-		log.info(d.toString());
+//		log event
+//		log.info(d.toString());
 		
 		super.processData(d);
 		
@@ -87,10 +88,13 @@ public class CubeKippObject extends AbstractKippObject {
 			processWifiData((WifiLevelsData) d);
 		} else if (d instanceof AccelerationData) {
 			processAccelerationData((AccelerationData) d);
+		} else if (d instanceof CubeOrientationData) {
+			processCubeOrientationData((CubeOrientationData) d);
 		} 
-		else if (d instanceof DirectionOrientationData) {
-			processOrientationData((DirectionOrientationData) d);
-		} else if (d instanceof ShakeData) {
+//		else if (d instanceof DirectionOrientationData) {
+//			processOrientationData((DirectionOrientationData) d);
+//		} 
+		else if (d instanceof ShakeData) {
 			processshakeData();
 		}
 
@@ -102,6 +106,21 @@ public class CubeKippObject extends AbstractKippObject {
 
 	}
 
+	private void processCubeOrientationData(CubeOrientationData data) {
+//		log.info("processCubeOrientationData event");
+//		log.info(data.toString());
+		
+		CubeOrientationData cd = (CubeOrientationData) data;
+
+		if(cd.getOrientation() != CubeOrientationData.Orientation.UNKNOWN) {
+			executeSideChange(String.valueOf(cd.getOrientation().ordinal()));
+		} 
+		
+		
+		
+
+	}
+	
 	private void executeShakeEvent() {
 		log.info("Executing shake event");
 		HashMap<String, String> paramMap = new HashMap<String, String>();
@@ -156,37 +175,37 @@ public class CubeKippObject extends AbstractKippObject {
 
 	}
 
-	@Override
-	protected void processOrientationData(DirectionOrientationData data) {
-		SensorSingleData sd = (SensorSingleData)data;
-		int deg = (int)sd.getValue();
-
-		// it is NOT flat on the ground
-		if (deg != -1) {
-			if (deg >= 315 || deg < 45) {
-				lastOrientation = "1";
-
-			} else if (deg >= 45 && deg < 135) {
-				lastOrientation = "2";
-			} else if (deg >= 135 && deg < 225) {
-				lastOrientation = "3";
-			} else if (deg >= 225 && deg < 315) {
-				lastOrientation = "4";
-			}
-		}
-		// it IS flat on the ground
-		else {
-			if (lastAccData.getZ() < 0) {
-				lastOrientation = "5";
-			} else {
-				lastOrientation = "6";
-			}
-		}
-
-		// execute the side change commands
-		executeSideChange(lastOrientation);
-
-	}
+//	@Override
+//	protected void processOrientationData(DirectionOrientationData data) {
+//		SensorSingleData sd = (SensorSingleData)data;
+//		int deg = (int)sd.getValue();
+//
+//		// it is NOT flat on the ground
+//		if (deg != -1) {
+//			if (deg >= 315 || deg < 45) {
+//				lastOrientation = "1";
+//
+//			} else if (deg >= 45 && deg < 135) {
+//				lastOrientation = "2";
+//			} else if (deg >= 135 && deg < 225) {
+//				lastOrientation = "3";
+//			} else if (deg >= 225 && deg < 315) {
+//				lastOrientation = "4";
+//			}
+//		}
+//		// it IS flat on the ground
+//		else {
+//			if (lastAccData.getZ() < 0) {
+//				lastOrientation = "5";
+//			} else {
+//				lastOrientation = "6";
+//			}
+//		}
+//
+//		// execute the side change commands
+//		executeSideChange(lastOrientation);
+//
+//	}
 
 	private void executeSideChange(String side) {
 		log.info("Executing side change with side " + side);
@@ -208,6 +227,12 @@ public class CubeKippObject extends AbstractKippObject {
 		lastAccData = sd;
 		lastEffAcc = Math.sqrt(sd.getX() * sd.getX() + sd.getY() * sd.getY() + sd.getZ() + sd.getZ());
 
+	}
+
+	@Override
+	protected void processOrientationData(DirectionOrientationData data) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

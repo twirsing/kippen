@@ -51,7 +51,7 @@ public class KippenCollectingActivity extends Activity {
 	// setting bakery, reset router
 	 private static final String WIFI_ESSID = "INTELLINET_AP";
 	 private static final String WIFI_PWD = null;
-	 private static final String SERVER_IP = "10.21.11.108";
+	 private static final String SERVER_IP = "10.21.11.110";
 	
 	// setting tomt
 //	private static final String WIFI_ESSID = "JulesWinnfield";
