@@ -109,11 +109,12 @@ public class KippenServer extends JFrame {
 								AbstractData data = JSONDataSerializer.deserialize(dataType, ois.readLine());
 							
 								// FIXME debug
-								if(data instanceof SensorTripleData) {
-									System.out.println(data);
-								}
+//								if(data instanceof SensorTripleData) {
+//									System.out.println(data);
+//								}
 								
-								//objectMap.get(data.getClientId()).processData(data);
+								
+								objectMap.get(data.getClientId()).processData(data);
 
 							}
 						} catch (Exception ex) {
