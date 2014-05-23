@@ -33,5 +33,30 @@
 			</events>
 			<type>cube</type>
 		</objectConfig>
+		
+		<objectConfig>
+			<!-- tomt -->
+			<mac>c4:43:8f:46:34:32</mac>   
+			<events>
+				<eventConfig eventType="shake">
+					<commands>
+						<CommandConfig commandType="TOSTRING">
+							<param key="string" value="the shake" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+				<eventConfig eventType="cubeSideChange">
+					<commands>
+						<CommandConfig commandType="TOSTRING">
+							<param key="string" value="the sidechange" />
+						</CommandConfig>
+						<CommandConfig commandType="ABLETONPLAY">
+							<param key="trackNumber" value="1" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+			</events>
+			<type>cube</type>
+		</objectConfig>
 	</objects>
 </tns:configuration>
