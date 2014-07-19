@@ -44,15 +44,15 @@ public class KippenCollectingActivity extends Activity {
 	// private static final String SERVER_IP = "192.168.0.11"; //server ip
 	
 	// setting bakery
-	// private static final String WIFI_ESSID = "StockEINS"; //StockEINS
-	// private static final String WIFI_PWD = "IchBinEinLustigesPasswort"; //IchBinEinLustigesPasswort
-	// private static final String SERVER_IP = "192.168.1.16"; //server ip
+	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
+	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort"; //IchBinEinLustigesPasswort
+	 private static final String SERVER_IP = "192.168.1.17"; //server ip
 	
 	// setting bakery, reset router
-	 private static final String WIFI_ESSID = "INTELLINET_AP";
-	 private static final String WIFI_PWD = null;
-	 private static final String SERVER_IP = "10.21.11.110";
-	
+//	 private static final String WIFI_ESSID = "INTELLINET_AP";
+//	 private static final String WIFI_PWD = null;
+//	 private static final String SERVER_IP = "10.21.11.109";
+//	
 	// setting tomt
 //	private static final String WIFI_ESSID = "JulesWinnfield";
 //	private static final String WIFI_PWD = "wuzikrabuzi";
