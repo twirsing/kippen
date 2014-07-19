@@ -53,6 +53,7 @@ public class KippenCollectingActivity extends Activity {
 //	 private static final String WIFI_PWD = null;
 //	 private static final String SERVER_IP = "10.21.11.109";
 //	
+
 	// setting tomt
 //	private static final String WIFI_ESSID = "JulesWinnfield";
 //	private static final String WIFI_PWD = "wuzikrabuzi";
@@ -89,6 +90,9 @@ public class KippenCollectingActivity extends Activity {
 	private ShakeSensing shakeDetectorListener;
 	
 	// move measurements
+	private Sensor moveSenseLinearAcc;
+	private Sensor moveSenseMagnetic;
+	private Sensor moveSenseGravity; 
 	private MoveSensing moveSensorListener;
 	
 	// helper for building alert messages for the front end
@@ -179,6 +183,9 @@ public class KippenCollectingActivity extends Activity {
 		//orientSensorListener = new OrientationSensing();
 		
 		// move sensing via orientation and acceleration (TODO)
+		moveSenseLinearAcc = senseMan.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+		moveSenseMagnetic = senseMan.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+		moveSenseGravity = senseMan.getDefaultSensor(Sensor.TYPE_GRAVITY);
 		moveSensorListener = new MoveSensing();
 		
 		// ... simple one
@@ -201,12 +208,20 @@ public class KippenCollectingActivity extends Activity {
 		System.out.println(wifiMan.getConnectionInfo().getMacAddress());
 		
 		senseMan.registerListener(shakeDetectorListener, shakeSense, Sensor.TYPE_ACCELEROMETER);
+		
 		senseMan.registerListener(accSensorListener, accSense, Sensor.TYPE_ACCELEROMETER);
+		
 		orientSensorListenerSimple.enable();
-//		//senseMan.registerListener(orientSensorListener, orientSense, Sensor.TYPE_ROTATION_VECTOR);
+		// senseMan.registerListener(orientSensorListener, orientSense, Sensor.TYPE_ROTATION_VECTOR);
+		
 		registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		wifiMan.startScan();
-//		registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
+		senseMan.registerListener(moveSensorListener, moveSenseLinearAcc, Sensor.TYPE_LINEAR_ACCELERATION);
+		senseMan.registerListener(moveSensorListener, moveSenseMagnetic, Sensor.TYPE_MAGNETIC_FIELD);
+		senseMan.registerListener(moveSensorListener, moveSenseGravity, Sensor.TYPE_GRAVITY);
+		
+		// registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 	}
 	
 	@Override

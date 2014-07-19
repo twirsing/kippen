@@ -10,6 +10,7 @@ import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BatteryData;
 import at.bakery.kippen.common.data.DirectionOrientationData;
+import at.bakery.kippen.common.data.MoveData;
 import at.bakery.kippen.common.data.WifiLevelsData;
 import at.bakery.kippen.server.outlets.AbstractKippOutlet;
 
@@ -41,13 +42,7 @@ public abstract class AbstractKippObject {
 	
 	public void processData(AbstractData data){
 		dataObjects.put(data.getClass().toString(), data);
-		
 	}
-	
-	protected abstract void processWifiData(WifiLevelsData data);
-	protected abstract void processBatteryData(BatteryData data);
-	protected abstract void processOrientationData(DirectionOrientationData data);
-	protected abstract void processAccelerationData(AccelerationData data);
 	
 	public String getId() {
 		return id;

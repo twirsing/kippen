@@ -13,6 +13,7 @@ import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BatteryData;
 import at.bakery.kippen.common.data.CubeOrientationData;
 import at.bakery.kippen.common.data.DirectionOrientationData;
+import at.bakery.kippen.common.data.MoveData;
 import at.bakery.kippen.common.data.SensorSingleData;
 import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.data.ShakeData;
@@ -96,6 +97,8 @@ public class CubeKippObject extends AbstractKippObject {
 //		} 
 		else if (d instanceof ShakeData) {
 			processshakeData();
+		} else if(d instanceof MoveData) {
+			processMoveData((MoveData)d);
 		}
 
 		output();
@@ -103,7 +106,6 @@ public class CubeKippObject extends AbstractKippObject {
 
 	private void processshakeData() {
 		executeShakeEvent();
-
 	}
 
 	private void processCubeOrientationData(CubeOrientationData data) {
@@ -115,10 +117,6 @@ public class CubeKippObject extends AbstractKippObject {
 		if(cd.getOrientation() != CubeOrientationData.Orientation.UNKNOWN) {
 			executeSideChange(String.valueOf(cd.getOrientation().ordinal()));
 		} 
-		
-		
-		
-
 	}
 	
 	private void executeShakeEvent() {
@@ -131,7 +129,6 @@ public class CubeKippObject extends AbstractKippObject {
 		}
 	}
 
-	@Override
 	protected void processWifiData(WifiLevelsData data) {
 		WifiLevelsData wd = (WifiLevelsData) data;
 
@@ -169,7 +166,6 @@ public class CubeKippObject extends AbstractKippObject {
 
 	}
 
-	@Override
 	protected void processBatteryData(BatteryData data) {
 		// TODO Auto-generated method stub
 
@@ -221,7 +217,6 @@ public class CubeKippObject extends AbstractKippObject {
 
 	}
 
-	@Override
 	protected void processAccelerationData(AccelerationData data) {
 		SensorTripleData sd = (SensorTripleData) data;
 		lastAccData = sd;
@@ -229,10 +224,13 @@ public class CubeKippObject extends AbstractKippObject {
 
 	}
 
-	@Override
 	protected void processOrientationData(DirectionOrientationData data) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	protected void processMoveData(MoveData data) {
+		System.out.println(data);
 	}
 
 }
