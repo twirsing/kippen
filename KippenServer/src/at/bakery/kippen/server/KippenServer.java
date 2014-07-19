@@ -6,7 +6,6 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -24,7 +23,6 @@ import javax.swing.SwingUtilities;
 import javax.xml.bind.JAXB;
 
 import at.bakery.kippen.common.AbstractData;
-import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.json.JSONDataSerializer;
 import at.bakery.kippen.config.CommandConfig;
 import at.bakery.kippen.config.Configuration;
@@ -35,14 +33,14 @@ import at.bakery.kippen.config.TypeEnum;
 import at.bakery.kippen.server.command.AbletonPlayCommand;
 import at.bakery.kippen.server.command.AbletonStopCommand;
 import at.bakery.kippen.server.command.Command;
-import at.bakery.kippen.server.command.ToStringCommand;
+import at.bakery.kippen.server.command.ToggleMuteCommand;
 import at.bakery.kippen.server.objects.AbstractKippObject;
 import at.bakery.kippen.server.objects.CubeKippObject;
 import at.bakery.kippen.server.outlets.JframeKippOutlet;
 
 public class KippenServer extends JFrame {
-	static Logger log =  Logger.getLogger(KippenServer.class.getName());
-	
+	static Logger log = Logger.getLogger(KippenServer.class.getName());
+
 	private JLabel infoLabel = new JLabel("Info: ");
 	private JLabel infoText = new JLabel("- - -");
 
@@ -98,23 +96,26 @@ public class KippenServer extends JFrame {
 					@Override
 					public void run() {
 						try {
-							BufferedReader ois = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF8"));
+							BufferedReader ois = new BufferedReader(
+									new InputStreamReader(client
+											.getInputStream(), "UTF8"));
 							// TODO if TX is needed
 							// OutputStream oos = client.getOutputStream();
-							while(true) {
+							while (true) {
 								// first line is canonical class name of event
-								String dataType = ois.readLine(); 
-								
+								String dataType = ois.readLine();
+
 								// second line is JSON data
-								AbstractData data = JSONDataSerializer.deserialize(dataType, ois.readLine());
-							
+								AbstractData data = JSONDataSerializer
+										.deserialize(dataType, ois.readLine());
+
 								// FIXME debug
-//								if(data instanceof SensorTripleData) {
-//									System.out.println(data);
-//								}
-								
-								
-								objectMap.get(data.getClientId()).processData(data);
+								// if(data instanceof SensorTripleData) {
+								// System.out.println(data);
+								// }
+
+								objectMap.get(data.getClientId()).processData(
+										data);
 
 							}
 						} catch (Exception ex) {
@@ -133,7 +134,7 @@ public class KippenServer extends JFrame {
 		// read XML config file
 
 		// set and register objects
-//		CubeKippObject cube1 = new CubeKippObject("88:30:8A:38:53:05");
+		// CubeKippObject cube1 = new CubeKippObject("88:30:8A:38:53:05");
 
 		HashMap<String, JLabel> jlabels = new HashMap<String, JLabel>();
 		jlabels.put("info", infoText);
@@ -143,44 +144,48 @@ public class KippenServer extends JFrame {
 		jlabels.put("distance", metricDistanceText);
 
 		JframeKippOutlet Jfoutlet = new JframeKippOutlet(jlabels);
-//		cube1.addOutlet(Jfoutlet);
-//		this.objectMap.put(cube1.getId(), cube1);
+		// cube1.addOutlet(Jfoutlet);
+		// this.objectMap.put(cube1.getId(), cube1);
 	}
 
 	private void initObjects() {
 		Configuration config = JAXB.unmarshal(new File("config.xml"),
 				Configuration.class);
-		
-		
-		//for each object set the commands and events
+
+		// for each object set the commands and events
 		for (ObjectConfig obj : config.getObjects().getObjectConfig()) {
-			//if its a cube
+			// if its a cube
 			if (obj.getType() == TypeEnum.CUBE) {
 				String mac = obj.getMac();
-				log.log(Level.INFO,"Found CUBE with MAC: " + mac);
-				//make new kippen object
+				log.log(Level.INFO, "Found CUBE with MAC: " + mac);
+				// make new kippen object
 				CubeKippObject cubeKippObject = new CubeKippObject(mac);
-				
-				//add the new object to the server object map
+
+				// add the new object to the server object map
 				objectMap.put(obj.getMac(), cubeKippObject);
-				
-				//for all events the object reacts to
+
+				// for all events the object reacts to
 				for (EventConfig e : obj.getEvents().getEventConfig()) {
-					List<Command> commands = makeCommands(e.getCommands().getCommandConfig());
-					
+					List<Command> commands = makeCommands(e.getCommands()
+							.getCommandConfig());
+
 					switch (e.getEventType()) {
 					case EventTypes.SIDECHANGE:
-						log.log(Level.INFO,"Found  side change event");
-						cubeKippObject.setCommandsForEvents(EventTypes.SIDECHANGE, commands);
+						log.log(Level.INFO, "Adding side change event to cube");
+						cubeKippObject.setCommandsForEvents(
+								EventTypes.SIDECHANGE, commands);
 						break;
 					case EventTypes.SHAKE:
-						log.log(Level.INFO,"Found shake event");
-						cubeKippObject.setCommandsForEvents(EventTypes.SHAKE, commands);
+						log.log(Level.INFO, "Found shake event");
+						cubeKippObject.setCommandsForEvents(EventTypes.SHAKE,
+								commands);
 						break;
-					//add other events here	
+					// add other events here
 					default:
 						break;
 					}
+					
+					log.log(Level.INFO, "-----------Processing next cube config--------");
 				}
 
 			}
@@ -192,20 +197,22 @@ public class KippenServer extends JFrame {
 		for (CommandConfig c : configList) {
 			switch (c.getCommandType()) {
 			case "ABLETONPLAY":
-				log.log(Level.INFO,"Found ABLETONPLAY command");
+				log.log(Level.INFO, "Found ABLETONPLAY command");
 				commandList.add(new AbletonPlayCommand(getCommandParamValue(
 						"trackNumber", c.getParam())));
 				break;
+			case "TOGGLEMUTE":
+				log.log(Level.INFO, "Found TOGGLEMUTE command");
+				commandList.add(new ToggleMuteCommand(Integer
+						.valueOf(getCommandParamValue("trackNumber",
+								c.getParam()))));
+				break;
 			case "ABLETONSTOP":
-				log.log(Level.INFO,"Found ABLETONSTOP command");
+				log.log(Level.INFO, "Found ABLETONSTOP command");
 				commandList.add(new AbletonStopCommand(getCommandParamValue(
 						"trackNumber", c.getParam())));
 				break;
-			case "TOSTRING":
-				log.log(Level.INFO,"Found TO STRING command");
-				commandList.add(new ToStringCommand());
-				break;
-
+	
 			default:
 				break;
 			}
@@ -213,9 +220,8 @@ public class KippenServer extends JFrame {
 		return commandList;
 	}
 
-	private String getCommandParamValue(String key,
-			List<Param> commandParam) {
-		for (Param param : commandParam){
+	private String getCommandParamValue(String key, List<Param> commandParam) {
+		for (Param param : commandParam) {
 			if (param.getKey().equalsIgnoreCase(key))
 				return param.getValue();
 		}

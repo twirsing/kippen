@@ -57,6 +57,10 @@ public class OSCPortIn extends OSCPort implements Runnable {
 		super(new DatagramSocket(port), port);
 	}
 
+	public void removeListener(String query){
+		dispatcher.removeListener(query);
+	}
+	
 	/**
 	 * Buffers were 1500 bytes in size, but were
 	 * increased to 1536, as this is a common MTU.

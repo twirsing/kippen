@@ -4,7 +4,7 @@ import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPort;
 import com.illposed.osc.OSCPortIn;
 import com.illposed.osc.OSCPortOut;
-import com.illposed.osc.TestOSCListener;
+import com.illposed.osc.AbletonOSCListener;
 
 import junit.framework.TestCase;
 
@@ -18,12 +18,12 @@ public class TestPlay extends TestCase {
 		
 	}
 	public void testPlayTrack() throws Exception {
-		OSCMessage mesg = new OSCMessage("/live/play/clip", new Object[]{0,0});
+		OSCMessage mesg = new OSCMessage("/live/play/clip", new Object[]{1,1});
 		OSCMessage stop = new OSCMessage("/live/stop");
 		try {
 			sender.send(mesg);
 			Thread.sleep(2000);
-			sender.send(stop);
+		//	sender.send(stop);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -37,7 +37,7 @@ public class TestPlay extends TestCase {
 		try {
 			sender.send(mesg);
 			
-			TestOSCListener listener = new TestOSCListener();
+			AbletonOSCListener listener = new AbletonOSCListener();
 			receiver.addListener("/live/master/volume", listener);
 			receiver.startListening();
 		//	sender.send(mesg);

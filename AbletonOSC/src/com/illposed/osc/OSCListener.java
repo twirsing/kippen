@@ -15,14 +15,29 @@ import java.util.Date;
  *
  * @author Chandrasekhar Ramakrishnan
  */
-public interface OSCListener {
-
+public abstract class OSCListener {
+	protected boolean isMessageReceived = false;
+	protected Date receivedTimestamp = null;
+	
+	protected OSCMessage message = null;
 	/**
 	 * Accept an incoming OSCMessage
 	 * @param time     The time this message is to be executed.
 	 *          <code>null</code> means execute now
 	 * @param message  The message to execute.
 	 */
-	public void acceptMessage(Date time, OSCMessage message);
+	public abstract void acceptMessage(Date time, OSCMessage message);
+	
+	public boolean isMessageReceived(){
+		return this.isMessageReceived;
+	}
+	
+	public OSCMessage getMessage(){
+		return this.message;
+	};
+	
+	public Date getReceivedTimestamp() {
+		return receivedTimestamp;
+	}
 
 }

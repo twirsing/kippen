@@ -68,7 +68,7 @@ public class OSCPortTest extends junit.framework.TestCase {
 
 	public void testReceiving() throws Exception {
 		OSCMessage mesg = new OSCMessage("/message/receiving");
-		TestOSCListener listener = new TestOSCListener();
+		AbletonOSCListener listener = new AbletonOSCListener();
 		receiver.addListener("/message/receiving", listener);
 		receiver.startListening();
 		sender.send(mesg);
@@ -82,7 +82,7 @@ public class OSCPortTest extends junit.framework.TestCase {
 	public void testBundleReceiving() throws Exception {
 		OSCBundle bundle = new OSCBundle();
 		bundle.addPacket(new OSCMessage("/bundle/receiving"));
-		TestOSCListener listener = new TestOSCListener();
+		AbletonOSCListener listener = new AbletonOSCListener();
 		receiver.addListener("/bundle/receiving", listener);
 		receiver.startListening();
 		sender.send(bundle);
