@@ -2,10 +2,12 @@
 <tns:configuration xmlns:tns="http://www.bakery.at/kippen"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.bakery.at/kippen config.xsd ">
+	<inactivityTimout>1</inactivityTimout>
 	<ableton>
 		<ip>ip</ip>
 		<port>0</port>
 	</ableton>
+	
 	<objects>
 		<objectConfig>
 			<!-- tomw <mac>88:30:8A:38:53:05</mac> -->
@@ -108,4 +110,5 @@
 		</objectConfig>
 		
 	</objects>
+	
 </tns:configuration>

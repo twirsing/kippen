@@ -18,6 +18,7 @@ import at.bakery.kippen.common.data.SensorSingleData;
 import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.data.ShakeData;
 import at.bakery.kippen.common.data.WifiLevelsData;
+import at.bakery.kippen.server.KippenServer;
 import at.bakery.kippen.server.command.Command;
 import at.bakery.kippen.server.outlets.AbstractKippOutlet;
 import at.bakery.kippen.server.outlets.CsvKippOutlet;
@@ -84,18 +85,23 @@ public class CubeKippObject extends AbstractKippObject {
 //		log.info(d.toString());
 		
 		super.processData(d);
+		System.out.println("data : " +d);
 		
 		if (d instanceof WifiLevelsData) {
 			processWifiData((WifiLevelsData) d);
 		} else if (d instanceof AccelerationData) {
 			processAccelerationData((AccelerationData) d);
 		} else if (d instanceof CubeOrientationData) {
+			KippenServer.lastMessageTimestamp = System.currentTimeMillis();
+			
 			processCubeOrientationData((CubeOrientationData) d);
 		} 
 //		else if (d instanceof DirectionOrientationData) {
 //			processOrientationData((DirectionOrientationData) d);
 //		} 
 		else if (d instanceof ShakeData) {
+			KippenServer.lastMessageTimestamp = System.currentTimeMillis();
+			
 			processshakeData();
 		} else if(d instanceof MoveData) {
 			processMoveData((MoveData)d);

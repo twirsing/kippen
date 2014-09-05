@@ -39,10 +39,10 @@ public class KippenCollectingActivity extends Activity {
 
 	
 	//BACKSTUBE
-	 private static final String WIFI_ESSID = "WBackstube"; //StockEINS
-	 private static final String WIFI_PWD = "ibclibcl";
-	 //IchBinEinLustigesPasswort
-	 private static final String SERVER_IP = "192.168.0.106"; //server ip
+//	 private static final String WIFI_ESSID = "WBackstube"; //StockEINS
+//	 private static final String WIFI_PWD = "ibclibcl";
+//	 //IchBinEinLustigesPasswort
+//	 private static final String SERVER_IP = "192.168.1.20"; //server ip
 
 	// setting tomw
 	// private static final String WIFI_ESSID = "UPC014580"; //StockEINS
@@ -51,10 +51,10 @@ public class KippenCollectingActivity extends Activity {
 	// private static final String SERVER_IP = "192.168.0.11"; //server ip
 
 	// setting bakery
-	// private static final String WIFI_ESSID = "StockEINS"; // StockEINS
-	// private static final String WIFI_PWD = "IchBinEinLustigesPasswort"; //
-	// IchBinEinLustigesPasswort
-	// private static final String SERVER_IP = "192.168.1.39"; // server ip
+	 private static final String WIFI_ESSID = "StockEINS"; // StockEINS
+	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort"; //
+//	 IchBinEinLustigesPasswort
+	 private static final String SERVER_IP = "192.168.1.20"; // server ip
 
 	// setting bakery, reset router
 	// private static final String WIFI_ESSID = "INTELLINET_AP";

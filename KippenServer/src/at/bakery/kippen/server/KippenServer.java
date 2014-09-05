@@ -22,6 +22,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.xml.bind.JAXB;
 
+import nerdproject.LiveController;
+
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.json.JSONDataSerializer;
 import at.bakery.kippen.config.CommandConfig;
@@ -40,7 +42,9 @@ import at.bakery.kippen.server.outlets.JframeKippOutlet;
 
 public class KippenServer extends JFrame {
 	static Logger log = Logger.getLogger(KippenServer.class.getName());
-
+	public static long lastMessageTimestamp = System.currentTimeMillis();
+	protected static long timoutMillis = 5000 * 60;
+	
 	private JLabel infoLabel = new JLabel("Info: ");
 	private JLabel infoText = new JLabel("- - -");
 
@@ -83,12 +87,13 @@ public class KippenServer extends JFrame {
 	private boolean quit = false;
 
 	public void start() throws Exception {
-
+		
 		Executor workerExecutor = Executors.newCachedThreadPool();
 		final ServerSocket serverSock = new ServerSocket(10000);
 		log.info("server is runnning");
 		try {
 			while (true) {
+
 				final Socket client = serverSock.accept();
 
 				workerExecutor.execute(new Runnable() {
@@ -132,7 +137,7 @@ public class KippenServer extends JFrame {
 
 	public void init() {
 		// read XML config file
-
+		
 		// set and register objects
 		// CubeKippObject cube1 = new CubeKippObject("88:30:8A:38:53:05");
 
@@ -152,6 +157,8 @@ public class KippenServer extends JFrame {
 		Configuration config = JAXB.unmarshal(new File("config.xml"),
 				Configuration.class);
 
+		timoutMillis = config.getInactivityTimout() * 1000 * 60;
+		System.out.println("TIMOUT MILLIS " + timoutMillis);
 		// for each object set the commands and events
 		for (ObjectConfig obj : config.getObjects().getObjectConfig()) {
 			// if its a cube
@@ -184,8 +191,9 @@ public class KippenServer extends JFrame {
 					default:
 						break;
 					}
-					
-					log.log(Level.INFO, "-----------Processing next cube config--------");
+
+					log.log(Level.INFO,
+							"-----------Processing next cube config--------");
 				}
 
 			}
@@ -212,7 +220,7 @@ public class KippenServer extends JFrame {
 				commandList.add(new AbletonStopCommand(getCommandParamValue(
 						"trackNumber", c.getParam())));
 				break;
-	
+
 			default:
 				break;
 			}
@@ -231,6 +239,32 @@ public class KippenServer extends JFrame {
 	private void showGUI() {
 		init();
 		initObjects();
+		
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				while (true) {
+					try {
+						log.log(Level.INFO, "started timout thread");
+						Thread.sleep(1000);
+						long currentTime = System.currentTimeMillis();
+						long diff = currentTime
+								- KippenServer.lastMessageTimestamp;
+						System.out.println(diff);
+						if (diff > KippenServer.timoutMillis) {
+							LiveController.getInstance().stopAll();
+							System.out.println("Timeout!");
+						}
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}).start();
+
+		
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 		addWindowListener(new WindowAdapter() {
