@@ -41,7 +41,7 @@ import at.bakery.kippen.server.objects.CubeKippObject;
 import at.bakery.kippen.server.outlets.JframeKippOutlet;
 
 public class KippenServer extends JFrame {
-	static Logger log = Logger.getLogger(KippenServer.class.getName());
+	public static Logger logger = Logger.getLogger(KippenServer.class.getName());
 	public static long lastMessageTimestamp = System.currentTimeMillis();
 	protected static long timoutMillis = 5000 * 60;
 	
@@ -90,7 +90,7 @@ public class KippenServer extends JFrame {
 		
 		Executor workerExecutor = Executors.newCachedThreadPool();
 		final ServerSocket serverSock = new ServerSocket(10000);
-		log.info("server is runnning");
+		logger.info("server is runnning");
 		try {
 			while (true) {
 
@@ -164,7 +164,7 @@ public class KippenServer extends JFrame {
 			// if its a cube
 			if (obj.getType() == TypeEnum.CUBE) {
 				String mac = obj.getMac();
-				log.log(Level.INFO, "Found CUBE with MAC: " + mac);
+				logger.log(Level.INFO, "Found CUBE with MAC: " + mac);
 				// make new kippen object
 				CubeKippObject cubeKippObject = new CubeKippObject(mac);
 
@@ -178,12 +178,12 @@ public class KippenServer extends JFrame {
 
 					switch (e.getEventType()) {
 					case EventTypes.SIDECHANGE:
-						log.log(Level.INFO, "Adding side change event to cube");
+						logger.log(Level.INFO, "Adding side change event to cube");
 						cubeKippObject.setCommandsForEvents(
 								EventTypes.SIDECHANGE, commands);
 						break;
 					case EventTypes.SHAKE:
-						log.log(Level.INFO, "Found shake event");
+						logger.log(Level.INFO, "Found shake event");
 						cubeKippObject.setCommandsForEvents(EventTypes.SHAKE,
 								commands);
 						break;
@@ -192,7 +192,7 @@ public class KippenServer extends JFrame {
 						break;
 					}
 
-					log.log(Level.INFO,
+					logger.log(Level.INFO,
 							"-----------Processing next cube config--------");
 				}
 
@@ -205,18 +205,18 @@ public class KippenServer extends JFrame {
 		for (CommandConfig c : configList) {
 			switch (c.getCommandType()) {
 			case "ABLETONPLAY":
-				log.log(Level.INFO, "Found ABLETONPLAY command");
+				logger.log(Level.INFO, "Found ABLETONPLAY command");
 				commandList.add(new AbletonPlayCommand(getCommandParamValue(
 						"trackNumber", c.getParam())));
 				break;
 			case "TOGGLEMUTE":
-				log.log(Level.INFO, "Found TOGGLEMUTE command");
+				logger.log(Level.INFO, "Found TOGGLEMUTE command");
 				commandList.add(new ToggleMuteCommand(Integer
 						.valueOf(getCommandParamValue("trackNumber",
 								c.getParam()))));
 				break;
 			case "ABLETONSTOP":
-				log.log(Level.INFO, "Found ABLETONSTOP command");
+				logger.log(Level.INFO, "Found ABLETONSTOP command");
 				commandList.add(new AbletonStopCommand(getCommandParamValue(
 						"trackNumber", c.getParam())));
 				break;
@@ -246,15 +246,14 @@ public class KippenServer extends JFrame {
 			public void run() {
 				while (true) {
 					try {
-						log.log(Level.INFO, "started timout thread");
-						Thread.sleep(1000);
+						logger.log(Level.INFO, "started timout thread");
+						Thread.sleep(60000);
 						long currentTime = System.currentTimeMillis();
 						long diff = currentTime
 								- KippenServer.lastMessageTimestamp;
-						System.out.println(diff);
 						if (diff > KippenServer.timoutMillis) {
+							KippenServer.logger.log(Level.INFO, "Stopping playback because of timeout");
 							LiveController.getInstance().stopAll();
-							System.out.println("Timeout!");
 						}
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
