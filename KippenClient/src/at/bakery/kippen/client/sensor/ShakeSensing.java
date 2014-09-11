@@ -74,9 +74,6 @@ public class ShakeSensing implements SensorEventListener {
         		// Check if enough movements have been made to qualify as a shake
         		if (moveCount > MIN_MOVEMENTS) {
         			// It's a shake! Notify the listener.
-        			// System.out.println("Shaken");
-        			
-        			
         			updateLock.lock();
         			
         			net.sendPackets(new ShakeData());
@@ -144,13 +141,4 @@ public class ShakeSensing implements SensorEventListener {
     	startTime = 0;
     	moveCount = 0;
     }
-    
-    /*
-     * Definition for OnShakeListener definition. I would normally put this
-     * into it's own .java file, but I included it here for quick reference
-     * and to make it easier to include this file in our project.
-     */
-//    public interface OnShakeListener {
-//    	public void onShake();
-//    }
 }

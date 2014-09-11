@@ -104,6 +104,8 @@ public class NetworkingTask extends Thread implements INetworking {
 					// set clientId
 					packet.setClientId(clientId);
 					
+					System.out.println("Sending " + packet.getClass().getSimpleName() + " -> " + packet);
+					
 					// JSON serialize and send packet
 					oos.write(JSONDataSerializer.serialize(packet));
 				} catch(Exception ex) {

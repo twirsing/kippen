@@ -36,6 +36,11 @@ public class MoveSensing implements SensorEventListener {
 
 	@Override
 	public void onSensorChanged(SensorEvent se) {
+		long curTime = System.nanoTime();
+		if(curTime - lastTime < 0.25e9) {
+			return;
+		}
+		
 		if(se.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
 			processLinearAcc(se.values);
 		} else if(se.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
@@ -58,10 +63,6 @@ public class MoveSensing implements SensorEventListener {
 		updateLock.unlock();
 		
 		lastTime = System.nanoTime();
-		
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {}
 	}
 	
 	private void processGravity(float[] values) {
@@ -93,7 +94,6 @@ public class MoveSensing implements SensorEventListener {
 		for(int i = 0; i < accMove.length; i++) {
 			tmpAcc[i] = (int)(accMove[i] * 100) / 100.0f;
 		}
-		System.out.println("ACC: " + Arrays.toString(tmpAcc));
 		
 		// FIXME if more precise results are required, use original accWorld
 		accMove = tmpAcc;
@@ -102,7 +102,6 @@ public class MoveSensing implements SensorEventListener {
 	private void computePosition() {
 		// only if acceleration then adjust position
 		if(accMove[0]*accMove[0] + accMove[1]*accMove[1] + accMove[2]*accMove[2] < 1) {
-			System.out.println("OLD: " + Arrays.toString(position));
 			return;
 		}
 		
@@ -122,8 +121,6 @@ public class MoveSensing implements SensorEventListener {
 		for(int i = 0; i < position.length; i++) {
 			roundedPos[i] = (int)position[i];
 		}
-		
-		System.out.println("POS: " + Arrays.toString(roundedPos));
 		
 		posMove = roundedPos;
 	}

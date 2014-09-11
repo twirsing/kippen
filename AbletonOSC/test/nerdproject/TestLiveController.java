@@ -7,9 +7,8 @@ import org.junit.Test;
 public class TestLiveController extends TestCase {
 
 	@Test
-	public void testLiveController() {
-		LiveController.getInstance().playClip(0,4 );
-//	 	LiveController.getInstance().setTrackVolume(0, 0.1f);
-	 	LiveController.getInstance().isClipPlaying(0,1);
+	public void testLiveController() throws Exception {
+		LiveController.getInstance().playClip(0, 2);
+		LiveController.getInstance().setTrackVolume(0, 1);
 	}
 }

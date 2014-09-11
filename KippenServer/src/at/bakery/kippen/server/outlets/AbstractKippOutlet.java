@@ -3,7 +3,6 @@
  */
 package at.bakery.kippen.server.outlets;
 
-import java.util.Map;
 
 /**
  * @author thomasw

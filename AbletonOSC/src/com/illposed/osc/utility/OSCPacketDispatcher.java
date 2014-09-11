@@ -39,10 +39,6 @@ public class OSCPacketDispatcher {
 		addressToListener.put(address, listener);
 	}
 
-	public void removeListener(String address) {
-		addressToListener.remove(address);
-	}
-	
 	public void dispatchPacket(OSCPacket packet) {
 		if (packet instanceof OSCBundle) {
 			dispatchBundle((OSCBundle) packet);
@@ -72,18 +68,10 @@ public class OSCPacketDispatcher {
 	}
 
 	private void dispatchMessage(OSCMessage message, Date time) {
-	//	System.out.println("got message " + message.getAddress() + "with answers \n" + this.printArguments(message.getArguments()));
 		for (Entry<String, OSCListener> addrList : addressToListener.entrySet()) {
 			if (message.getAddress().matches(addrList.getKey())) {
 				addrList.getValue().acceptMessage(time, message);
 			}
 		}
-	}
-
-	private String printArguments(Object[] arguments) {
-		String tmp ="";
-		for(Object o : arguments)
-			tmp += o.toString() + "\n";
-		return tmp;
 	}
 }

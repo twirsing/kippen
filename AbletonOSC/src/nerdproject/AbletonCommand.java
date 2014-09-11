@@ -1,3 +1,4 @@
+package nerdproject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,7 +15,7 @@ public class AbletonCommand {
 	private OSCPortOut sender;
 
 	public void init() throws UnknownHostException, SocketException {
-		sender = new OSCPortOut(9000);
+		sender = new OSCPortOut(9999);
 		System.out.print("Command> ");
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));

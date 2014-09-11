@@ -16,9 +16,8 @@ public class AbletonPlayCommand implements Command {
 	}
 
 	@Override
-	public void execute(Map<String, String> params) {
-		LiveController.getInstance().playClip(trackNumber,
-				Integer.valueOf(params.get("clipNumber")));
+	public void execute(Map<String, String> params) throws Exception {
+		LiveController.getInstance().playClip(trackNumber, Integer.valueOf(params.get("clipNumber")));
 	}
 
 }

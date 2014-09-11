@@ -17,15 +17,15 @@ import com.illposed.osc.utility.OSCPacketDispatcher;
 public class OSCPacketDispatcherTest extends junit.framework.TestCase {
 
 	private OSCPacketDispatcher dispatcher;
-	private AbletonOSCListener listener1;
-	private AbletonOSCListener listener2;
+	private TestOSCListener listener1;
+	private TestOSCListener listener2;
 
 	@Override
 	protected void setUp() throws Exception {
 		dispatcher = new OSCPacketDispatcher();
-		listener1 = new AbletonOSCListener();
+		listener1 = new TestOSCListener();
 		dispatcher.addListener("/listener1", listener1);
-		listener2 = new AbletonOSCListener();
+		listener2 = new TestOSCListener();
 		dispatcher.addListener("/listener2", listener2);
 	}
 

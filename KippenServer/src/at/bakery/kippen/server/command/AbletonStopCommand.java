@@ -16,8 +16,7 @@ public class AbletonStopCommand implements Command {
 	}
 
 	@Override
-	public
-	void execute(Map<String, String> params) {
+	public void execute(Map<String, String> params) throws Exception {
 		LiveController.getInstance().stopTrack(trackNumber);
 	}
 

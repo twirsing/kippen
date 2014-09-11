@@ -27,6 +27,8 @@ public class CubeOrientationSensing extends OrientationEventListener {
 
 	@Override
 	public void onOrientationChanged(int deg) {
+		System.out.println("Cube orientation " + deg);
+		
 		CubeOrientationData orientationData;
 		
 		if (deg != -1) {
