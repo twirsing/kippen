@@ -2,16 +2,14 @@ package at.bakery.kippen.server.objects;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.logging.Logger;
 
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.AccelerationData;
-import at.bakery.kippen.common.data.BatteryData;
-import at.bakery.kippen.common.data.CubeOrientationData;
 import at.bakery.kippen.common.data.BarrelOrientationData;
+import at.bakery.kippen.common.data.BatteryData;
 import at.bakery.kippen.common.data.MoveData;
 import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.data.ShakeData;
@@ -21,10 +19,10 @@ import at.bakery.kippen.server.command.Command;
 import at.bakery.kippen.server.outlets.AbstractKippOutlet;
 import at.bakery.kippen.server.outlets.CsvKippOutlet;
 
-public class CubeObject extends AbstractKippenObject {
-	static Logger log =  Logger.getLogger(CubeObject.class.getName());
+public class BarrelObject extends AbstractKippenObject {
+	static Logger log =  Logger.getLogger(BarrelObject.class.getName());
 
-	public CubeObject(String id) {
+	public BarrelObject(String id) {
 		super(id);
 	}
 
@@ -32,14 +30,12 @@ public class CubeObject extends AbstractKippenObject {
 	public void processData(AbstractData d) {
 		super.processData(d);
 		
-		log.info("CUBE processes " + d.getClass().getSimpleName() + " -> " + d.toString());
+		log.info("BARREL processes " + d.getClass().getSimpleName() + " -> " + d.toString());
 		
 		if (d instanceof WifiLevelsData) {
 			processWifiData((WifiLevelsData) d);
-		} else if (d instanceof AccelerationData) {
-			processAccelerationData((AccelerationData) d);
-		} else if (d instanceof CubeOrientationData) {
-			processCubeOrientationData((CubeOrientationData) d);
+		} else if (d instanceof BarrelOrientationData) {
+			processOrientationData((BarrelOrientationData) d);
 		} else if (d instanceof ShakeData) {
 			processShakeData();
 		} else if(d instanceof MoveData) {
@@ -61,7 +57,11 @@ public class CubeObject extends AbstractKippenObject {
 	
 	protected void stop() {
 		// FIXME implement ableton stop
-		System.out.println("STOP the cube " + id);
+		System.out.println("STOP the barrel " + id);
+	}
+	
+	private void processOrientationData(BarrelOrientationData data) {
+		log.info("Barrel relative orientation " + data.getValue());
 	}
 
 	// 2 seconds delay before a new shake is processed
@@ -87,31 +87,6 @@ public class CubeObject extends AbstractKippenObject {
 		}
 	}
 
-	private void processCubeOrientationData(CubeOrientationData data) {
-		CubeOrientationData cd = (CubeOrientationData) data;
-
-		if(cd.getOrientation() == CubeOrientationData.Orientation.UNKNOWN) {
-			return;
-		} 
-		
-		String side = String.valueOf(cd.getOrientation().ordinal());
-		
-		log.info("Executing side change with side " + side);
-		HashMap<String, String> paramMap = new HashMap<String, String>();
-		paramMap.put("clipNumber", side);
-		List<Command> sideChangeEvents = eventMap.get(EventTypes.SIDECHANGE);
-		
-		if (sideChangeEvents != null) {
-			for (Command c : sideChangeEvents) {
-				try {
-					c.execute(paramMap);
-				} catch (Exception e) {
-					log.warning("Failed to execute command " + c.getClass().getSimpleName());
-				}
-			}
-		}
-	}
-	
 	private Queue<WifiLevelsData> avgWifiLevel = new LinkedList<>();
 	
 	private void processWifiData(WifiLevelsData data) {

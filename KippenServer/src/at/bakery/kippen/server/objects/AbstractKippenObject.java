@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BatteryData;
-import at.bakery.kippen.common.data.DirectionOrientationData;
+import at.bakery.kippen.common.data.BarrelOrientationData;
 import at.bakery.kippen.common.data.MoveData;
 import at.bakery.kippen.common.data.WifiLevelsData;
 import at.bakery.kippen.server.command.Command;

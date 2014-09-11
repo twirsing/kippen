@@ -8,11 +8,8 @@ import android.view.OrientationEventListener;
 import at.bakery.kippen.client.activity.INetworking;
 import at.bakery.kippen.client.activity.KippenCollectingActivity;
 import at.bakery.kippen.client.activity.NetworkingTask;
-import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.CubeOrientationData;
 import at.bakery.kippen.common.data.CubeOrientationData.Orientation;
-import at.bakery.kippen.common.data.DirectionOrientationData;
-import at.bakery.kippen.common.data.SensorSingleData;
 import at.bakery.kippen.common.data.SensorTripleData;
 
 public class CubeOrientationSensing extends OrientationEventListener {

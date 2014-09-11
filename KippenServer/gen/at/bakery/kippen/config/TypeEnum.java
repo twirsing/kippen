@@ -32,7 +32,9 @@ import javax.xml.bind.annotation.XmlType;
 public enum TypeEnum {
 
     @XmlEnumValue("cube")
-    CUBE("cube");
+    CUBE("cube"),
+    @XmlEnumValue("barrel")
+    BARREL("barrel");
     private final String value;
 
     TypeEnum(String v) {

@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import at.bakery.kippen.client.activity.INetworking;

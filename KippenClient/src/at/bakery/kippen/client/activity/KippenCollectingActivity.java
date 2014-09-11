@@ -14,12 +14,12 @@ import android.view.Menu;
 import android.view.OrientationEventListener;
 import at.bakery.kippen.client.R;
 import at.bakery.kippen.client.sensor.AccelerationSensing;
+import at.bakery.kippen.client.sensor.BarrelOrientationSensing;
 import at.bakery.kippen.client.sensor.CubeOrientationSensing;
 import at.bakery.kippen.client.sensor.ISensorDataCache;
 import at.bakery.kippen.client.sensor.MoveSensing;
 import at.bakery.kippen.client.sensor.ShakeSensing;
 import at.bakery.kippen.common.AbstractData;
-import at.bakery.kippen.common.data.ClientConfigData;
 import at.bakery.kippen.common.data.PingData;
 
 public class KippenCollectingActivity extends Activity {
@@ -53,7 +53,10 @@ public class KippenCollectingActivity extends Activity {
 	// INACTIVE private SensorEventListener orientSensorListener;
 	
 	// the simple orientation without flat phone detection
-	private OrientationEventListener orientSensorListenerSimple;
+	private OrientationEventListener cubeOrientSensorListener;
+	
+	// the barrel orientation
+	private OrientationEventListener barrelOrientSensorListener;
 	
 	// used for wifi based measurements and for server connection
 	private WifiManager wifiMan;
@@ -166,7 +169,10 @@ public class KippenCollectingActivity extends Activity {
 		moveSensorListener = new MoveSensing();
 		
 		// ... simple cube side change listener
-		orientSensorListenerSimple = new CubeOrientationSensing(getApplicationContext());
+		cubeOrientSensorListener = new CubeOrientationSensing(getApplicationContext());
+		
+		// ... simple barrel roll degree change listener
+		barrelOrientSensorListener = new BarrelOrientationSensing(getApplicationContext());
 		
 		// the wifi measuring sensor
 		// INACTIVE wifiMan.setWifiEnabled(true);
@@ -189,7 +195,9 @@ public class KippenCollectingActivity extends Activity {
 		
 		senseMan.registerListener(accSensorListener, accSense, SensorManager.SENSOR_DELAY_FASTEST);
 		
-		orientSensorListenerSimple.enable();
+		cubeOrientSensorListener.enable();
+		
+		barrelOrientSensorListener.enable();
 		
 		// INACTIVE senseMan.registerListener(orientSensorListener, orientSense, SensorManager.SENSOR_DELAY_FASTEST);
 		

@@ -45,7 +45,7 @@
 						</CommandConfig>
 					</commands>
 				</eventConfig>
-				<eventConfig eventType="cubeSideChange">
+				<!-- eventConfig eventType="cubeSideChange">
 					<commands>
 						<CommandConfig commandType="TOSTRING">
 							<param key="string" value="the sidechange" />
@@ -54,9 +54,16 @@
 							<param key="trackNumber" value="1" />
 						</CommandConfig>
 					</commands>
+				</eventConfig -->
+				<eventConfig eventType="rollChange">
+					<commands>
+						<CommandConfig commandType="TOSTRING">
+							<param key="string" value="the roll change" />
+						</CommandConfig>
+					</commands>
 				</eventConfig>
 			</events>
-			<type>cube</type>
+			<type>barrel</type>
 		</objectConfig>
 	</objects>
 </tns:configuration>
