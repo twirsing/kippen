@@ -27,14 +27,14 @@ import at.bakery.kippen.config.TypeEnum;
 import at.bakery.kippen.server.command.AbletonPlayCommand;
 import at.bakery.kippen.server.command.AbletonStopCommand;
 import at.bakery.kippen.server.command.Command;
-import at.bakery.kippen.server.command.ToStringCommand;
+import at.bakery.kippen.server.command.ToggleMuteCommand;
 import at.bakery.kippen.server.objects.AbstractKippenObject;
 import at.bakery.kippen.server.objects.BarrelObject;
 import at.bakery.kippen.server.objects.CubeObject;
 
 public class KippenServer {
-	static Logger log =  Logger.getLogger(KippenServer.class.getName());
-	
+	static Logger log = Logger.getLogger(KippenServer.class.getName());
+
 	private HashMap<String, AbstractKippenObject> objectMap = new HashMap<String, AbstractKippenObject>();
 
 	public static void main(String args[]) {
@@ -51,40 +51,46 @@ public class KippenServer {
 
 		Executor workerExecutor = Executors.newCachedThreadPool();
 		final ServerSocket serverSock = new ServerSocket(10000);
-		
+
 		log.info("Kippen Server is starting up ...");
-		
+
 		try {
 			while (true) {
 				final Socket client = serverSock.accept();
-				final NetworkInterface ni = NetworkInterface.getByInetAddress(client.getInetAddress());
+				final NetworkInterface ni = NetworkInterface
+						.getByInetAddress(client.getInetAddress());
 				final String clientId;
-				if(ni != null && ni.getHardwareAddress() != null) {
+				if (ni != null && ni.getHardwareAddress() != null) {
 					clientId = new String(ni.getHardwareAddress());
 				} else {
 					clientId = client.getInetAddress().getHostAddress();
 				}
-				
+
 				log.info("Client " + clientId + " connected ...");
-				
+
 				workerExecutor.execute(new Runnable() {
 
 					@Override
 					public void run() {
 						try {
-							BufferedReader ois = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF8"));
-							while(true) {
+							BufferedReader ois = new BufferedReader(
+									new InputStreamReader(client
+											.getInputStream(), "UTF8"));
+							while (true) {
 								// first line is canonical class name of event
-								String dataType = ois.readLine(); 
-								
+								String dataType = ois.readLine();
+
 								// second line is JSON data
-								AbstractData data = JSONDataSerializer.deserialize(dataType, ois.readLine());
-							
+								AbstractData data = JSONDataSerializer
+										.deserialize(dataType, ois.readLine());
+
 								// pick the client and process received data
-								objectMap.get(data.getClientId()).processData(data);
+								objectMap.get(data.getClientId()).processData(
+										data);
 							}
 						} catch (Exception ex) {
-							System.out.println("Client " + clientId + " died ...");
+							System.out.println("Client " + clientId
+									+ " died ...");
 						}
 					}
 				});
@@ -95,62 +101,69 @@ public class KippenServer {
 	}
 
 	private void initObjects() {
-		Configuration config = JAXB.unmarshal(new File("config.xml"), Configuration.class);
-		
-		//for each object set the commands and events
+		Configuration config = JAXB.unmarshal(new File("config.xml"),
+				Configuration.class);
+
+		// for each object set the commands and events
 		for (ObjectConfig obj : config.getObjects().getObjectConfig()) {
 			String mac = obj.getMac();
-			
+
 			if (obj.getType() == TypeEnum.CUBE) {
 				log.info("Registering a CUBE with MAC " + mac);
-				
-				//make new kippen object
+
+				// make new kippen object
 				CubeObject cubeKippObject = new CubeObject(mac);
-				
-				//add the new object to the server object map
+
+				// add the new object to the server object map
 				objectMap.put(obj.getMac(), cubeKippObject);
-				
-				//for all events the object reacts to
+
+				// for all events the object reacts to
 				for (EventConfig e : obj.getEvents().getEventConfig()) {
-					List<Command> commands = makeCommands(e.getCommands().getCommandConfig());
-					
+					List<Command> commands = makeCommands(e.getCommands()
+							.getCommandConfig());
+
 					switch (e.getEventType()) {
 					case EventTypes.SIDECHANGE:
 						log.info("Found side change event");
-						cubeKippObject.setCommandsForEvents(EventTypes.SIDECHANGE, commands);
+						cubeKippObject.setCommandsForEvents(
+								EventTypes.SIDECHANGE, commands);
 						break;
 					case EventTypes.SHAKE:
 						log.info("Found shake event");
-						cubeKippObject.setCommandsForEvents(EventTypes.SHAKE, commands);
+						cubeKippObject.setCommandsForEvents(EventTypes.SHAKE,
+								commands);
 						break;
-					//add other events here	
+					// add other events here
 					default:
 						break;
 					}
 				}
 			} else if (obj.getType() == TypeEnum.BARREL) {
 				log.info("Registering a BARREL with MAC " + mac);
-				
-				//make new kippen object
+
+				// make new kippen object
 				BarrelObject barrelKippObject = new BarrelObject(mac);
-				
-				//add the new object to the server object map
+
+				// add the new object to the server object map
 				objectMap.put(obj.getMac(), barrelKippObject);
-				
-				//for all events the object reacts to
+
+				// for all events the object reacts to
 				for (EventConfig e : obj.getEvents().getEventConfig()) {
-					List<Command> commands = makeCommands(e.getCommands().getCommandConfig());
-					
+					List<Command> commands = makeCommands(e.getCommands()
+							.getCommandConfig());
+
 					switch (e.getEventType()) {
 					case EventTypes.SHAKE:
 						log.info("Found shake event");
-						barrelKippObject.setCommandsForEvents(EventTypes.SHAKE, commands);
+						barrelKippObject.setCommandsForEvents(EventTypes.SHAKE,
+								commands);
 						break;
 					case EventTypes.ROLLCHANGE:
 						log.info("Found roll event");
-						barrelKippObject.setCommandsForEvents(EventTypes.ROLLCHANGE, commands);
+						barrelKippObject.setCommandsForEvents(
+								EventTypes.ROLLCHANGE, commands);
 						break;
-					//add other events here	
+					// add other events here
 					default:
 						break;
 					}
@@ -164,18 +177,20 @@ public class KippenServer {
 		for (CommandConfig c : configList) {
 			switch (c.getCommandType()) {
 			case "ABLETONPLAY":
-				log.log(Level.INFO,"Found ABLETONPLAY command");
+				log.log(Level.INFO, "Found ABLETONPLAY command");
 				commandList.add(new AbletonPlayCommand(getCommandParamValue(
 						"trackNumber", c.getParam())));
 				break;
 			case "ABLETONSTOP":
-				log.log(Level.INFO,"Found ABLETONSTOP command");
+				log.log(Level.INFO, "Found ABLETONSTOP command");
 				commandList.add(new AbletonStopCommand(getCommandParamValue(
 						"trackNumber", c.getParam())));
 				break;
-			case "TOSTRING":
-				log.log(Level.INFO,"Found TO STRING command");
-				commandList.add(new ToStringCommand());
+			case "TOGGLEMUTE":
+				log.log(Level.INFO, "Found TOGGLEMUTE command");
+				commandList.add(new ToggleMuteCommand(Integer
+						.valueOf(getCommandParamValue("trackNumber",
+								c.getParam()))));
 				break;
 
 			default:
@@ -185,7 +200,7 @@ public class KippenServer {
 		return commandList;
 	}
 
-	private String getCommandParamValue(String key,	List<Param> commandParam) {
+	private String getCommandParamValue(String key, List<Param> commandParam) {
 		for (Param param : commandParam) {
 			if (param.getKey().equalsIgnoreCase(key)) {
 				return param.getValue();
