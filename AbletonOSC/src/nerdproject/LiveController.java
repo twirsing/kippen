@@ -12,6 +12,9 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.event.ListSelectionEvent;
+
+import com.google.common.collect.Lists;
 import com.illposed.osc.AbletonOSCListener;
 import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPortIn;
@@ -57,40 +60,84 @@ public class LiveController {
 	public boolean isClipPlaying(int trackNumber, int clipNumber) {
 		final boolean isPlaying = false;
 
-		OSCMessage message = this.sendReceive("/live/track/info", trackNumber);
+		OSCMessage message = this.sendReceive("/live/track/info", null,
+				trackNumber);
 
 		TrackInfo trackInfo = new TrackInfo(message.getArguments());
 
 		return trackInfo.getClips().get(clipNumber).isPlaying();
 	}
 
-	public List<String> getDevices(int track) {
+	public List<Device> getDevices(int track) {
+		OSCMessage message = this.sendReceive("/live/devicelist", null, track);
 
-		OSCMessage message = this.sendReceive("/live/devicelist", track);
+		ArrayList<Device> devices = new ArrayList<Device>();
+
 		Object[] arguments = message.getArguments();
+		// (int track, int device, str name, ...)
 
-		printObjectArray(arguments);
+		List<List<Object>> pairs = Lists.partition(Arrays.asList(Arrays
+				.copyOfRange(arguments, 1, arguments.length)), 2);
+		for (List<Object> pair : pairs) {
+			Device device = new Device((int) arguments[0], (int) pair.get(0),
+					(String) pair.get(1));
+			devices.add(device);
+		}
 
-		return null;
+		return devices;
 	}
 
-	public void setDeviceParameter(int trackNumber, int deviceNumber, int parameterNumber, int value){
+	public List<DeviceParameter> getDeviceParameters(int trackNumber,
+			int deviceNumber) {
+		ArrayList<DeviceParameter> deviceParameters = new ArrayList<DeviceParameter>();
+
+		// (int track, int device, int parameter int value, str name, ...)
+		OSCMessage message = this.sendReceive("/live/device",
+				"/live/device/allparam", trackNumber, deviceNumber);
+
+		Object[] arguments = message.getArguments();
+		// triples: paramternum, value, paramname
+		List<List<Object>> triples = Lists.partition(Arrays.asList(Arrays
+				.copyOfRange(arguments, 2, arguments.length)), 3);
+
+		for (List<Object> triple : triples) {
+			Object value = triple.get(1);
+			DeviceParameter deviceParameter;
+			if (value instanceof Integer) {
+				deviceParameter = new DeviceParameter((int) arguments[0],
+						(int) arguments[1], (int) triple.get(0), (int) value,
+						(String) triple.get(2));
+			} else {
+				deviceParameter = new DeviceParameter((int) arguments[0],
+						(int) arguments[1], (int) triple.get(0), (float) value,
+						(String) triple.get(2));
+			}
+
+			deviceParameters.add(deviceParameter);
+		}
+
+		return deviceParameters;
+	}
+
+	public void setDeviceParameter(int trackNumber, int deviceNumber,
+			int parameterNumber, float value) {
 		this.sendMessage("/live/device", new Object[] { trackNumber,
 				deviceNumber, parameterNumber, value });
 	}
-	
-//	public int getDeviceParameter(int trackNumber, int deviceNumber, int value){
-//		this.sendMessage("/live/device", new Object[] { trackNumber,
-//				deviceNumber, value });
-//	}
-	
+
+	// public int getDeviceParameter(int trackNumber, int deviceNumber, int
+	// value){
+	// this.sendMessage("/live/device", new Object[] { trackNumber,
+	// deviceNumber, value });
+	// }
+
 	public void playClip(int trackNumber, int clipNumber) {
 		this.sendMessage("/live/play/clip", new Object[] { trackNumber,
 				clipNumber });
 	}
 
 	public boolean isMuted(int trackNumber) {
-		OSCMessage message = this.sendReceive("/live/mute", trackNumber);
+		OSCMessage message = this.sendReceive("/live/mute", null, trackNumber);
 		Object[] arguments = message.getArguments();
 		Integer muteStatus = (Integer) arguments[1];
 
@@ -125,19 +172,20 @@ public class LiveController {
 	public void setTrackVolume(int trackNum, float volume) {
 		this.sendMessage("/live/volume", new Object[] { trackNum, volume });
 	}
-	
+
 	public void setMasterVolume(float volume) {
 		this.sendMessage("/live/master/volume", new Object[] { volume });
 	}
-	
+
 	public void setSend(int track, int sendNum, float value) {
 		this.sendMessage("/live/send", new Object[] { track, sendNum, value });
 	}
 
 	public float getSend(int track, int sendNum) {
-		OSCMessage message = this.sendReceive("/live/send", track, sendNum);
+		OSCMessage message = this.sendReceive("/live/send", null, track,
+				sendNum);
 
-		//[track, clip, send val]
+		// [track, clip, send val]
 		return (Float) message.getArguments()[2];
 
 	}
@@ -161,7 +209,17 @@ public class LiveController {
 		}
 	}
 
-	private OSCMessage sendReceive(String message, Object... params) {
+	/**
+	 * Sends a message and waits for a response to an incoming address. If the
+	 * receiveAddress parameter is null the message is the receive address.
+	 * 
+	 * @param message
+	 * @param receiveAddress
+	 * @param params
+	 * @return
+	 */
+	private OSCMessage sendReceive(String message, String receiveAddress,
+			Object... params) {
 		AbletonOSCListener listener = new AbletonOSCListener();
 		Collection<Object> arrayList = new ArrayList<>();
 		if (params == null) {
@@ -169,7 +227,10 @@ public class LiveController {
 		}
 		arrayList.addAll(Arrays.asList(params));
 
-		receiver.addListener(message, listener);
+		if (receiveAddress == null)
+			receiver.addListener(message, listener);
+		else
+			receiver.addListener(receiveAddress, listener);
 		sendMessage(message, params);
 		while (!listener.isMessageReceived()) {
 			try {
