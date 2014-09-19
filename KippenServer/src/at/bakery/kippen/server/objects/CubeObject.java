@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import at.bakery.kippen.common.AbstractData;
@@ -17,6 +18,7 @@ import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.data.ShakeData;
 import at.bakery.kippen.common.data.WifiLevelsData;
 import at.bakery.kippen.server.EventTypes;
+import at.bakery.kippen.server.KippenServer;
 import at.bakery.kippen.server.command.Command;
 import at.bakery.kippen.server.outlets.AbstractKippOutlet;
 import at.bakery.kippen.server.outlets.CsvKippOutlet;
@@ -26,13 +28,14 @@ public class CubeObject extends AbstractKippenObject {
 
 	public CubeObject(String id) {
 		super(id);
+		log.setLevel(KippenServer.LOG_LEVEL);
 	}
 
 	@Override
 	public void processData(AbstractData d) {
 		super.processData(d);
 		
-		log.info("CUBE processes " + d.getClass().getSimpleName() + " -> " + d.toString());
+		log.log(Level.FINEST ,"CUBE processes " + d.getClass().getSimpleName() + " -> " + d.toString());
 		
 		if (d instanceof WifiLevelsData) {
 			processWifiData((WifiLevelsData) d);
@@ -59,13 +62,13 @@ public class CubeObject extends AbstractKippenObject {
 		}
 	}
 	
-	protected void stop() {
+	protected void timeout() {
+		super.timeout();
 		// FIXME implement ableton stop
-		System.out.println("STOP the cube " + id);
 	}
 
 	// 2 seconds delay before a new shake is processed
-	private static final long NEW_SHAKE_AFTER = (long)2e9;
+	private static final long NEW_SHAKE_AFTER = (long)1e9;
 	private long lastShook = System.nanoTime();
 	
 	private void processShakeData() {
@@ -78,7 +81,7 @@ public class CubeObject extends AbstractKippenObject {
 		lastShook = curTime;
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		
-		for(Command c : eventMap.get(EventTypes.SHAKE)) {
+		for(Command c : eventsOfObject.get(EventTypes.SHAKE)) {
 			try {
 				c.execute(paramMap);
 			} catch (Exception e) {
@@ -99,7 +102,7 @@ public class CubeObject extends AbstractKippenObject {
 		log.info("Executing side change with side " + side);
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("clipNumber", side);
-		List<Command> sideChangeEvents = eventMap.get(EventTypes.SIDECHANGE);
+		List<Command> sideChangeEvents = eventsOfObject.get(EventTypes.SIDECHANGE);
 		
 		if (sideChangeEvents != null) {
 			for (Command c : sideChangeEvents) {
@@ -140,7 +143,7 @@ public class CubeObject extends AbstractKippenObject {
 
 			// RSSI to meters conversion
 			double dist = Math.pow(10, ((27.55 - (67.6 + avgLevel)) / 20.0));
-			log.info("~ " + dist + "m (level: " + avgLevel + ")");
+			log.log(Level.FINEST ,"~ " + dist + "m (level: " + avgLevel + ")");
 
 			// remember the last to measurements, remove others
 			if (avgWifiLevel.size() > 10) {
@@ -156,5 +159,7 @@ public class CubeObject extends AbstractKippenObject {
 	}
 
 	private void processBatteryData(BatteryData data) {}
-	private void processMoveData(MoveData data) {}
+	private void processMoveData(MoveData data) {
+		
+	}
 }

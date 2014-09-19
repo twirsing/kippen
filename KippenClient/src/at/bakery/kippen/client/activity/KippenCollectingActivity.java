@@ -32,14 +32,14 @@ public class KippenCollectingActivity extends Activity {
 	private static final String SERVER_IP = "192.168.0.11"; //server ip */
 	
 	// setting bakery
-	/* private static final String WIFI_ESSID = "StockEINS"; //StockEINS
+	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
 	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort"; //IchBinEinLustigesPasswort
-	 private static final String SERVER_IP = "192.168.1.38"; //server ip */
+	 private static final String SERVER_IP = "192.168.1.20"; //server ip 
 	
 	// setting tomt
-	private static final String WIFI_ESSID = "JulesWinnfield";
-	private static final String WIFI_PWD = "wuzikrabuzi";
-	private static final String SERVER_IP = "192.168.1.141";
+//	private static final String WIFI_ESSID = "JulesWinnfield";
+//	private static final String WIFI_PWD = "wuzikrabuzi";
+//	private static final String SERVER_IP = "192.168.1.141";
 	
 	// access to sensors
 	private SensorManager senseMan;
@@ -135,7 +135,7 @@ public class KippenCollectingActivity extends Activity {
 	    String clientId = wifiMan.getConnectionInfo().getMacAddress();
 		
 	    // create the client socket for data transmission
-	    NetworkingTask.setup(SERVER_IP, 10000, clientId);
+	    NetworkingTask.setup(SERVER_IP, 10001, clientId);
 	    NetworkingTask networkTask = NetworkingTask.getInstance();
 	    networkTask.start();
 	    

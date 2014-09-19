@@ -18,7 +18,7 @@ public class BarrelOrientationSensing extends OrientationEventListener {
 	private Lock updateLock = new ReentrantLock();
 	private INetworking net = NetworkingTask.getInstance();
 	
-	private static final int MAX_DEGREES = 2 * 360;
+	private static final int MAX_DEGREES = 10 * 360;
 	private int degrees = 0;
 	private int lastAbsDegrees = 0;
 	

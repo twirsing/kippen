@@ -27,6 +27,7 @@ import at.bakery.kippen.config.TypeEnum;
 import at.bakery.kippen.server.command.AbletonPlayCommand;
 import at.bakery.kippen.server.command.AbletonStopCommand;
 import at.bakery.kippen.server.command.Command;
+import at.bakery.kippen.server.command.MasterVolumeCommand;
 import at.bakery.kippen.server.command.ToggleMuteCommand;
 import at.bakery.kippen.server.objects.AbstractKippenObject;
 import at.bakery.kippen.server.objects.BarrelObject;
@@ -34,6 +35,9 @@ import at.bakery.kippen.server.objects.CubeObject;
 
 public class KippenServer {
 	static Logger log = Logger.getLogger(KippenServer.class.getName());
+	public static Level LOG_LEVEL = Level.INFO;
+
+	public static int OBJECT_TIMEOUT_MINUTES = 5;
 
 	private HashMap<String, AbstractKippenObject> objectMap = new HashMap<String, AbstractKippenObject>();
 
@@ -50,7 +54,7 @@ public class KippenServer {
 		initObjects();
 
 		Executor workerExecutor = Executors.newCachedThreadPool();
-		final ServerSocket serverSock = new ServerSocket(10000);
+		final ServerSocket serverSock = new ServerSocket(10001);
 
 		log.info("Kippen Server is starting up ...");
 
@@ -89,8 +93,7 @@ public class KippenServer {
 										data);
 							}
 						} catch (Exception ex) {
-							System.out.println("Client " + clientId
-									+ " died ...");
+							log.severe("Client " + clientId + " died ...");
 						}
 					}
 				});
@@ -103,6 +106,12 @@ public class KippenServer {
 	private void initObjects() {
 		Configuration config = JAXB.unmarshal(new File("config.xml"),
 				Configuration.class);
+		
+		int objectTimeout = config.getTimeoutMinutes();
+
+		log.info("Setting object timeout to: " + objectTimeout + " minute(s).");
+		
+		OBJECT_TIMEOUT_MINUTES = objectTimeout;
 
 		// for each object set the commands and events
 		for (ObjectConfig obj : config.getObjects().getObjectConfig()) {
@@ -124,13 +133,18 @@ public class KippenServer {
 
 					switch (e.getEventType()) {
 					case EventTypes.SIDECHANGE:
-						log.info("Found side change event");
+						log.info("Registering side change event");
 						cubeKippObject.setCommandsForEvents(
 								EventTypes.SIDECHANGE, commands);
 						break;
 					case EventTypes.SHAKE:
-						log.info("Found shake event");
+						log.info("Registering shake event");
 						cubeKippObject.setCommandsForEvents(EventTypes.SHAKE,
+								commands);
+						break;
+					case EventTypes.TIMEOUT:
+						log.info("Registering roll event");
+						cubeKippObject.setCommandsForEvents(EventTypes.TIMEOUT,
 								commands);
 						break;
 					// add other events here
@@ -154,14 +168,19 @@ public class KippenServer {
 
 					switch (e.getEventType()) {
 					case EventTypes.SHAKE:
-						log.info("Found shake event");
+						log.info("Registering shake event");
 						barrelKippObject.setCommandsForEvents(EventTypes.SHAKE,
 								commands);
 						break;
 					case EventTypes.ROLLCHANGE:
-						log.info("Found roll event");
+						log.info("Registering roll event");
 						barrelKippObject.setCommandsForEvents(
 								EventTypes.ROLLCHANGE, commands);
+						break;
+					case EventTypes.TIMEOUT:
+						log.info("Registering roll event");
+						barrelKippObject.setCommandsForEvents(
+								EventTypes.TIMEOUT, commands);
 						break;
 					// add other events here
 					default:
@@ -177,20 +196,24 @@ public class KippenServer {
 		for (CommandConfig c : configList) {
 			switch (c.getCommandType()) {
 			case "ABLETONPLAY":
-				log.log(Level.INFO, "Found ABLETONPLAY command");
+				log.log(Level.INFO, "Registering ABLETONPLAY command");
 				commandList.add(new AbletonPlayCommand(getCommandParamValue(
 						"trackNumber", c.getParam())));
 				break;
-			case "ABLETONSTOP":
-				log.log(Level.INFO, "Found ABLETONSTOP command");
+			case "STOPTRACK":
+				log.log(Level.INFO, "Registering ABLETONSTOP command");
 				commandList.add(new AbletonStopCommand(getCommandParamValue(
 						"trackNumber", c.getParam())));
 				break;
 			case "TOGGLEMUTE":
-				log.log(Level.INFO, "Found TOGGLEMUTE command");
+				log.log(Level.INFO, "Registering TOGGLEMUTE command");
 				commandList.add(new ToggleMuteCommand(Integer
 						.valueOf(getCommandParamValue("trackNumber",
 								c.getParam()))));
+				break;
+			case "MASTERVOLUME":
+				log.log(Level.INFO, "Registering MASTERVOLUME command");
+				commandList.add(new MasterVolumeCommand());
 				break;
 
 			default:

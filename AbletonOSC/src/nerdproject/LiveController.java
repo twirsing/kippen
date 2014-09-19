@@ -66,7 +66,7 @@ public class LiveController {
 
 	public List<String> getDevices(int track) {
 
-		OSCMessage message = this.sendReceive("/live/return/devicelist", track);
+		OSCMessage message = this.sendReceive("/live/devicelist", track);
 		Object[] arguments = message.getArguments();
 
 		printObjectArray(arguments);
@@ -74,6 +74,16 @@ public class LiveController {
 		return null;
 	}
 
+	public void setDeviceParameter(int trackNumber, int deviceNumber, int parameterNumber, int value){
+		this.sendMessage("/live/device", new Object[] { trackNumber,
+				deviceNumber, parameterNumber, value });
+	}
+	
+//	public int getDeviceParameter(int trackNumber, int deviceNumber, int value){
+//		this.sendMessage("/live/device", new Object[] { trackNumber,
+//				deviceNumber, value });
+//	}
+	
 	public void playClip(int trackNumber, int clipNumber) {
 		this.sendMessage("/live/play/clip", new Object[] { trackNumber,
 				clipNumber });
@@ -117,7 +127,7 @@ public class LiveController {
 	}
 	
 	public void setMasterVolume(float volume) {
-		this.sendMessage("/live/master/volume", new Object[] {0, volume });
+		this.sendMessage("/live/master/volume", new Object[] { volume });
 	}
 	
 	public void setSend(int track, int sendNum, float value) {

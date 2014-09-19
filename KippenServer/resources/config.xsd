@@ -8,8 +8,10 @@
 			<element name="ableton" type="tns:ableton" maxOccurs="1"
 				minOccurs="1">
 			</element>
-			<element name="objects" type="tns:ObjectsElement"
-				maxOccurs="1" minOccurs="1"></element>
+            <element name="timeoutMinutes" type="int"></element>
+            <element name="objects" type="tns:ObjectsElement"
+				maxOccurs="1" minOccurs="1">
+			</element>
 		</sequence>
 	</complexType>
 
