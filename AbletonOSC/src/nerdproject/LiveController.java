@@ -14,6 +14,9 @@ import java.util.logging.Logger;
 
 import javax.swing.event.ListSelectionEvent;
 
+import org.encog.util.arrayutil.NormalizationAction;
+import org.encog.util.arrayutil.NormalizedField;
+
 import com.google.common.collect.Lists;
 import com.illposed.osc.AbletonOSCListener;
 import com.illposed.osc.OSCMessage;
@@ -27,8 +30,7 @@ public class LiveController {
 
 	static Logger log = Logger.getLogger(LiveController.class.getName());
 
-	private LiveController(InetAddress liveOSCAddress, int liveOSCPort,
-			int listeningPort) {
+	private LiveController(InetAddress liveOSCAddress, int liveOSCPort, int listeningPort) {
 		try {
 			log.log(Level.INFO, "Listening on port " + listeningPort);
 			receiver = new OSCPortIn(listeningPort);
@@ -60,8 +62,7 @@ public class LiveController {
 	public boolean isClipPlaying(int trackNumber, int clipNumber) {
 		final boolean isPlaying = false;
 
-		OSCMessage message = this.sendReceive("/live/track/info", null,
-				trackNumber);
+		OSCMessage message = this.sendReceive("/live/track/info", null, trackNumber);
 
 		TrackInfo trackInfo = new TrackInfo(message.getArguments());
 
@@ -76,40 +77,33 @@ public class LiveController {
 		Object[] arguments = message.getArguments();
 		// (int track, int device, str name, ...)
 
-		List<List<Object>> pairs = Lists.partition(Arrays.asList(Arrays
-				.copyOfRange(arguments, 1, arguments.length)), 2);
+		List<List<Object>> pairs = Lists.partition(Arrays.asList(Arrays.copyOfRange(arguments, 1, arguments.length)), 2);
 		for (List<Object> pair : pairs) {
-			Device device = new Device((int) arguments[0], (int) pair.get(0),
-					(String) pair.get(1));
+			Device device = new Device((int) arguments[0], (int) pair.get(0), (String) pair.get(1));
 			devices.add(device);
 		}
 
 		return devices;
 	}
 
-	public List<DeviceParameter> getDeviceParameters(int trackNumber,
-			int deviceNumber) {
+	public List<DeviceParameter> getDeviceParameters(int trackNumber, int deviceNumber) {
 		ArrayList<DeviceParameter> deviceParameters = new ArrayList<DeviceParameter>();
 
 		// (int track, int device, int parameter int value, str name, ...)
-		OSCMessage message = this.sendReceive("/live/device",
-				"/live/device/allparam", trackNumber, deviceNumber);
+		OSCMessage message = this.sendReceive("/live/device", "/live/device/allparam", trackNumber, deviceNumber);
 
 		Object[] arguments = message.getArguments();
 		// triples: paramternum, value, paramname
-		List<List<Object>> triples = Lists.partition(Arrays.asList(Arrays
-				.copyOfRange(arguments, 2, arguments.length)), 3);
+		List<List<Object>> triples = Lists.partition(Arrays.asList(Arrays.copyOfRange(arguments, 2, arguments.length)), 3);
 
 		for (List<Object> triple : triples) {
 			Object value = triple.get(1);
 			DeviceParameter deviceParameter;
 			if (value instanceof Integer) {
-				deviceParameter = new DeviceParameter((int) arguments[0],
-						(int) arguments[1], (int) triple.get(0), (int) value,
+				deviceParameter = new DeviceParameter((int) arguments[0], (int) arguments[1], (int) triple.get(0), (int) value,
 						(String) triple.get(2));
 			} else {
-				deviceParameter = new DeviceParameter((int) arguments[0],
-						(int) arguments[1], (int) triple.get(0), (float) value,
+				deviceParameter = new DeviceParameter((int) arguments[0], (int) arguments[1], (int) triple.get(0), (float) value,
 						(String) triple.get(2));
 			}
 
@@ -119,21 +113,50 @@ public class LiveController {
 		return deviceParameters;
 	}
 
-	public void setDeviceParameter(int trackNumber, int deviceNumber,
-			int parameterNumber, float value) {
-		this.sendMessage("/live/device", new Object[] { trackNumber,
-				deviceNumber, parameterNumber, value });
+	public void setDeviceParameter(int trackNumber, int deviceNumber, int parameterNumber, float value) {
+		this.sendMessage("/live/device", new Object[] { trackNumber, deviceNumber, parameterNumber, value });
+	}
+	
+	public void setDeviceParameterNormalized(int trackNumber, int deviceNumber, int parameterNumber, float value) {
+		ParameterRange parameterRange = this.getDeviceParameterRange(trackNumber, deviceNumber, parameterNumber);
+		
+		double normalizedValue = normalizeParameterInputValue(value, parameterRange);
+		this.setDeviceParameter(trackNumber, deviceNumber, parameterNumber, (float) normalizedValue);
 	}
 
-	// public int getDeviceParameter(int trackNumber, int deviceNumber, int
-	// value){
-	// this.sendMessage("/live/device", new Object[] { trackNumber,
-	// deviceNumber, value });
-	// }
+	protected double normalizeParameterInputValue(float value, ParameterRange parameterRange) {
+		NormalizedField normalizer = new NormalizedField(NormalizationAction.Normalize, null, 1.0, 0.0, parameterRange.getHigh(), parameterRange.getLow());
+		double normalizedValue = normalizer.normalize(value);
+		return normalizedValue;
+	}
+
+	public DeviceParameter getDeviceParameter(int trackNumber, int deviceNumber, int parameterNumber) {
+		OSCMessage message = this.sendReceive("/live/device", "/live/device/param", new Object[] { trackNumber, deviceNumber,
+				parameterNumber });
+
+		Object[] m = message.getArguments();
+		// (track, device, param, p.value, str(p.name)
+
+		return new DeviceParameter((int) m[0], (int) m[1], (int) m[2], (float) m[3], (String) m[4]);
+	}
+
+	public float getDeviceParameterValue(int trackNumber, int deviceNumber, int parameterNumber) {
+		return this.getDeviceParameter(trackNumber, deviceNumber, parameterNumber).getValue();
+	}
+
+	public ParameterRange getDeviceParameterRange(int trackNumber, int deviceNumber, int parameterNumber) {
+		OSCMessage message = this.sendReceive("/live/device/range", null, new Object[] { trackNumber, deviceNumber,
+				parameterNumber });
+
+		// /live/device/range (int track, int device, int/float min, int/float
+		// max)
+		Object[] m = message.getArguments();
+
+		return new ParameterRange((float) m[3], (float) m[4]);
+	}
 
 	public void playClip(int trackNumber, int clipNumber) {
-		this.sendMessage("/live/play/clip", new Object[] { trackNumber,
-				clipNumber });
+		this.sendMessage("/live/play/clip", new Object[] { trackNumber, clipNumber });
 	}
 
 	public boolean isMuted(int trackNumber) {
@@ -182,8 +205,7 @@ public class LiveController {
 	}
 
 	public float getSend(int track, int sendNum) {
-		OSCMessage message = this.sendReceive("/live/send", null, track,
-				sendNum);
+		OSCMessage message = this.sendReceive("/live/send", null, track, sendNum);
 
 		// [track, clip, send val]
 		return (Float) message.getArguments()[2];
@@ -200,8 +222,7 @@ public class LiveController {
 		arrayList.addAll(Arrays.asList(params));
 		OSCMessage oscMessage = new OSCMessage(message, arrayList);
 
-		System.out.println("Sending message " + message + " with params: "
-				+ arrayList);
+		System.out.println("Sending message " + message + " with params: " + arrayList);
 		try {
 			sender.send(oscMessage);
 		} catch (IOException e) {
@@ -218,8 +239,7 @@ public class LiveController {
 	 * @param params
 	 * @return
 	 */
-	private OSCMessage sendReceive(String message, String receiveAddress,
-			Object... params) {
+	private OSCMessage sendReceive(String message, String receiveAddress, Object... params) {
 		AbletonOSCListener listener = new AbletonOSCListener();
 		Collection<Object> arrayList = new ArrayList<>();
 		if (params == null) {
@@ -247,8 +267,7 @@ public class LiveController {
 
 	public static LiveController getInstance() {
 		if (instance == null) {
-			System.out.println("Working Directory = "
-					+ System.getProperty("user.dir"));
+			System.out.println("Working Directory = " + System.getProperty("user.dir"));
 			Properties properties = new Properties();
 			BufferedInputStream stream;
 			int incommingPort;
@@ -256,15 +275,12 @@ public class LiveController {
 			String hostIP;
 			InetAddress hostAddress;
 			try {
-				stream = new BufferedInputStream(new FileInputStream(
-						"configuration.properties"));
+				stream = new BufferedInputStream(new FileInputStream("configuration.properties"));
 
 				properties.load(stream);
 				stream.close();
-				incommingPort = Integer.valueOf(properties
-						.getProperty("incommingPort"));
-				liveOSCPort = Integer.valueOf(properties
-						.getProperty("liveOSCPort"));
+				incommingPort = Integer.valueOf(properties.getProperty("incommingPort"));
+				liveOSCPort = Integer.valueOf(properties.getProperty("liveOSCPort"));
 				hostIP = properties.getProperty("hostIP");
 
 				if (hostIP == "localhost") {
@@ -278,8 +294,7 @@ public class LiveController {
 				e.printStackTrace();
 				throw new RuntimeException("properties file cannot be read");
 			}
-			LiveController.instance = new LiveController(hostAddress,
-					liveOSCPort, incommingPort);
+			LiveController.instance = new LiveController(hostAddress, liveOSCPort, incommingPort);
 			return LiveController.instance;
 		}
 		return instance;
