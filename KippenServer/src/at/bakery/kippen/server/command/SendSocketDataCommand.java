@@ -20,8 +20,7 @@ import at.bakery.kippen.server.KippenServer;
 
 import com.google.gson.Gson;
 
-
-public class SendSocketDataCommand implements Command{
+public class SendSocketDataCommand implements Command {
 
 	private String command;
 	private String destinationIP;
@@ -29,18 +28,18 @@ public class SendSocketDataCommand implements Command{
 	private String data1, data2;
 
 	static Logger log = Logger.getLogger(KippenServer.class.getName());
-	
-	public SendSocketDataCommand(String destinationIP, String destinationPort, String command, String data1, String data2){
+
+	public SendSocketDataCommand(String destinationIP, String destinationPort, String command, String data1, String data2) {
 		this.command = command;
 		this.destinationIP = destinationIP;
 		this.destinationPort = Integer.valueOf(destinationPort);
 		this.data1 = data1;
 		this.data2 = data2;
 	}
-	
+
 	@Override
 	public void execute(Map<String, String> params) {
-//		System.out.println("execute: "+destinationIP+"::"+destinationPort+"::"+command);
+		System.out.println("execute: " + destinationIP + "::" + destinationPort + "::" + command + "::" + data1 + "::" + data2);
 
 		OutputStream oos;
 		BufferedReader ois;
@@ -50,27 +49,27 @@ public class SendSocketDataCommand implements Command{
 			try {
 				socket = new Socket(InetAddress.getByName(this.destinationIP), this.destinationPort);
 				oos = socket.getOutputStream();
-				ois = new BufferedReader(
-						new InputStreamReader(socket.getInputStream(), "UTF8"));
+				ois = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF8"));
 			} catch (Exception e) {
 				return;
 			}
 			try {
 				Object myobj = new PingData();
-				String json = "{\"command\":\""+this.command+"\", \"data1\":\""+this.data1+"\", \"data2\":\""+this.data2+"\"}";
+				String json = "{\"command\":\"" + this.command + "\", \"data1\":\"" + this.data1 + "\", \"data2\":\""
+						+ this.data2 + "\"}";
 				oos.write(json.getBytes("UTF8"));
 				oos.flush();
-			    StringBuilder responseStrBuilder = new StringBuilder();
-			    String response = ois.readLine();
-			    String status = new Gson().fromJson(response, String.class);
+				StringBuilder responseStrBuilder = new StringBuilder();
+				String response = ois.readLine();
+				String status = new Gson().fromJson(response, String.class);
 
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				ex.printStackTrace();
 				System.err.println("Failed to send packets");
 			}
 			oos.close();
 			ois.close();
-		
+
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -79,7 +78,6 @@ public class SendSocketDataCommand implements Command{
 			e.printStackTrace();
 		}
 
-		
 	}
 
 }

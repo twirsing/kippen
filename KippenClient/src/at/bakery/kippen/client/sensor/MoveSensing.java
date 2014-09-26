@@ -50,7 +50,7 @@ public class MoveSensing implements SensorEventListener {
 		//computePosition();
 		
 		SensorTripleData t = new MoveData(accMove[0], accMove[1], accMove[2]);
-		
+		System.out.println("mmove data at client " + t);
 		updateLock.lock();
 		
 		net.sendPackets(t);
