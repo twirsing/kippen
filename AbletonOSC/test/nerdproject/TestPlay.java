@@ -1,12 +1,11 @@
 package nerdproject;
 
+import junit.framework.TestCase;
+
 import com.illposed.osc.OSCMessage;
-import com.illposed.osc.OSCPort;
 import com.illposed.osc.OSCPortIn;
 import com.illposed.osc.OSCPortOut;
 import com.illposed.osc.TestOSCListener;
-
-import junit.framework.TestCase;
 
 public class TestPlay extends TestCase {
 	private OSCPortOut sender;

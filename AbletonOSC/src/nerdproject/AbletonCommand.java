@@ -15,7 +15,7 @@ public class AbletonCommand {
 	private OSCPortOut sender;
 
 	public void init() throws UnknownHostException, SocketException {
-		sender = new OSCPortOut(9999);
+		sender = new OSCPortOut(9000);
 		System.out.print("Command> ");
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));

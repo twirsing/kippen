@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import nerdproject.LiveController;
 
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.AccelerationData;
@@ -15,6 +18,7 @@ import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.data.ShakeData;
 import at.bakery.kippen.common.data.WifiLevelsData;
 import at.bakery.kippen.server.EventTypes;
+import at.bakery.kippen.server.KippenServer;
 import at.bakery.kippen.server.command.Command;
 import at.bakery.kippen.server.outlets.AbstractKippOutlet;
 import at.bakery.kippen.server.outlets.CsvKippOutlet;
@@ -24,13 +28,14 @@ public class BarrelObject extends AbstractKippenObject {
 
 	public BarrelObject(String id) {
 		super(id);
+		log.setLevel(KippenServer.LOG_LEVEL);
 	}
 
 	@Override
 	public void processData(AbstractData d) {
 		super.processData(d);
 		
-		log.info("BARREL processes " + d.getClass().getSimpleName() + " -> " + d.toString());
+		log.log(Level.FINEST , "BARREL processes " + d.getClass().getSimpleName() + " -> " + d.toString());
 		
 		if (d instanceof WifiLevelsData) {
 			processWifiData((WifiLevelsData) d);
@@ -55,13 +60,25 @@ public class BarrelObject extends AbstractKippenObject {
 		}
 	}
 	
-	protected void stop() {
-		// FIXME implement ableton stop
-		System.out.println("STOP the barrel " + id);
+	@Override
+	protected void timeout() {
+		super.timeout();
 	}
 	
 	private void processOrientationData(BarrelOrientationData data) {
-		log.info("Barrel relative orientation " + data.getValue());
+		log.log(Level.FINEST ,"Barrel relative orientation " + data.getValue());
+		HashMap<String, String> paramMap = new HashMap<String, String>();
+		
+		paramMap.put("volume", String.valueOf(data.getValue()));
+		
+		for(Command c : eventsOfObject.get(EventTypes.ROLLCHANGE)) {
+			try {
+				c.execute(paramMap);
+			} catch (Exception e) {
+				log.warning("Failed to execute command " + c.getClass().getSimpleName());
+			}
+		}
+		
 	}
 
 	// 2 seconds delay before a new shake is processed
@@ -78,7 +95,7 @@ public class BarrelObject extends AbstractKippenObject {
 		lastShook = curTime;
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		
-		for(Command c : eventMap.get(EventTypes.SHAKE)) {
+		for(Command c : eventsOfObject.get(EventTypes.SHAKE)) {
 			try {
 				c.execute(paramMap);
 			} catch (Exception e) {
@@ -115,7 +132,7 @@ public class BarrelObject extends AbstractKippenObject {
 
 			// RSSI to meters conversion
 			double dist = Math.pow(10, ((27.55 - (67.6 + avgLevel)) / 20.0));
-			log.info("~ " + dist + "m (level: " + avgLevel + ")");
+			log.log(Level.FINEST , "~ " + dist + "m (level: " + avgLevel + ")");
 
 			// remember the last to measurements, remove others
 			if (avgWifiLevel.size() > 10) {

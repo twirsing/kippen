@@ -18,39 +18,40 @@ import com.illposed.osc.utility.OSCPacketDispatcher;
 
 /**
  * OSCPortIn is the class that listens for OSC messages.
- *
- * An example based on
- * {@link com.illposed.osc.OSCPortTest#testReceiving()}:
+ * 
+ * An example based on {@link com.illposed.osc.OSCPortTest#testReceiving()}:
+ * 
  * <pre>
-
-	receiver = new OSCPortIn(OSCPort.DEFAULT_SC_OSC_PORT());
-	OSCListener listener = new OSCListener() {
-		public void acceptMessage(java.util.Date time, OSCMessage message) {
-			System.out.println("Message received!");
-		}
-	};
-	receiver.addListener("/message/receiving", listener);
-	receiver.startListening();
-
+ * 
+ * receiver = new OSCPortIn(OSCPort.DEFAULT_SC_OSC_PORT());
+ * OSCListener listener = new OSCListener() {
+ * 	public void acceptMessage(java.util.Date time, OSCMessage message) {
+ * 		System.out.println(&quot;Message received!&quot;);
+ * 	}
+ * };
+ * receiver.addListener(&quot;/message/receiving&quot;, listener);
+ * receiver.startListening();
+ * 
  * </pre>
- *
- * Then, using a program such as SuperCollider or sendOSC, send a message
- * to this computer, port {@link #DEFAULT_SC_OSC_PORT},
- * with the address "/message/receiving".
- *
+ * 
+ * Then, using a program such as SuperCollider or sendOSC, send a message to
+ * this computer, port {@link #DEFAULT_SC_OSC_PORT}, with the address
+ * "/message/receiving".
+ * 
  * @author Chandrasekhar Ramakrishnan
  */
 public class OSCPortIn extends OSCPort implements Runnable {
 
 	// state for listening
 	private boolean listening;
-	private OSCByteArrayToJavaConverter converter
-			= new OSCByteArrayToJavaConverter();
+	private OSCByteArrayToJavaConverter converter = new OSCByteArrayToJavaConverter();
 	private OSCPacketDispatcher dispatcher = new OSCPacketDispatcher();
 
 	/**
 	 * Create an OSCPort that listens on the specified port.
-	 * @param port UDP port to listen on.
+	 * 
+	 * @param port
+	 *            UDP port to listen on.
 	 * @throws SocketException
 	 */
 	public OSCPortIn(int port) throws SocketException {
@@ -58,14 +59,19 @@ public class OSCPortIn extends OSCPort implements Runnable {
 	}
 
 	/**
-	 * Buffers were 1500 bytes in size, but were
-	 * increased to 1536, as this is a common MTU.
+	 * Buffers were 1500 bytes in size, but were increased to 1536, as this is a
+	 * common MTU.
 	 */
 	private static final int BUFFER_SIZE = 1536;
+
+	public void removeListener(String query) {
+		dispatcher.removeListener(query);
+	}
 
 	/**
 	 * Run the loop that listens for OSC on a socket until
 	 * {@link #isListening()} becomes false.
+	 * 
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
@@ -119,8 +125,12 @@ public class OSCPortIn extends OSCPort implements Runnable {
 
 	/**
 	 * Register the listener for incoming OSCPackets addressed to an Address
-	 * @param anAddress  the address to listen for. The address can be specified as a regex, e.g., "/m.*e/receiving"
-	 * @param listener   the object to invoke when a message comes in
+	 * 
+	 * @param anAddress
+	 *            the address to listen for. The address can be specified as a
+	 *            regex, e.g., "/m.*e/receiving"
+	 * @param listener
+	 *            the object to invoke when a message comes in
 	 */
 	public void addListener(String anAddress, OSCListener listener) {
 		dispatcher.addListener(anAddress, listener);

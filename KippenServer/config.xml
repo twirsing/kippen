@@ -2,30 +2,71 @@
 <tns:configuration xmlns:tns="http://www.bakery.at/kippen"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.bakery.at/kippen config.xsd ">
+
+	<!-- Specififies the time after which a timeout even for an object is called -->
+	<timeoutMinutes>1</timeoutMinutes>
+
 	<ableton>
 		<ip>ip</ip>
 		<port>0</port>
 	</ableton>
+
 	<objects>
 		<objectConfig>
-			<!-- tomw -->
-			<mac>88:30:8A:38:53:05</mac>  
-			<!-- <mac>c4:43:8f:46:34:32</mac> -->
-			<!-- matthias <mac>10:68:3f:49:25:4e</mac> -->  
+			<!-- tomw <mac>88:30:8A:38:53:05</mac> -->
+			<!-- tommy? <mac>c4:43:8f:46:34:32</mac> -->
+			<!-- matthias -->
+			<mac>10:68:3f:49:25:4e</mac>
 			<events>
-				<eventConfig eventType="shake">
+				<!-- <eventConfig eventType="rollChange"> <commands> <CommandConfig commandType="MASTERVOLUME"> 
+					</CommandConfig> </commands> </eventConfig> -->
+				<eventConfig eventType="cubeSideChange">
 					<commands>
-						<CommandConfig commandType="TOSTRING">
-							<param key="string" value="the shake" />
+						<CommandConfig commandType="ABLETONPLAY">
+							<param key="trackNumber" value="0" />
 						</CommandConfig>
 					</commands>
 				</eventConfig>
+				<eventConfig eventType="timeout">
+					<commands>
+						<CommandConfig commandType="STOPTRACK">
+							<param key="trackNumber" value="0" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+				<eventConfig eventType="shake">
+					<commands>
+						<CommandConfig commandType="TOGGLEMUTE">
+							<param key="trackNumber" value="0" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+				<!-- <eventConfig eventType="cubeSideChange"> <commands> <CommandConfig 
+					commandType="ABLETONPLAY"> <param key="trackNumber" value="0" /> </CommandConfig> 
+					</commands> </eventConfig> <eventConfig eventType="shake"> <commands> <CommandConfig 
+					commandType="TOGGLEMUTE"> <param key="trackNumber" value="0" /> </CommandConfig> 
+					</commands> </eventConfig> -->
+			</events>
+			<type>cube</type>
+		</objectConfig>
+		<objectConfig>
+			<!-- tomw -->
+			<mac>88:30:8A:38:53:05</mac>
+			<!-- <mac>c4:43:8f:46:34:32</mac> -->
+
+			<events>
+
 				<eventConfig eventType="cubeSideChange">
 					<commands>
-						<CommandConfig commandType="TOSTRING">
-							<param key="string" value="the sidechange" />
-						</CommandConfig>
+
 						<CommandConfig commandType="ABLETONPLAY">
+							<param key="trackNumber" value="1" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+				<eventConfig eventType="shake">
+					<commands>
+						<CommandConfig commandType="TOGGLEMUTE">
 							<param key="trackNumber" value="1" />
 						</CommandConfig>
 					</commands>
@@ -33,37 +74,80 @@
 			</events>
 			<type>cube</type>
 		</objectConfig>
-		
-		<objectConfig>
-			<!-- tomt -->
-			<mac>c4:43:8f:46:34:32</mac>   
+		<!--<objectConfig>
+			 tomw2 HTC
+			<mac>c4:43:8f:46:34:32</mac>
 			<events>
-				<eventConfig eventType="shake">
+				<eventConfig eventType="cubeSideChange">
 					<commands>
-						<CommandConfig commandType="TOSTRING">
-							<param key="string" value="the shake" />
+						<CommandConfig commandType="ABLETONPLAY">
+							<param key="trackNumber" value="2" />
 						</CommandConfig>
 					</commands>
 				</eventConfig>
-				<!-- eventConfig eventType="cubeSideChange">
+				<eventConfig eventType="shake">
 					<commands>
-						<CommandConfig commandType="TOSTRING">
-							<param key="string" value="the sidechange" />
-						</CommandConfig>
-						<CommandConfig commandType="ABLETONPLAY">
-							<param key="trackNumber" value="1" />
-						</CommandConfig>
-					</commands>
-				</eventConfig -->
-				<eventConfig eventType="rollChange">
-					<commands>
-						<CommandConfig commandType="TOSTRING">
-							<param key="string" value="the roll change" />
+						<CommandConfig commandType="TOGGLEMUTE">
+							<param key="trackNumber" value="2" />
 						</CommandConfig>
 					</commands>
 				</eventConfig>
 			</events>
-			<type>barrel</type>
+			<type>cube</type>
 		</objectConfig>
+-->
+		<objectConfig>
+			<!-- FLO -->
+			<mac>8c:3a:e3:1a:83:5a</mac>
+			<events>
+
+				<eventConfig eventType="cubeSideChange">
+					<commands>
+
+						<CommandConfig commandType="ABLETONPLAY">
+							<param key="trackNumber" value="2" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+				<eventConfig eventType="shake">
+					<commands>
+						<CommandConfig commandType="TOGGLEMUTE">
+							<param key="trackNumber" value="2" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+			</events>
+			<type>cube</type>
+		</objectConfig>
+
+
+		<objectConfig>
+			<!-- tomt -->
+			<mac>c4:43:8f:46:34:32</mac>
+			<events>
+
+				<eventConfig eventType="cubeSideChange">
+					<commands>
+
+						<CommandConfig commandType="ABLETONPLAY">
+							<param key="trackNumber" value="4" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+				<eventConfig eventType="shake">
+					<commands>
+						<CommandConfig commandType="TOGGLEMUTE">
+							<param key="trackNumber" value="4" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+			</events>
+			<type>cube</type>
+		</objectConfig>
+
 	</objects>
+
 </tns:configuration>
+
+
+

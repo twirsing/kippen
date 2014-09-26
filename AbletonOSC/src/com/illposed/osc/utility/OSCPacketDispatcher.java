@@ -38,6 +38,10 @@ public class OSCPacketDispatcher {
 	public void addListener(String address, OSCListener listener) {
 		addressToListener.put(address, listener);
 	}
+	
+	public void removeListener(String query){
+		addressToListener.remove(query);
+	}
 
 	public void dispatchPacket(OSCPacket packet) {
 		if (packet instanceof OSCBundle) {
