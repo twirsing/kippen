@@ -36,7 +36,8 @@ public abstract class AbstractKippenObject {
 	protected HashSet<AbstractKippOutlet> outletObjects = new HashSet<AbstractKippOutlet>();
 	protected HashMap<String, AbstractData> dataObjects = new HashMap<String, AbstractData>();
 
-	private static final long IDLE_AFTER_SECONDS = KippenServer.OBJECT_TIMEOUT_MINUTES * 60;
+//	private static final long IDLE_AFTER_SECONDS = KippenServer.OBJECT_TIMEOUT_MINUTES * 60;
+	private static final long IDLE_AFTER_SECONDS =  20;
 	private long lastActivityTime = System.nanoTime();
 
 	/**

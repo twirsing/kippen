@@ -28,6 +28,7 @@ import at.bakery.kippen.server.command.AbletonPlayCommand;
 import at.bakery.kippen.server.command.AbletonStopCommand;
 import at.bakery.kippen.server.command.Command;
 import at.bakery.kippen.server.command.MasterVolumeCommand;
+import at.bakery.kippen.server.command.SendSocketDataCommand;
 import at.bakery.kippen.server.command.ToggleMuteCommand;
 import at.bakery.kippen.server.objects.AbstractKippenObject;
 import at.bakery.kippen.server.objects.BarrelObject;
@@ -61,8 +62,7 @@ public class KippenServer {
 		try {
 			while (true) {
 				final Socket client = serverSock.accept();
-				final NetworkInterface ni = NetworkInterface
-						.getByInetAddress(client.getInetAddress());
+				final NetworkInterface ni = NetworkInterface.getByInetAddress(client.getInetAddress());
 				final String clientId;
 				if (ni != null && ni.getHardwareAddress() != null) {
 					clientId = new String(ni.getHardwareAddress());
@@ -77,20 +77,16 @@ public class KippenServer {
 					@Override
 					public void run() {
 						try {
-							BufferedReader ois = new BufferedReader(
-									new InputStreamReader(client
-											.getInputStream(), "UTF8"));
+							BufferedReader ois = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF8"));
 							while (true) {
 								// first line is canonical class name of event
 								String dataType = ois.readLine();
 
 								// second line is JSON data
-								AbstractData data = JSONDataSerializer
-										.deserialize(dataType, ois.readLine());
+								AbstractData data = JSONDataSerializer.deserialize(dataType, ois.readLine());
 
 								// pick the client and process received data
-								objectMap.get(data.getClientId()).processData(
-										data);
+								objectMap.get(data.getClientId()).processData(data);
 							}
 						} catch (Exception ex) {
 							log.severe("Client " + clientId + " died ...");
@@ -104,13 +100,12 @@ public class KippenServer {
 	}
 
 	private void initObjects() {
-		Configuration config = JAXB.unmarshal(new File("config.xml"),
-				Configuration.class);
-		
+		Configuration config = JAXB.unmarshal(new File("config.xml"), Configuration.class);
+
 		int objectTimeout = config.getTimeoutMinutes();
 
 		log.info("Setting object timeout to: " + objectTimeout + " minute(s).");
-		
+
 		OBJECT_TIMEOUT_MINUTES = objectTimeout;
 
 		// for each object set the commands and events
@@ -128,24 +123,20 @@ public class KippenServer {
 
 				// for all events the object reacts to
 				for (EventConfig e : obj.getEvents().getEventConfig()) {
-					List<Command> commands = makeCommands(e.getCommands()
-							.getCommandConfig());
+					List<Command> commands = makeCommands(e.getCommands().getCommandConfig());
 
 					switch (e.getEventType()) {
 					case EventTypes.SIDECHANGE:
 						log.info("Registering side change event");
-						cubeKippObject.setCommandsForEvents(
-								EventTypes.SIDECHANGE, commands);
+						cubeKippObject.setCommandsForEvents(EventTypes.SIDECHANGE, commands);
 						break;
 					case EventTypes.SHAKE:
 						log.info("Registering shake event");
-						cubeKippObject.setCommandsForEvents(EventTypes.SHAKE,
-								commands);
+						cubeKippObject.setCommandsForEvents(EventTypes.SHAKE, commands);
 						break;
 					case EventTypes.TIMEOUT:
 						log.info("Registering roll event");
-						cubeKippObject.setCommandsForEvents(EventTypes.TIMEOUT,
-								commands);
+						cubeKippObject.setCommandsForEvents(EventTypes.TIMEOUT, commands);
 						break;
 					// add other events here
 					default:
@@ -163,24 +154,20 @@ public class KippenServer {
 
 				// for all events the object reacts to
 				for (EventConfig e : obj.getEvents().getEventConfig()) {
-					List<Command> commands = makeCommands(e.getCommands()
-							.getCommandConfig());
+					List<Command> commands = makeCommands(e.getCommands().getCommandConfig());
 
 					switch (e.getEventType()) {
 					case EventTypes.SHAKE:
 						log.info("Registering shake event");
-						barrelKippObject.setCommandsForEvents(EventTypes.SHAKE,
-								commands);
+						barrelKippObject.setCommandsForEvents(EventTypes.SHAKE, commands);
 						break;
 					case EventTypes.ROLLCHANGE:
 						log.info("Registering roll event");
-						barrelKippObject.setCommandsForEvents(
-								EventTypes.ROLLCHANGE, commands);
+						barrelKippObject.setCommandsForEvents(EventTypes.ROLLCHANGE, commands);
 						break;
 					case EventTypes.TIMEOUT:
 						log.info("Registering roll event");
-						barrelKippObject.setCommandsForEvents(
-								EventTypes.TIMEOUT, commands);
+						barrelKippObject.setCommandsForEvents(EventTypes.TIMEOUT, commands);
 						break;
 					// add other events here
 					default:
@@ -215,6 +202,18 @@ public class KippenServer {
 				log.log(Level.INFO, "Registering MASTERVOLUME command");
 				commandList.add(new MasterVolumeCommand());
 				break;
+				
+			case "SENDSOCKETDATA":
+				log.log(Level.INFO, "Registering SENDSOCKETDATA command");
+				commandList.add(new SendSocketDataCommand(
+						getCommandParamValue("destinationIP", c.getParam()),
+						getCommandParamValue("destinationPort", c.getParam()),
+						getCommandParamValue("command", c.getParam()),
+						getCommandParamValue("data1", c.getParam()),
+						getCommandParamValue("data2", c.getParam())
+						));
+				break;
+				
 
 			default:
 				break;

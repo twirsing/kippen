@@ -25,6 +25,7 @@ import at.bakery.kippen.server.outlets.CsvKippOutlet;
 
 public class CubeObject extends AbstractKippenObject {
 	static Logger log = Logger.getLogger(CubeObject.class.getName());
+	private int currentSide = -1;
 
 	public CubeObject(String id) {
 		super(id);
@@ -96,12 +97,17 @@ public class CubeObject extends AbstractKippenObject {
 		if (cd.getOrientation() == CubeOrientationData.Orientation.UNKNOWN) {
 			return;
 		}
+		int sideInt = cd.getOrientation().ordinal();
+		System.out.println("Sideint " + sideInt + " current " + currentSide);
+		if (sideInt == currentSide) {
+			System.out.println("2Sideint " + sideInt + " current " + currentSide);
+			return;
+		}
 
-		String side = String.valueOf(cd.getOrientation().ordinal());
-
-		log.info("Executing side change with side " + side);
+		String sideString = String.valueOf(sideInt);
+		log.info("Executing side change with side " + sideString);
 		HashMap<String, String> paramMap = new HashMap<String, String>();
-		paramMap.put("clipNumber", side);
+		paramMap.put("clipNumber", sideString);
 		List<Command> sideChangeEvents = eventsOfObject.get(EventTypes.SIDECHANGE);
 
 		if (sideChangeEvents != null) {
@@ -110,8 +116,13 @@ public class CubeObject extends AbstractKippenObject {
 					c.execute(paramMap);
 				} catch (Exception e) {
 					log.warning("Failed to execute command " + c.getClass().getSimpleName());
+				} finally {
+
 				}
 			}
+
+			// set the current side
+			currentSide = sideInt;
 		}
 	}
 

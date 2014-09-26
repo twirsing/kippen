@@ -25,6 +25,13 @@
 						<CommandConfig commandType="ABLETONPLAY">
 							<param key="trackNumber" value="0" />
 						</CommandConfig>
+						<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="switchrelay" />
+							<param key="destinationIP" value="192.168.0.106" />
+							<param key="destinationPort" value="9999" />
+							<param key="data1" value="0" />
+							<param key="data2" value="high" />
+						</CommandConfig>
 					</commands>
 				</eventConfig>
 				<eventConfig eventType="timeout">
@@ -32,12 +39,27 @@
 						<CommandConfig commandType="STOPTRACK">
 							<param key="trackNumber" value="0" />
 						</CommandConfig>
+						<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="switchrelay" />
+							<param key="destinationIP" value="192.168.0.106" />
+							<param key="destinationPort" value="9999" />
+							<param key="data1" value="0" />
+							<param key="data2" value="low" />
+						</CommandConfig>
+
 					</commands>
 				</eventConfig>
 				<eventConfig eventType="shake">
 					<commands>
 						<CommandConfig commandType="TOGGLEMUTE">
 							<param key="trackNumber" value="0" />
+						</CommandConfig>
+						<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="switchrelay" />
+							<param key="destinationIP" value="192.168.0.106" />
+							<param key="destinationPort" value="9999" />
+							<param key="data1" value="0" />
+							<param key="data2" value="toggle" />
 						</CommandConfig>
 					</commands>
 				</eventConfig>
@@ -74,28 +96,12 @@
 			</events>
 			<type>cube</type>
 		</objectConfig>
-		<!--<objectConfig>
-			 tomw2 HTC
-			<mac>c4:43:8f:46:34:32</mac>
-			<events>
-				<eventConfig eventType="cubeSideChange">
-					<commands>
-						<CommandConfig commandType="ABLETONPLAY">
-							<param key="trackNumber" value="2" />
-						</CommandConfig>
-					</commands>
-				</eventConfig>
-				<eventConfig eventType="shake">
-					<commands>
-						<CommandConfig commandType="TOGGLEMUTE">
-							<param key="trackNumber" value="2" />
-						</CommandConfig>
-					</commands>
-				</eventConfig>
-			</events>
-			<type>cube</type>
-		</objectConfig>
--->
+		<!--<objectConfig> tomw2 HTC <mac>c4:43:8f:46:34:32</mac> <events> <eventConfig 
+			eventType="cubeSideChange"> <commands> <CommandConfig commandType="ABLETONPLAY"> 
+			<param key="trackNumber" value="2" /> </CommandConfig> </commands> </eventConfig> 
+			<eventConfig eventType="shake"> <commands> <CommandConfig commandType="TOGGLEMUTE"> 
+			<param key="trackNumber" value="2" /> </CommandConfig> </commands> </eventConfig> 
+			</events> <type>cube</type> </objectConfig> -->
 		<objectConfig>
 			<!-- FLO -->
 			<mac>8c:3a:e3:1a:83:5a</mac>
@@ -144,6 +150,9 @@
 			</events>
 			<type>cube</type>
 		</objectConfig>
+
+
+
 
 	</objects>
 
