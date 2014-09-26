@@ -74,7 +74,7 @@ public class AccelerationSensing implements SensorEventListener, ISensorDataCach
 			AccelerationData accData = new AccelerationData(avgValue.getX() / values.size(), avgValue.getY() / values.size(), avgValue.getZ() / values.size());
 			
 			cachedData = accData;
-			net.sendPackets(accData);
+			//net.sendPackets(accData);
 			
 			interval = 0;
 		}

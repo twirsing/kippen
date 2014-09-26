@@ -77,20 +77,16 @@ public class KippenServer {
 					@Override
 					public void run() {
 						try {
-							BufferedReader ois = new BufferedReader(
-									new InputStreamReader(client
-											.getInputStream(), "UTF8"));
+							BufferedReader ois = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF8"));
 							while (true) {
 								// first line is canonical class name of event
 								String dataType = ois.readLine();
 
 								// second line is JSON data
-								AbstractData data = JSONDataSerializer
-										.deserialize(dataType, ois.readLine());
+								AbstractData data = JSONDataSerializer.deserialize(dataType, ois.readLine());
 
 								// pick the client and process received data
-								objectMap.get(data.getClientId()).processData(
-										data);
+								objectMap.get(data.getClientId()).processData(data);
 							}
 						} catch (Exception ex) {
 							log.severe("Client " + clientId + " died ...");

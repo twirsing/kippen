@@ -5,6 +5,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
+import android.app.Activity;
+import android.util.Log;
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.json.JSONDataSerializer;
 
@@ -28,6 +30,7 @@ public class NetworkingTask extends Thread implements INetworking {
 	
 	// singleton instance
 	private static NetworkingTask instance;
+	private static Activity activity;
 	
 	protected static void setup(String host, int port, String clientId) {
 		instance = new NetworkingTask(host, port, clientId);
@@ -35,7 +38,7 @@ public class NetworkingTask extends Thread implements INetworking {
 	
 	public static NetworkingTask getInstance() {
 		if(instance == null) {
-			System.err.println("It is likely that you failed setup IP and port, using default localhost:8080");
+			Log.e("KIPPEN", "It is likely that you failed setup IP and port, using default localhost:8080");
 			setup("127.0.0.1", 8080, "anonymousClient");
 		}
 		
@@ -85,6 +88,10 @@ public class NetworkingTask extends Thread implements INetworking {
 	public void run() {
 		while(!quit) {
 			try {
+				Thread.sleep(50);
+			} catch(Exception ex) {}
+			
+			try {
 				flush.acquire();
 			} catch (InterruptedException e1) {}
 			
@@ -104,13 +111,14 @@ public class NetworkingTask extends Thread implements INetworking {
 					// set clientId
 					packet.setClientId(clientId);
 					
-					System.out.println("Sending " + packet.getClass().getSimpleName() + " -> " + packet);
+					Log.i("KIPPEN", "Sending " + packet.getClass().getSimpleName() + " -> " + packet);
 					
 					// JSON serialize and send packet
 					oos.write(JSONDataSerializer.serialize(packet));
 				} catch(Exception ex) {
 					ex.printStackTrace();
-					System.err.println("Failed to send packets");
+					Log.e("KIPPEN", "Failed to send packets");
+					return;
 				}
 			}
 			

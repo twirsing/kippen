@@ -80,10 +80,6 @@ public class WifiSensing extends BroadcastReceiver {
 		}
 		
 		updateLock.unlock();
-			
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {}
 		
 		// initiate the next scan
 		wifiMan.startScan();	 // FIXME do this periodically in main!!			

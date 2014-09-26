@@ -10,6 +10,7 @@ import android.hardware.SensorManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.OrientationEventListener;
 import at.bakery.kippen.client.R;
@@ -21,6 +22,12 @@ import at.bakery.kippen.client.sensor.MoveSensing;
 import at.bakery.kippen.client.sensor.ShakeSensing;
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.PingData;
+
+
+/*
+ * TODO all-in-one sensor listener
+ * TODO deposit job for activity.recreate on any error (e.g. network task)
+ */
 
 public class KippenCollectingActivity extends Activity {
 
@@ -41,7 +48,7 @@ public class KippenCollectingActivity extends Activity {
 	// setting StockEINS
 	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
 	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
-	 private static final String SERVER_IP = "192.168.0.100"; //server ip
+	 private static final String SERVER_IP = "192.168.0.104"; //server ip
 	//
 	// setting tomt
 	// private static final String WIFI_ESSID = "JulesWinnfield";
@@ -84,7 +91,7 @@ public class KippenCollectingActivity extends Activity {
 
 	// helper for building alert messages for the front end
 	private static AlertDialog.Builder alertBuilder;
-
+	
 	public static AbstractData getCachedSensorData(Class<? extends ISensorDataCache> cache) {
 		if (cache == accSensorListener.getClass()) {
 			return accSensorListener.getCacheData();
@@ -190,23 +197,27 @@ public class KippenCollectingActivity extends Activity {
 		// the shake detector
 		shakeSense = senseMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		shakeDetectorListener = new ShakeSensing();
+		
+		Log.i("KIPPEN", "Android client activity created.");
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 
-		senseMan.registerListener(moveSensorListener, moveSenseLinearAcc, SensorManager.SENSOR_DELAY_FASTEST);
-		senseMan.registerListener(moveSensorListener, moveSenseMagnetic, SensorManager.SENSOR_DELAY_FASTEST);
-		senseMan.registerListener(moveSensorListener, moveSenseGravity, SensorManager.SENSOR_DELAY_FASTEST);
+		senseMan.registerListener(shakeDetectorListener, shakeSense, 100000);
 
-		senseMan.registerListener(shakeDetectorListener, shakeSense, SensorManager.SENSOR_DELAY_FASTEST);
-
-		senseMan.registerListener(accSensorListener, accSense, SensorManager.SENSOR_DELAY_FASTEST);
+		senseMan.registerListener(accSensorListener, accSense, 100000);
+		
+		senseMan.registerListener(moveSensorListener, moveSenseLinearAcc, 100000);
+		senseMan.registerListener(moveSensorListener, moveSenseMagnetic, 100000);
+		senseMan.registerListener(moveSensorListener, moveSenseGravity, 100000);
 
 		cubeOrientSensorListener.enable();
 
 		barrelOrientSensorListener.enable();
+		
+		Log.i("KIPPEN", "Client started/resumed.");
 
 		// INACTIVE senseMan.registerListener(orientSensorListener, orientSense,
 		// SensorManager.SENSOR_DELAY_FASTEST);
@@ -224,12 +235,10 @@ public class KippenCollectingActivity extends Activity {
 		// do nothing on pause
 		super.onPause();
 	}
-
+	
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.kippen_collecting, menu);
-		return true;
+	protected void onStop() {
+		super.onStop();
 	}
 
 	private static void showErrorDialog(String messageId) {

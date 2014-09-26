@@ -49,10 +49,6 @@ public class OrientationSensing implements SensorEventListener {
 		net.sendPackets(t);
 		
 		updateLock.unlock();
-		
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {}
 	}
 
 	@Override
