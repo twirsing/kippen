@@ -24,7 +24,7 @@ import at.bakery.kippen.server.outlets.AbstractKippOutlet;
 import at.bakery.kippen.server.outlets.CsvKippOutlet;
 
 public class CubeObject extends AbstractKippenObject {
-	static Logger log =  Logger.getLogger(CubeObject.class.getName());
+	static Logger log = Logger.getLogger(CubeObject.class.getName());
 
 	public CubeObject(String id) {
 		super(id);
@@ -34,9 +34,9 @@ public class CubeObject extends AbstractKippenObject {
 	@Override
 	public void processData(AbstractData d) {
 		super.processData(d);
-		
-		log.log(Level.FINEST ,"CUBE processes " + d.getClass().getSimpleName() + " -> " + d.toString());
-		
+
+		log.log(Level.FINEST, "CUBE processes " + d.getClass().getSimpleName() + " -> " + d.toString());
+
 		if (d instanceof WifiLevelsData) {
 			processWifiData((WifiLevelsData) d);
 		} else if (d instanceof AccelerationData) {
@@ -45,15 +45,15 @@ public class CubeObject extends AbstractKippenObject {
 			processCubeOrientationData((CubeOrientationData) d);
 		} else if (d instanceof ShakeData) {
 			processShakeData();
-		} else if(d instanceof MoveData) {
-			processMoveData((MoveData)d);
-		} else if(d instanceof BatteryData) {
-			processBatteryData((BatteryData)d);
+		} else if (d instanceof MoveData) {
+			processMoveData((MoveData) d);
+		} else if (d instanceof BatteryData) {
+			processBatteryData((BatteryData) d);
 		}
 
 		output();
 	}
-	
+
 	protected void output() {
 		for (AbstractKippOutlet aOutlet : outletObjects) {
 			if (aOutlet instanceof CsvKippOutlet) {
@@ -61,27 +61,27 @@ public class CubeObject extends AbstractKippenObject {
 			}
 		}
 	}
-	
+
 	protected void timeout() {
 		super.timeout();
 		// FIXME implement ableton stop
 	}
 
 	// 2 seconds delay before a new shake is processed
-	private static final long NEW_SHAKE_AFTER = (long)1e9;
+	private static final long NEW_SHAKE_AFTER = (long) 1e9;
 	private long lastShook = System.nanoTime();
-	
+
 	private void processShakeData() {
 		long curTime = System.nanoTime();
-		if(curTime - lastShook < NEW_SHAKE_AFTER) {
+		if (curTime - lastShook < NEW_SHAKE_AFTER) {
 			// ignore if shake events indifferent
 			return;
 		}
-		
+
 		lastShook = curTime;
 		HashMap<String, String> paramMap = new HashMap<String, String>();
-		
-		for(Command c : eventsOfObject.get(EventTypes.SHAKE)) {
+
+		for (Command c : eventsOfObject.get(EventTypes.SHAKE)) {
 			try {
 				c.execute(paramMap);
 			} catch (Exception e) {
@@ -93,17 +93,17 @@ public class CubeObject extends AbstractKippenObject {
 	private void processCubeOrientationData(CubeOrientationData data) {
 		CubeOrientationData cd = (CubeOrientationData) data;
 
-		if(cd.getOrientation() == CubeOrientationData.Orientation.UNKNOWN) {
+		if (cd.getOrientation() == CubeOrientationData.Orientation.UNKNOWN) {
 			return;
-		} 
-		
+		}
+
 		String side = String.valueOf(cd.getOrientation().ordinal());
-		
+
 		log.info("Executing side change with side " + side);
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("clipNumber", side);
 		List<Command> sideChangeEvents = eventsOfObject.get(EventTypes.SIDECHANGE);
-		
+
 		if (sideChangeEvents != null) {
 			for (Command c : sideChangeEvents) {
 				try {
@@ -114,9 +114,9 @@ public class CubeObject extends AbstractKippenObject {
 			}
 		}
 	}
-	
+
 	private Queue<WifiLevelsData> avgWifiLevel = new LinkedList<>();
-	
+
 	private void processWifiData(WifiLevelsData data) {
 		WifiLevelsData wd = (WifiLevelsData) data;
 
@@ -133,7 +133,7 @@ public class CubeObject extends AbstractKippenObject {
 
 				// for each measured wifi in the item ...
 				for (Entry<String, Object> val : w.getNetworks()) {
-					innerAvgLevel += (double)val.getValue();
+					innerAvgLevel += (double) val.getValue();
 				}
 
 				// ... compute average
@@ -143,7 +143,7 @@ public class CubeObject extends AbstractKippenObject {
 
 			// RSSI to meters conversion
 			double dist = Math.pow(10, ((27.55 - (67.6 + avgLevel)) / 20.0));
-			log.log(Level.FINEST ,"~ " + dist + "m (level: " + avgLevel + ")");
+			log.log(Level.FINEST, "~ " + dist + "m (level: " + avgLevel + ")");
 
 			// remember the last to measurements, remove others
 			if (avgWifiLevel.size() > 10) {
@@ -154,12 +154,15 @@ public class CubeObject extends AbstractKippenObject {
 	}
 
 	private void processAccelerationData(AccelerationData data) {
-		SensorTripleData sd = (SensorTripleData) data;
-		//log.info("" + Math.sqrt(sd.getX() * sd.getX() + sd.getY() * sd.getY() + sd.getZ() + sd.getZ()));
+		// SensorTripleData sd = (SensorTripleData) data;
+
 	}
 
-	private void processBatteryData(BatteryData data) {}
+	private void processBatteryData(BatteryData data) {
+	}
+
 	private void processMoveData(MoveData data) {
-		
+		System.out.println(data);
+		log.info("Move: " + Math.sqrt(data.getX() * data.getX() + data.getY() * data.getY() + data.getZ() + data.getZ()));
 	}
 }
