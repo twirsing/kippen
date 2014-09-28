@@ -205,13 +205,7 @@ public class KippenServer {
 				
 			case "SENDSOCKETDATA":
 				log.log(Level.INFO, "Registering SENDSOCKETDATA command");
-				commandList.add(new SendSocketDataCommand(
-						getCommandParamValue("destinationIP", c.getParam()),
-						getCommandParamValue("destinationPort", c.getParam()),
-						getCommandParamValue("command", c.getParam()),
-						getCommandParamValue("data1", c.getParam()),
-						getCommandParamValue("data2", c.getParam())
-						));
+				commandList.add(new SendSocketDataCommand(c.getParam()));
 				break;
 				
 
