@@ -29,8 +29,8 @@
 							<param key="command" value="switchrelay" />
 							<param key="destinationIP" value="192.168.0.106" />
 							<param key="destinationPort" value="9999" />
-							<param key="data1" value="0" />
-							<param key="data2" value="high" />
+							<param key="channel" value="1" />
+							<param key="switchcommand" value="high" />
 						</CommandConfig>
 					</commands>
 				</eventConfig>
@@ -43,8 +43,8 @@
 							<param key="command" value="switchrelay" />
 							<param key="destinationIP" value="192.168.0.106" />
 							<param key="destinationPort" value="9999" />
-							<param key="data1" value="0" />
-							<param key="data2" value="low" />
+							<param key="channel" value="0" />
+							<param key="switchcommand" value="low" />
 						</CommandConfig>
 
 					</commands>
@@ -58,8 +58,8 @@
 							<param key="command" value="switchrelay" />
 							<param key="destinationIP" value="192.168.0.106" />
 							<param key="destinationPort" value="9999" />
-							<param key="data1" value="0" />
-							<param key="data2" value="toggle" />
+							<param key="channel" value="0" />
+							<param key="switchcommand" value="flash" />
 						</CommandConfig>
 					</commands>
 				</eventConfig>
