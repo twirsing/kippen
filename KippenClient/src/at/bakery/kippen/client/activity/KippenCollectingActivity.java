@@ -41,7 +41,7 @@ public class KippenCollectingActivity extends Activity {
 	// setting StockEINS
 	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
 	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
-	 private static final String SERVER_IP = "192.168.0.100"; //server ip
+	 private static final String SERVER_IP = "192.168.0.104"; //server ip
 	//
 	// setting tomt
 	// private static final String WIFI_ESSID = "JulesWinnfield";

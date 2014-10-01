@@ -98,9 +98,7 @@ public class CubeObject extends AbstractKippenObject {
 			return;
 		}
 		int sideInt = cd.getOrientation().ordinal();
-		System.out.println("Sideint " + sideInt + " current " + currentSide);
 		if (sideInt == currentSide) {
-			System.out.println("2Sideint " + sideInt + " current " + currentSide);
 			return;
 		}
 

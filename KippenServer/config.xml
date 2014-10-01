@@ -16,7 +16,9 @@
 			<!-- tomw <mac>88:30:8A:38:53:05</mac> -->
 			<!-- tommy? <mac>c4:43:8f:46:34:32</mac> -->
 			<!-- matthias -->
-			<mac>10:68:3f:49:25:4e</mac>
+			<!-- <mac>10:68:3f:49:25:4e</mac> -->
+			<!-- Little Samsung 1 -->
+			<mac>C8:14:79:2A:A4:44</mac>
 			<events>
 				<!-- <eventConfig eventType="rollChange"> <commands> <CommandConfig commandType="MASTERVOLUME"> 
 					</CommandConfig> </commands> </eventConfig> -->
@@ -24,7 +26,7 @@
 					<commands>
 						<CommandConfig commandType="ABLETONPLAY">
 							<param key="trackNumber" value="0" />
-						</CommandConfig>
+						</CommandConfig><!-- 
 						<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="switchrelay" />
 							<param key="destinationIP" value="192.168.0.106" />
@@ -32,6 +34,7 @@
 							<param key="data1" value="0" />
 							<param key="data2" value="high" />
 						</CommandConfig>
+						 -->
 					</commands>
 				</eventConfig>
 				<eventConfig eventType="timeout">
@@ -39,14 +42,14 @@
 						<CommandConfig commandType="STOPTRACK">
 							<param key="trackNumber" value="0" />
 						</CommandConfig>
-						<CommandConfig commandType="SENDSOCKETDATA">
+						<!-- <CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="switchrelay" />
 							<param key="destinationIP" value="192.168.0.106" />
 							<param key="destinationPort" value="9999" />
 							<param key="data1" value="0" />
 							<param key="data2" value="low" />
 						</CommandConfig>
-
+ -->
 					</commands>
 				</eventConfig>
 				<eventConfig eventType="shake">
@@ -54,13 +57,13 @@
 						<CommandConfig commandType="TOGGLEMUTE">
 							<param key="trackNumber" value="0" />
 						</CommandConfig>
-						<CommandConfig commandType="SENDSOCKETDATA">
+					<!-- 	<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="switchrelay" />
 							<param key="destinationIP" value="192.168.0.106" />
 							<param key="destinationPort" value="9999" />
 							<param key="data1" value="0" />
 							<param key="data2" value="toggle" />
-						</CommandConfig>
+						</CommandConfig>-->
 					</commands>
 				</eventConfig>
 				<!-- <eventConfig eventType="cubeSideChange"> <commands> <CommandConfig 
