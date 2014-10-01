@@ -26,15 +26,10 @@
 					<commands>
 						<CommandConfig commandType="ABLETONPLAY">
 							<param key="trackNumber" value="0" />
-						</CommandConfig><!-- 
-						<CommandConfig commandType="SENDSOCKETDATA">
-							<param key="command" value="switchrelay" />
-							<param key="destinationIP" value="192.168.0.106" />
-							<param key="destinationPort" value="9999" />
-							<param key="data1" value="0" />
-							<param key="data2" value="high" />
-						</CommandConfig>
-						 -->
+						</CommandConfig><!-- <CommandConfig commandType="SENDSOCKETDATA"> <param 
+							key="command" value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" 
+							/> <param key="destinationPort" value="9999" /> <param key="channel" value="1" 
+							/> <param key="switchcommand" value="high" /> </CommandConfig> -->
 					</commands>
 				</eventConfig>
 				<eventConfig eventType="timeout">
@@ -42,14 +37,10 @@
 						<CommandConfig commandType="STOPTRACK">
 							<param key="trackNumber" value="0" />
 						</CommandConfig>
-						<!-- <CommandConfig commandType="SENDSOCKETDATA">
-							<param key="command" value="switchrelay" />
-							<param key="destinationIP" value="192.168.0.106" />
-							<param key="destinationPort" value="9999" />
-							<param key="data1" value="0" />
-							<param key="data2" value="low" />
-						</CommandConfig>
- -->
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" 
+							value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" /> 
+							<param key="destinationPort" value="9999" /> <param key="channel" value="0" 
+							/> <param key="switchcommand" value="low" /> </CommandConfig> -->
 					</commands>
 				</eventConfig>
 				<eventConfig eventType="shake">
@@ -57,13 +48,10 @@
 						<CommandConfig commandType="TOGGLEMUTE">
 							<param key="trackNumber" value="0" />
 						</CommandConfig>
-					<!-- 	<CommandConfig commandType="SENDSOCKETDATA">
-							<param key="command" value="switchrelay" />
-							<param key="destinationIP" value="192.168.0.106" />
-							<param key="destinationPort" value="9999" />
-							<param key="data1" value="0" />
-							<param key="data2" value="toggle" />
-						</CommandConfig>-->
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" 
+							value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" /> 
+							<param key="destinationPort" value="9999" /> <param key="channel" value="0" 
+							/> <param key="switchcommand" value="flash" /> </CommandConfig> -->
 					</commands>
 				</eventConfig>
 				<!-- <eventConfig eventType="cubeSideChange"> <commands> <CommandConfig 

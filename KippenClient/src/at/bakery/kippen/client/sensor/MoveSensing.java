@@ -30,17 +30,12 @@ public class MoveSensing implements SensorEventListener {
 	
 	// the result direction (acc) and position
 	private float[] accMove = new float[4];
-	private float[] posMove = new float[4];
+	//private float[] posMove = new float[4];
 	
 	private long lastTime = System.nanoTime();
 
 	@Override
 	public void onSensorChanged(SensorEvent se) {
-		long curTime = System.nanoTime();
-		if(curTime - lastTime < 0.25e9) {
-			return;
-		}
-		
 		if(se.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
 			processLinearAcc(se.values);
 		} else if(se.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
@@ -52,7 +47,7 @@ public class MoveSensing implements SensorEventListener {
 		}
 		
 		// we interested in accumulated position ...
-		computePosition();
+		//computePosition();
 		
 		SensorTripleData t = new MoveData(accMove[0], accMove[1], accMove[2]);
 		System.out.println("mmove data at client " + t);
@@ -99,7 +94,7 @@ public class MoveSensing implements SensorEventListener {
 		accMove = tmpAcc;
 	}
 	
-	private void computePosition() {
+	/*private void computePosition() {
 		// only if acceleration then adjust position
 		if(accMove[0]*accMove[0] + accMove[1]*accMove[1] + accMove[2]*accMove[2] < 1) {
 			return;
@@ -123,7 +118,7 @@ public class MoveSensing implements SensorEventListener {
 		}
 		
 		posMove = roundedPos;
-	}
+	}*/
 
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {}
