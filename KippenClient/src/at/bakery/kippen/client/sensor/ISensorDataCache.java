@@ -4,5 +4,5 @@ import at.bakery.kippen.common.AbstractData;
 
 public interface ISensorDataCache {
 
-	public AbstractData getCacheData();
+	public AbstractData getCacheAccelerationData();
 }
