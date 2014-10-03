@@ -31,7 +31,6 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 	// network lock, networking and timing
 	private Lock updateLock = new ReentrantLock();
 	private INetworking net = NetworkingTask.getInstance();
-	private long lastTime = System.nanoTime();
 	
 	/* ------------------------------------------
 	 * MOVE SENSING
@@ -245,7 +244,7 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 	}
 	
 	private void handleOrientation(SensorEvent se) {
-		if(curAcc == null || magVector == null) {
+		if(curAcc == null) {
 			return;
 		}
 		
@@ -347,8 +346,6 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 		handleShake(se);
 		handleAvgAcceleration(se);
 		handleOrientation(se);
-		
-		lastTime = System.nanoTime();
 	}
 	
 	public void onOrientationChanged(int deg) {
