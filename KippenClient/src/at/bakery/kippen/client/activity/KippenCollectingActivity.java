@@ -1,7 +1,6 @@
 package at.bakery.kippen.client.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -9,7 +8,6 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.OrientationEventListener;
 import at.bakery.kippen.client.R;
 import at.bakery.kippen.client.sensor.MotionSensing;
 import at.bakery.kippen.common.data.PingData;
@@ -37,20 +35,17 @@ public class KippenCollectingActivity extends Activity {
 //	private static final String SERVER_IP = "192.168.0.26"; // server ip
 
 	// setting StockEINS
-//	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
-//	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
-//	 private static final String SERVER_IP = "192.168.0.104"; //server ip
+	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
+	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
+	 private static final String SERVER_IP = "192.168.0.104"; //server ip
 	//
 	// setting tomt
-	 private static final String WIFI_ESSID = "JulesWinnfield";
-	 private static final String WIFI_PWD = "wuzikrabuzi";
-	 private static final String SERVER_IP = "192.168.1.141";
+//	 private static final String WIFI_ESSID = "JulesWinnfield";
+//	 private static final String WIFI_PWD = "wuzikrabuzi";
+//	 private static final String SERVER_IP = "192.168.1.141";
 
 	// access to sensors
 	private SensorManager senseMan;
-
-	// the simple orientation without flat phone detection
-	private OrientationEventListener orientSensorListener;
 
 	// used for wifi based measurements and for server connection
 	private WifiManager wifiMan;
@@ -67,13 +62,8 @@ public class KippenCollectingActivity extends Activity {
 	private Sensor moveSenseMagnetic;
 	private Sensor moveSenseGravity;
 	
-	private Sensor orientSense;
-	
 	private static MotionSensing sensorListener;
 
-	// helper for building alert messages for the front end
-	private static AlertDialog.Builder alertBuilder;
-	
 	public static SensorTripleData getCacheAccelerationData() {
 		return sensorListener.getCacheAccelerationData();
 	}
@@ -82,8 +72,6 @@ public class KippenCollectingActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_kippen_collecting);
-
-		alertBuilder = new AlertDialog.Builder(this);
 
 		// the sensor manager, providing all sensor services of the device
 		Object tmpMan = getSystemService(Context.SENSOR_SERVICE);
@@ -150,11 +138,6 @@ public class KippenCollectingActivity extends Activity {
 		// the accelerometer
 		accSense = senseMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
-		// orientation field
-		// INACTIVE orientSense =
-		// senseMan.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-		// INACTIVE orientSensorListener = new OrientationSensing();
-
 		// move sensing via orientation and acceleration (TODO)
 		moveSenseLinearAcc = senseMan.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 		moveSenseMagnetic = senseMan.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -162,15 +145,21 @@ public class KippenCollectingActivity extends Activity {
 		
 		// general sensor listener
 		sensorListener = new MotionSensing();
-		senseMan.registerListener(sensorListener, accSense, 100000);
-		senseMan.registerListener(sensorListener, moveSenseLinearAcc, 100000);
-		senseMan.registerListener(sensorListener, moveSenseMagnetic, 100000);
-		senseMan.registerListener(sensorListener, moveSenseGravity, 100000);
 
 		// the wifi measuring sensor
 		// INACTIVE wifiMan.setWifiEnabled(true);
 		// INACTIVE wifiReceiver = new WifiSensing(wifiMan, config);
 
 		Log.i("KIPPEN", "Android client activity created.");
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		senseMan.registerListener(sensorListener, accSense, 50000);
+		senseMan.registerListener(sensorListener, moveSenseLinearAcc, 50000);
+		senseMan.registerListener(sensorListener, moveSenseMagnetic, 50000);
+		senseMan.registerListener(sensorListener, moveSenseGravity, 50000);
 	}
 }
