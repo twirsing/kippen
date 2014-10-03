@@ -85,11 +85,19 @@ public class KippenServer {
 								// second line is JSON data
 								AbstractData data = JSONDataSerializer.deserialize(dataType, ois.readLine());
 
+								AbstractKippenObject object = objectMap.get(data.getClientId());
+								
+								if(object == null){
+									log.warning("Client MAC address " + data.getClientId() + " is not registered");
+									return;
+								}
+								
 								// pick the client and process received data
-								objectMap.get(data.getClientId()).processData(data);
+								object.processData(data);
 							}
 						} catch (Exception ex) {
 							log.severe("Client " + clientId + " died ...");
+							ex.printStackTrace();
 						}
 					}
 				});
@@ -205,13 +213,7 @@ public class KippenServer {
 				
 			case "SENDSOCKETDATA":
 				log.log(Level.INFO, "Registering SENDSOCKETDATA command");
-				commandList.add(new SendSocketDataCommand(
-						getCommandParamValue("destinationIP", c.getParam()),
-						getCommandParamValue("destinationPort", c.getParam()),
-						getCommandParamValue("command", c.getParam()),
-						getCommandParamValue("data1", c.getParam()),
-						getCommandParamValue("data2", c.getParam())
-						));
+				commandList.add(new SendSocketDataCommand(c.getParam()));
 				break;
 				
 
