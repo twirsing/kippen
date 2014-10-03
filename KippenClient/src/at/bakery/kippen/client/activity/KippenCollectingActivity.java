@@ -3,8 +3,6 @@ package at.bakery.kippen.client.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.net.wifi.WifiConfiguration;
@@ -13,9 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import at.bakery.kippen.client.R;
-import at.bakery.kippen.client.sensor.OrientationSensing;
-import at.bakery.kippen.client.sensor.MovementSensing;
-import at.bakery.kippen.common.AbstractData;
+import at.bakery.kippen.client.sensor.MotionSensing;
 import at.bakery.kippen.common.data.PingData;
 import at.bakery.kippen.common.data.SensorTripleData;
 
@@ -73,7 +69,7 @@ public class KippenCollectingActivity extends Activity {
 	
 	private Sensor orientSense;
 	
-	private static MovementSensing sensorListener;
+	private static MotionSensing sensorListener;
 
 	// helper for building alert messages for the front end
 	private static AlertDialog.Builder alertBuilder;
@@ -165,15 +161,11 @@ public class KippenCollectingActivity extends Activity {
 		moveSenseGravity = senseMan.getDefaultSensor(Sensor.TYPE_GRAVITY);
 		
 		// general sensor listener
-		sensorListener = new MovementSensing();
+		sensorListener = new MotionSensing();
 		senseMan.registerListener(sensorListener, accSense, 100000);
 		senseMan.registerListener(sensorListener, moveSenseLinearAcc, 100000);
 		senseMan.registerListener(sensorListener, moveSenseMagnetic, 100000);
 		senseMan.registerListener(sensorListener, moveSenseGravity, 100000);
-
-		// general orientation listener
-		orientSensorListener = new OrientationSensing(getApplicationContext());
-		orientSensorListener.enable();
 
 		// the wifi measuring sensor
 		// INACTIVE wifiMan.setWifiEnabled(true);

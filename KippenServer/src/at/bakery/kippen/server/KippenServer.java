@@ -81,12 +81,17 @@ public class KippenServer {
 							while (true) {
 								// first line is canonical class name of event
 								String dataType = ois.readLine();
+								if(dataType == null || dataType.isEmpty()) {
+									continue;
+								}
 
 								// second line is JSON data
 								AbstractData data = JSONDataSerializer.deserialize(dataType, ois.readLine());
-
-								AbstractKippenObject object = objectMap.get(data.getClientId());
+								if(data == null) {
+									continue;
+								}
 								
+								AbstractKippenObject object = objectMap.get(data.getClientId());
 								if(object == null){
 									log.warning("Client MAC address " + data.getClientId() + " is not registered");
 									return;

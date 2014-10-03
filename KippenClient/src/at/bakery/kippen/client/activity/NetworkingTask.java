@@ -5,7 +5,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
-import android.app.Activity;
 import android.util.Log;
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.json.JSONDataSerializer;
@@ -14,10 +13,10 @@ public class NetworkingTask extends Thread implements INetworking {
 
 	private Socket socket;
 	private OutputStream oos;
-//	private ObjectInputStream ois;
+	//private ObjectInputStream ois;
 	
 	private AbstractData txPackets[] = new AbstractData[0];
-	private AbstractData rxPacket;
+	//private AbstractData rxPacket;
 	
 	private boolean quit = false;
 	
@@ -30,7 +29,6 @@ public class NetworkingTask extends Thread implements INetworking {
 	
 	// singleton instance
 	private static NetworkingTask instance;
-	private static Activity activity;
 	
 	protected static void setup(String host, int port, String clientId) {
 		instance = new NetworkingTask(host, port, clientId);
@@ -110,8 +108,6 @@ public class NetworkingTask extends Thread implements INetworking {
 				try {
 					// set clientId
 					packet.setClientId(clientId);
-					
-					Log.i("KIPPEN", "Sending " + packet.getClass().getSimpleName() + " -> " + packet);
 					
 					// JSON serialize and send packet
 					oos.write(JSONDataSerializer.serialize(packet));
