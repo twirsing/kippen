@@ -40,8 +40,6 @@ public class KippenServer {
 	static Logger log = Logger.getLogger(KippenServer.class.getName());
 	public static Level LOG_LEVEL = Level.INFO;
 
-	public static int OBJECT_TIMEOUT_MINUTES = 5;
-
 	private HashMap<String, AbstractKippenObject> objectMap = new HashMap<String, AbstractKippenObject>();
 
 	public static void main(String args[]) {
@@ -121,7 +119,6 @@ public class KippenServer {
 
 		log.info("Setting object timeout to: " + objectTimeout + " minute(s).");
 
-		OBJECT_TIMEOUT_MINUTES = objectTimeout;
 
 		// for each object set the commands and events
 		for (ObjectConfig obj : config.getObjects().getObjectConfig()) {
