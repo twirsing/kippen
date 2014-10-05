@@ -97,6 +97,7 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 	/* -------------------------------------------
 	 * BARREL
 	 * ------------------------------------------- */
+	//TODO make this configurable via the XML file
 	private static final int MAX_DEGREES = 10 * 360;
 	private int degrees = 0;
 	private int lastAbsDegrees = 0;

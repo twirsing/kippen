@@ -34,6 +34,8 @@ import at.bakery.kippen.server.objects.AbstractKippenObject;
 import at.bakery.kippen.server.objects.BarrelObject;
 import at.bakery.kippen.server.objects.CubeObject;
 
+
+//TODO make server listen to changes in the xml  config file so changes can be applied at runtime.
 public class KippenServer {
 	static Logger log = Logger.getLogger(KippenServer.class.getName());
 	public static Level LOG_LEVEL = Level.INFO;
