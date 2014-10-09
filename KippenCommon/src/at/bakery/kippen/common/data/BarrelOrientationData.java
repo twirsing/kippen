@@ -14,6 +14,10 @@ public class BarrelOrientationData extends SensorSingleData {
 		return (double)getValue();
 	}
 	
+	public void setOrientation(double orientation) {
+		setValue(orientation);
+	}
+	
 	@Override
 	public String toString() {
 		return "SENSOR orientation = " + getOrientation();

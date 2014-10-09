@@ -76,7 +76,7 @@ public class WifiSensing extends BroadcastReceiver {
 		}
 		
 		if(wifiLevels.hasNetworks()) {
-			net.sendPackets(wifiLevels);
+			net.sendPacket(wifiLevels);
 		}
 		
 		updateLock.unlock();

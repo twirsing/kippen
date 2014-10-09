@@ -30,7 +30,7 @@ public class BatterySensing extends BroadcastReceiver {
 		capacity = lvl / scl;
 		charging = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) > 0;
 		
-		net.sendPackets(new BatteryData(charging, capacity));
+		net.sendPacket(new BatteryData(charging, capacity));
 		
 		updateLock.unlock();
 	}

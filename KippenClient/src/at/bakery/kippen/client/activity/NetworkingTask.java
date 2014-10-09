@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
+import android.os.Message;
 import android.util.Log;
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.json.JSONDataSerializer;
@@ -13,12 +14,8 @@ public class NetworkingTask extends Thread implements INetworking {
 
 	private Socket socket;
 	private OutputStream oos;
-	//private ObjectInputStream ois;
 	
-	private AbstractData txPackets[] = new AbstractData[0];
-	//private AbstractData rxPacket;
-	
-	private boolean quit = false;
+	private AbstractData txPackets;
 	
 	private Semaphore flush = new Semaphore(0);
 	private Semaphore wait = new Semaphore(1);
@@ -50,7 +47,7 @@ public class NetworkingTask extends Thread implements INetworking {
 	}
 	
 	@Override
-	public void sendPackets(AbstractData ... packets) {
+	public void sendPacket(AbstractData packets) {
 		try {
 			wait.acquire();
 		} catch (InterruptedException e) {}
@@ -58,35 +55,21 @@ public class NetworkingTask extends Thread implements INetworking {
 		flush.release();
 	}
 	
-//	@Override
-//	public DataWithTimestamp receivePacket() {
-//		try {
-//			wait.acquire();
-//		} catch (InterruptedException e) {}
-//		flush.release();
-//		
-//		// wait till finished
-//		try {
-//			wait.acquire();
-//			
-//			return rxPacket;
-//		} catch (InterruptedException e) {}
-//		finally {
-//			wait.release();
-//		}
-//		
-//		return null;
-//	}
-	
-	public void quit() {
-		quit = true;
+	private void resetSocket() {
+		try {
+			socket.close();
+		} catch(Exception ex) {
+			Log.e("KIPPEN", "Failed to close socket, ignoring, but leaking");
+		} finally {
+			socket = null;
+		}
 	}
 	
 	@Override
 	public void run() {
-		while(!quit) {
+		while(true) {
 			try {
-				Thread.sleep(50);
+				Thread.sleep(10);
 			} catch(Exception ex) {}
 			
 			try {
@@ -97,28 +80,24 @@ public class NetworkingTask extends Thread implements INetworking {
 				try {
 					socket = new Socket(InetAddress.getByName(host), port);
 					oos = socket.getOutputStream();
-					// TODO establish input stream if RX needed
-				} catch (Exception e) {
-					return;
+				} catch (Exception ex) {
+					Log.e("KIPPEN", "Failed to open socket", ex);
+					resetSocket();
 				}
 			}
 			
 			// send packets and reset TX
-			for(AbstractData packet : txPackets) {
-				try {
-					// set clientId
-					packet.setClientId(clientId);
-					
-					// JSON serialize and send packet
-					oos.write(JSONDataSerializer.serialize(packet));
-				} catch(Exception ex) {
-					ex.printStackTrace();
-					Log.e("KIPPEN", "Failed to send packets");
-					return;
-				}
+			if(txPackets == null) continue;
+			try {
+				// set clientId
+				txPackets.setClientId(clientId);
+				
+				// JSON serialize and send packet
+				oos.write(JSONDataSerializer.serialize(txPackets));
+			} catch(Exception ex) {
+				Log.e("KIPPEN", "Failed to send packets", ex);
+				resetSocket();
 			}
-			
-			// TODO try to RX a packet
 			
 			wait.release();
 		}

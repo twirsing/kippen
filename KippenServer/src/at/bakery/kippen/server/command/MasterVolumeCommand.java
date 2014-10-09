@@ -2,9 +2,9 @@ package at.bakery.kippen.server.command;
 
 import java.util.Map;
 
-import com.google.common.base.Preconditions;
-
 import nerdproject.LiveController;
+
+import com.google.common.base.Preconditions;
 
 public class MasterVolumeCommand implements Command{
 

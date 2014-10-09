@@ -3,34 +3,39 @@ package at.bakery.kippen.client.sensor;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.opengl.Matrix;
 import android.util.Log;
-import android.view.OrientationEventListener;
 import at.bakery.kippen.client.activity.INetworking;
-import at.bakery.kippen.client.activity.KippenCollectingActivity;
 import at.bakery.kippen.client.activity.NetworkingTask;
-import at.bakery.kippen.common.AbstractData;
-import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BarrelOrientationData;
+import at.bakery.kippen.common.data.ContainerData;
 import at.bakery.kippen.common.data.CubeOrientationData;
-import at.bakery.kippen.common.data.MoveData;
+import at.bakery.kippen.common.data.CubeOrientationData.Orientation;
 import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.data.ShakeData;
-import at.bakery.kippen.common.data.CubeOrientationData.Orientation;
 
-public class MotionSensing implements SensorEventListener, ISensorDataCache {
+public class MotionSensing implements SensorEventListener {
 
 	// network lock, networking and timing
-	private Lock updateLock = new ReentrantLock();
 	private INetworking net = NetworkingTask.getInstance();
+	
+	/* ------------------------------------------
+	 * SENSOR DATA CACHES - LATEST ONES
+	 * ------------------------------------------ */
+	private final SensorTripleData ACC_DATA = new SensorTripleData(0, 0, 0);
+	private final SensorTripleData AVG_ACC_DATA = new SensorTripleData(0, 0, 0);
+	private final ShakeData SHAKE_DATA = new ShakeData();
+	private final SensorTripleData MOVE_DATA = new SensorTripleData(0, 0, 0);
+	private final CubeOrientationData CUBE_DATA = new CubeOrientationData(Orientation.UNKNOWN);
+	private final BarrelOrientationData BARREL_DATA = new BarrelOrientationData(0);
+	
+	// container data for sending (groups together all required data packages)
+	private final ContainerData CONTAINER_DATA;
 	
 	/* ------------------------------------------
 	 * MOVE SENSING
@@ -84,10 +89,6 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 	private SensorTripleData measureEnd = new SensorTripleData(0, 0, 0);
 	private SensorTripleData measureRef = measureStart;
 	
-	private float[] curAcc = new float[3];
-	
-	private AccelerationData cachedData;
-	
 	/* -------------------------------------------
 	 * CUBE
 	 * ------------------------------------------- */
@@ -100,9 +101,15 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 	private int degrees = 0;
 	private int lastAbsDegrees = 0;
 	
-	@Override
-	public AccelerationData getCacheAccelerationData() {
-		return cachedData;
+	public MotionSensing() {
+		// tell the container data what to contain when sent
+		CONTAINER_DATA = new ContainerData();
+		CONTAINER_DATA.accData = ACC_DATA;
+		CONTAINER_DATA.avgAccData = AVG_ACC_DATA;
+		CONTAINER_DATA.moveData = MOVE_DATA;
+		CONTAINER_DATA.shakeData = SHAKE_DATA;
+		CONTAINER_DATA.cubeData = CUBE_DATA;
+		CONTAINER_DATA.barrelData = BARREL_DATA;
 	}
 	
 	private void handleAvgAcceleration(SensorEvent se) {
@@ -110,7 +117,7 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 			return;
 		}
 		
-		curAcc = Arrays.copyOf(se.values, 3);
+		ACC_DATA.setXYZ(se.values[0], se.values[1], se.values[2]);
 		
 		measureRef.setXYZ(se.values[0], se.values[1], se.values[2]);
 		if(measureRef == measureStart) {
@@ -126,8 +133,6 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 				measureEnd.getZ() - measureStart.getZ());
 		values.offer(t);
 		
-		updateLock.lock();
-		
 		avgValue.incrementXYZ(t.getX(), t.getY(), t.getZ());
 		
 		if(values.size() > MEASURE_COUNT) {
@@ -137,17 +142,12 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 		
 		interval++;
 		if(interval > MEASURE_SEND_INTERVAL) {
-			AccelerationData accData = new AccelerationData(avgValue.getX() / values.size(), avgValue.getY() / values.size(), avgValue.getZ() / values.size());
-			
-			cachedData = accData;
-			//net.sendPackets(accData);
+			AVG_ACC_DATA.setXYZ(avgValue.getX() / values.size(), avgValue.getY() / values.size(), avgValue.getZ() / values.size());
 			
 			interval = 0;
 			
-			Log.d("KIPPEN", "ACCELERATION: " + accData);
+			Log.d("KIPPEN", "ACCELERATION: " + ACC_DATA);
 		}
-		
-		updateLock.unlock();
 	}
 	
 	private void handleMove(SensorEvent se) {
@@ -183,27 +183,26 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 			return;
 		}
 		
-		SensorTripleData t = new MoveData(accMove[0], accMove[1], accMove[2]);
+		MOVE_DATA.setXYZ(accMove[0], accMove[1], accMove[2]);
 		
-		updateLock.lock();
-		net.sendPackets(t);
-		updateLock.unlock();
-		
-		Log.d("KIPPEN", "MOVE: " + t);
+		Log.d("KIPPEN", "MOVE: " + MOVE_DATA);
 	}
 	
 	private void handleShake(SensorEvent se) {
+		// reset shake
+		SHAKE_DATA.setShaking(false);
+		
 		final float alpha = 0.8f;
 
         // gravity
-        mGravity[X] = alpha * mGravity[X] + (1 - alpha) * se.values[X];
-        mGravity[Y] = alpha * mGravity[Y] + (1 - alpha) * se.values[Y];
-        mGravity[Z] = alpha * mGravity[Z] + (1 - alpha) * se.values[Z];
+        mGravity[X] = alpha * mGravity[X] + (1 - alpha) * (float)ACC_DATA.getX();
+        mGravity[Y] = alpha * mGravity[Y] + (1 - alpha) * (float)ACC_DATA.getY();
+        mGravity[Z] = alpha * mGravity[Z] + (1 - alpha) * (float)ACC_DATA.getZ();
 
         // linear acceleration along the x, y, and z axes (gravity effects removed)
-        mLinearAcceleration[X] = se.values[X] - mGravity[X];
-        mLinearAcceleration[Y] = se.values[Y] - mGravity[Y];
-        mLinearAcceleration[Z] = se.values[Z] - mGravity[Z];
+        mLinearAcceleration[X] = (float)ACC_DATA.getX() - mGravity[X];
+        mLinearAcceleration[Y] = (float)ACC_DATA.getY() - mGravity[Y];
+        mLinearAcceleration[Z] = (float)ACC_DATA.getZ() - mGravity[Z];
          
         // max linear acceleration in any direction
         float maxLinearAcceleration = mLinearAcceleration[X];
@@ -229,9 +228,7 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
         	} else {
         		moveCount++;
         		if(moveCount > MIN_MOVEMENTS) {
-        			updateLock.lock();
-        			net.sendPackets(new ShakeData());
-        			updateLock.unlock();
+        			SHAKE_DATA.setShaking(true);
         			
         			Log.d("KIPPEN", "SHAKE: !");
         			
@@ -244,19 +241,15 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 	}
 	
 	private void handleOrientation(SensorEvent se) {
-		if(curAcc == null) {
-			return;
-		}
-		
         int orientation = -1;
-        float X = -curAcc[0];
-        float Y = -curAcc[1];
-        float Z = -curAcc[2];
+        double X = -ACC_DATA.getX();
+        double Y = -ACC_DATA.getY();
+        double Z = -ACC_DATA.getZ();
         
-        float magnitude = X*X + Y*Y;
+        double magnitude = X*X + Y*Y;
         if(magnitude * 4 >= Z*Z) {
-            float OneEightyOverPi = 57.29577957855f;
-            float angle = (float)Math.atan2(-Y, X) * OneEightyOverPi;
+            double OneEightyOverPi = 57.29577957855f;
+            double angle = Math.atan2(-Y, X) * OneEightyOverPi;
             
             orientation = 90 - (int)Math.round(angle);
             while(orientation >= 360) {
@@ -271,36 +264,32 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 	}
 	
 	private void handleCube(int deg) {
-		CubeOrientationData orientationData;
+		CubeOrientationData orientationData = CUBE_DATA;
 		
 		if (deg != -1) {
 			if (deg >= 315 || deg < 45) {
-				orientationData = new CubeOrientationData(Orientation.BACK);
+				orientationData.setOrientation(Orientation.BACK);
 			} else if (deg >= 45 && deg < 135) {
-				orientationData = new CubeOrientationData(Orientation.RIGHT);
+				orientationData.setOrientation(Orientation.RIGHT);
 			} else if (deg >= 135 && deg < 225) {
-				orientationData = new CubeOrientationData(Orientation.FRONT);
+				orientationData.setOrientation(Orientation.FRONT);
 			} else if (deg >= 225 && deg < 315) {
-				orientationData = new CubeOrientationData(Orientation.LEFT);
+				orientationData.setOrientation(Orientation.LEFT);
 			} else {
-				orientationData = new CubeOrientationData(Orientation.UNKNOWN);
+				orientationData.setOrientation(Orientation.UNKNOWN);
 			}
 		}
 		// it IS flat on the ground
 		else {
-			SensorTripleData accData = KippenCollectingActivity.getCacheAccelerationData();
+			SensorTripleData accData = ACC_DATA;
 			if(accData == null) {
-				orientationData = new CubeOrientationData(Orientation.UNKNOWN);
+				orientationData.setOrientation(Orientation.UNKNOWN);
 			} else if (accData.getZ() < 0) {
-				orientationData = new CubeOrientationData(Orientation.BOTTOM);
+				orientationData.setOrientation(Orientation.BOTTOM);
 			} else {
-				orientationData = new CubeOrientationData(Orientation.TOP);
+				orientationData.setOrientation(Orientation.TOP);
 			}
 		}
-		
-		updateLock.lock();
-		net.sendPackets(orientationData);
-		updateLock.unlock();
 		
 		Log.d("KIPPEN", "CUBE: " + orientationData);
 	}
@@ -331,21 +320,20 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 		if(degrees < 0) degrees = 0;
 		else if(degrees > MAX_DEGREES) degrees = MAX_DEGREES;
 		
-		BarrelOrientationData orientationData = new BarrelOrientationData((double)degrees / MAX_DEGREES); 
-		
-		updateLock.lock();
-		net.sendPackets(orientationData);
-		updateLock.unlock();
+		BARREL_DATA.setOrientation((double)degrees / MAX_DEGREES);
 		
 		Log.d("KIPPEN", "BARREL: " + degrees + "/" + MAX_DEGREES);
 	}
 	
 	@Override
 	public void onSensorChanged(SensorEvent se) {
+		handleAvgAcceleration(se);
 		handleMove(se);
 		handleShake(se);
-		handleAvgAcceleration(se);
 		handleOrientation(se);
+		
+		// send all sensor data at once
+		net.sendPacket(CONTAINER_DATA);
 	}
 	
 	public void onOrientationChanged(int deg) {
@@ -355,4 +343,76 @@ public class MotionSensing implements SensorEventListener, ISensorDataCache {
 	
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+	
+	/*
+	 * HELPERS
+	 */
+	
+	/*public float[] computeLinearAcceleration() {
+        // Get a local copy of the sensor values
+		float[] acceleration = new float[] {(float)ACC_DATA.getX(), (float)ACC_DATA.getY(), (float)ACC_DATA.getZ()};
+		float[] magnetic = new float[3];
+ 
+        // Get a local copy of the sensor values
+        System.arraycopy(magnetic, 0, this.magVector, 0, acceleration.length);
+ 
+        // Get the rotation matrix to put our local device coordinates
+        // into the world-coordinate system.
+        float[] r = new float[9];
+        if (SensorManager.getRotationMatrix(r, null, acceleration, magnetic)) {
+            // values[0]: azimuth/yaw, rotation around the Z axis.
+            // values[1]: pitch, rotation around the X axis.
+            // values[2]: roll, rotation around the Y axis.
+            float[] values = new float[3];
+ 
+            // NOTE: the reference coordinate-system used is different
+            // from the world coordinate-system defined for the rotation
+            // matrix:
+            // X is defined as the vector product Y.Z (It is tangential
+            // to the ground at the device's current location and
+            // roughly points West). Y is tangential to the ground at
+            // the device's current location and points towards the
+            // magnetic North Pole. Z points towards the center of the
+            // Earth and is perpendicular to the ground.
+            SensorManager.getOrientation(r, values);
+ 
+            float magnitude = (float) (Math.sqrt(Math.pow(acceleration[0], 2)
+                    + Math.pow(acceleration[1], 2)
+                    + Math.pow(acceleration[2], 2)) / SensorManager.GRAVITY_EARTH);
+ 
+            double var = varianceAccel.addSample(magnitude);
+             
+            // Attempt to estimate the gravity components when the device is
+            // stable and not experiencing linear acceleration.
+            if (var < 0.03)
+            {
+                //values[0]: azimuth, rotation around the Z axis.
+                //values[1]: pitch, rotation around the X axis.
+                //values[2]: roll, rotation around the Y axis.
+                 
+                // Find the gravity component of the X-axis
+                // = g*-cos(pitch)*sin(roll);
+                components[0] = (float) (SensorManager.GRAVITY_EARTH * -Math.cos(values[1]) * Math
+                        .sin(values[2]));
+                 
+                // Find the gravity component of the Y-axis
+                // = g*-sin(pitch);
+                components[1] = (float) (SensorManager.GRAVITY_EARTH * -Math.sin(values[1]));
+ 
+                // Find the gravity component of the Z-axis
+                // = g*cos(pitch)*cos(roll);
+                components[2] = (float) (SensorManager.GRAVITY_EARTH * Math.cos(values[1]) * Math
+                        .cos(values[2]));
+            }
+ 
+            // Subtract the gravity component of the signal
+            // from the input acceleration signal to get the
+            // tilt compensated output.
+            linearAcceleration[0] = (this.acceleration[0] - components[0])/SensorManager.GRAVITY_EARTH;
+            linearAcceleration[1] = (this.acceleration[1] - components[1])/SensorManager.GRAVITY_EARTH;
+            linearAcceleration[2] = (this.acceleration[2] - components[2])/SensorManager.GRAVITY_EARTH;
+        }
+ 
+        return linearAcceleration;
+    }*/
 }
