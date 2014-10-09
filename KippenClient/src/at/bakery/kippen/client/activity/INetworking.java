@@ -4,5 +4,5 @@ import at.bakery.kippen.common.AbstractData;
 
 public interface INetworking {
 	
-	public void sendPackets(AbstractData ... packets);
+	public void sendPacket(AbstractData packet);
 }

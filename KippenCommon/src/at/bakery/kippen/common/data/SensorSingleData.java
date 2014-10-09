@@ -6,8 +6,6 @@ import at.bakery.kippen.common.AbstractData;
 
 public class SensorSingleData extends AbstractData {
 
-	private static final long serialVersionUID = -1420878341062188979L;
-
 	public SensorSingleData(long ts, double value) {
 		super(ts);
 		
@@ -16,6 +14,11 @@ public class SensorSingleData extends AbstractData {
 	
 	public double getValue() {
 		return (Double)getValue("value");
+	}
+	
+	public void setValue(double value) {
+		setTimestamp(System.nanoTime());
+		setDouble("value", value);
 	}
 
 	@Override

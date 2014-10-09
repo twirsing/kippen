@@ -1,28 +1,22 @@
 package at.bakery.kippen.client.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
-import android.view.Menu;
-import android.view.OrientationEventListener;
 import at.bakery.kippen.client.R;
-import at.bakery.kippen.client.sensor.AccelerationSensing;
-import at.bakery.kippen.client.sensor.BarrelOrientationSensing;
-import at.bakery.kippen.client.sensor.CubeOrientationSensing;
-import at.bakery.kippen.client.sensor.ISensorDataCache;
-import at.bakery.kippen.client.sensor.MoveSensing;
-import at.bakery.kippen.client.sensor.ShakeSensing;
-import at.bakery.kippen.common.AbstractData;
+import at.bakery.kippen.client.sensor.BatterySensing;
+import at.bakery.kippen.client.sensor.MotionSensing;
 import at.bakery.kippen.common.data.PingData;
-
 
 /*
  * TODO all-in-one sensor listener
@@ -48,69 +42,57 @@ public class KippenCollectingActivity extends Activity {
 	// setting StockEINS
 	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
 	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
-	 private static final String SERVER_IP = "192.168.0.104"; //server ip
+	 private static final String SERVER_IP = "192.168.0.109"; //server ip
 	//
 	// setting tomt
-	// private static final String WIFI_ESSID = "JulesWinnfield";
-	// private static final String WIFI_PWD = "wuzikrabuzi";
-	// private static final String SERVER_IP = "192.168.1.141";
+//	 private static final String WIFI_ESSID = "JulesWinnfield";
+//	 private static final String WIFI_PWD = "wuzikrabuzi";
+//	 private static final String SERVER_IP = "192.168.1.141";
 
 	// access to sensors
 	private SensorManager senseMan;
-
-	// used for accelerometer based measurements
-	private Sensor accSense;
-	private static AccelerationSensing accSensorListener;
-
-	// the orientation 3D
-	// INACTIVE private Sensor orientSense;
-	// INACTIVE private SensorEventListener orientSensorListener;
-
-	// the simple orientation without flat phone detection
-	private OrientationEventListener cubeOrientSensorListener;
-
-	// the barrel orientation
-	private OrientationEventListener barrelOrientSensorListener;
 
 	// used for wifi based measurements and for server connection
 	private WifiManager wifiMan;
 	// INACTIVE private WifiSensing wifiReceiver;
 
 	// used for battery based measurements
-	// INACTIVE private BatterySensing batteryReceiver;
+	private BatterySensing batteryReceiver;
 
-	// used for shake detection
-	private Sensor shakeSense;
-	private ShakeSensing shakeDetectorListener;
-
+	// used for accelerometer based measurements
+	private Sensor accSense;
+	
 	// move measurements
 	private Sensor moveSenseLinearAcc;
 	private Sensor moveSenseMagnetic;
 	private Sensor moveSenseGravity;
-	private MoveSensing moveSensorListener;
-
-	// helper for building alert messages for the front end
-	private static AlertDialog.Builder alertBuilder;
 	
-	public static AbstractData getCachedSensorData(Class<? extends ISensorDataCache> cache) {
-		if (cache == accSensorListener.getClass()) {
-			return accSensorListener.getCacheData();
-		}
+	private static MotionSensing sensorListener;
+	
+	private static KippenCollectingActivity kippenInstance;
 
-		return null;
+	public static Handler getRestartHandler() {
+		return restartHandler;
 	}
+	
+	public static final Handler restartHandler = new Handler(Looper.getMainLooper()) {
+		@Override
+		public void handleMessage(Message msg) {
+			kippenInstance.recreate();
+		}
+    };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		kippenInstance = this;
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_kippen_collecting);
-
-		alertBuilder = new AlertDialog.Builder(this);
 
 		// the sensor manager, providing all sensor services of the device
 		Object tmpMan = getSystemService(Context.SENSOR_SERVICE);
 		if (tmpMan == null) {
-			showErrorDialog("No sensor services detected on device. It does not make sense to start, I rather quit myself.");
+			Log.e("KIPPEN", "No sensor services detected on device. It does not make sense to start, I rather quit myself.");
 			this.finish();
 		}
 		senseMan = (SensorManager) tmpMan;
@@ -118,7 +100,7 @@ public class KippenCollectingActivity extends Activity {
 		// wifi specific services
 		tmpMan = getSystemService(Context.WIFI_SERVICE);
 		if (tmpMan == null) {
-			showErrorDialog("No WIFI capabilities detected on device. Would not know how to talk to my master any other way. Too sad ...");
+			Log.e("KIPPEN", "No WIFI capabilities detected on device. Would not know how to talk to my master any other way. Too sad ...");
 			this.finish();
 		}
 		wifiMan = (WifiManager) tmpMan;
@@ -142,7 +124,7 @@ public class KippenCollectingActivity extends Activity {
 		// manager
 		wifiMan.enableNetwork(wifiMan.addNetwork(wc), true);
 		if (!wifiMan.reconnect()) {
-			showErrorDialog("The device was not able to connect to the host network. Please check your AP and client-side wifi configurations! Quit for now ...");
+			Log.e("KIPPEN", "The device was not able to connect to the host network. Please check your AP and client-side wifi configurations! Quit for now ...");
 			this.finish();
 		}
 
@@ -164,94 +146,38 @@ public class KippenCollectingActivity extends Activity {
 		// INACTIVE config.setConfig(ConfigType.MEASURE_AP_ESSID, essids);
 
 		// send a simple ping to the server to notify about our presence
-		networkTask.sendPackets(new PingData());
+		networkTask.sendPacket(new PingData());
 
 		// the battery status measurement
-		// INACTIVE batteryReceiver = new BatterySensing();
+		batteryReceiver = new BatterySensing();
 
 		// the accelerometer
 		accSense = senseMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		accSensorListener = new AccelerationSensing();
-
-		// orientation field
-		// INACTIVE orientSense =
-		// senseMan.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-		// INACTIVE orientSensorListener = new OrientationSensing();
 
 		// move sensing via orientation and acceleration (TODO)
 		moveSenseLinearAcc = senseMan.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 		moveSenseMagnetic = senseMan.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 		moveSenseGravity = senseMan.getDefaultSensor(Sensor.TYPE_GRAVITY);
-		moveSensorListener = new MoveSensing();
-
-		// ... simple cube side change listener
-		cubeOrientSensorListener = new CubeOrientationSensing(getApplicationContext());
-
-		// ... simple barrel roll degree change listener
-		barrelOrientSensorListener = new BarrelOrientationSensing(getApplicationContext());
+		
+		// general sensor listener
+		sensorListener = new MotionSensing();
 
 		// the wifi measuring sensor
 		// INACTIVE wifiMan.setWifiEnabled(true);
 		// INACTIVE wifiReceiver = new WifiSensing(wifiMan, config);
 
-		// the shake detector
-		shakeSense = senseMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		shakeDetectorListener = new ShakeSensing();
-		
 		Log.i("KIPPEN", "Android client activity created.");
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		senseMan.registerListener(shakeDetectorListener, shakeSense, 100000);
-
-		senseMan.registerListener(accSensorListener, accSense, 100000);
 		
-		senseMan.registerListener(moveSensorListener, moveSenseLinearAcc, 100000);
-		senseMan.registerListener(moveSensorListener, moveSenseMagnetic, 100000);
-		senseMan.registerListener(moveSensorListener, moveSenseGravity, 100000);
-
-		cubeOrientSensorListener.enable();
-
-		barrelOrientSensorListener.enable();
+		senseMan.registerListener(sensorListener, accSense, 50000);
+		senseMan.registerListener(sensorListener, moveSenseLinearAcc, 50000);
+		senseMan.registerListener(sensorListener, moveSenseMagnetic, 50000);
+		senseMan.registerListener(sensorListener, moveSenseGravity, 50000);
 		
-		Log.i("KIPPEN", "Client started/resumed.");
-
-		// INACTIVE senseMan.registerListener(orientSensorListener, orientSense,
-		// SensorManager.SENSOR_DELAY_FASTEST);
-
-		// INACTIVE registerReceiver(wifiReceiver, new
-		// IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-		// INACTIVE wifiMan.startScan();
-
-		// INACTIVE registerReceiver(batteryReceiver, new
-		// IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-	}
-
-	@Override
-	protected void onPause() {
-		// do nothing on pause
-		super.onPause();
-	}
-	
-	@Override
-	protected void onStop() {
-		super.onStop();
-	}
-
-	private static void showErrorDialog(String messageId) {
-		alertBuilder.setMessage(messageId);
-		alertBuilder.setCancelable(false);
-		alertBuilder.setPositiveButton("Ok", new OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		});
-		AlertDialog alert = alertBuilder.create();
-		alert.show();
+		registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 	}
 }

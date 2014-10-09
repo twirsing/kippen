@@ -7,8 +7,6 @@ import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import nerdproject.LiveController;
-
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BarrelOrientationData;
