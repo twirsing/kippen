@@ -24,6 +24,7 @@ import at.bakery.kippen.config.EventConfig;
 import at.bakery.kippen.config.ObjectConfig;
 import at.bakery.kippen.config.Param;
 import at.bakery.kippen.config.TypeEnum;
+import at.bakery.kippen.server.command.AbletonDeviceCommand;
 import at.bakery.kippen.server.command.AbletonPlayCommand;
 import at.bakery.kippen.server.command.AbletonStopCommand;
 import at.bakery.kippen.server.command.Command;
@@ -33,7 +34,6 @@ import at.bakery.kippen.server.command.ToggleMuteCommand;
 import at.bakery.kippen.server.objects.AbstractKippenObject;
 import at.bakery.kippen.server.objects.BarrelObject;
 import at.bakery.kippen.server.objects.CubeObject;
-
 
 //TODO make server listen to changes in the xml  config file so changes can be applied at runtime.
 public class KippenServer {
@@ -81,22 +81,22 @@ public class KippenServer {
 							while (true) {
 								// first line is canonical class name of event
 								String dataType = ois.readLine();
-								if(dataType == null || dataType.isEmpty()) {
+								if (dataType == null || dataType.isEmpty()) {
 									continue;
 								}
 
 								// second line is JSON data
 								AbstractData data = JSONDataSerializer.deserialize(dataType, ois.readLine());
-								if(data == null) {
+								if (data == null) {
 									continue;
 								}
-								
+
 								AbstractKippenObject object = objectMap.get(data.getClientId());
-								if(object == null){
+								if (object == null) {
 									log.warning("Client MAC address " + data.getClientId() + " is not registered");
 									return;
 								}
-								
+
 								// pick the client and process received data
 								object.processData(data);
 							}
@@ -118,7 +118,6 @@ public class KippenServer {
 		int objectTimeout = config.getTimeoutMinutes();
 
 		log.info("Setting object timeout to: " + objectTimeout + " minute(s).");
-
 
 		// for each object set the commands and events
 		for (ObjectConfig obj : config.getObjects().getObjectConfig()) {
@@ -149,6 +148,10 @@ public class KippenServer {
 					case EventTypes.TIMEOUT:
 						log.info("Registering roll event");
 						cubeKippObject.setCommandsForEvents(EventTypes.TIMEOUT, commands);
+						break;
+					case EventTypes.MOVE:
+						log.info("Registering move event");
+						cubeKippObject.setCommandsForEvents(EventTypes.MOVE, commands);
 						break;
 					// add other events here
 					default:
@@ -196,30 +199,33 @@ public class KippenServer {
 			switch (c.getCommandType()) {
 			case "ABLETONPLAY":
 				log.log(Level.INFO, "Registering ABLETONPLAY command");
-				commandList.add(new AbletonPlayCommand(getCommandParamValue(
-						"trackNumber", c.getParam())));
+				commandList.add(new AbletonPlayCommand(getCommandParamValue("trackNumber", c.getParam())));
 				break;
 			case "STOPTRACK":
 				log.log(Level.INFO, "Registering ABLETONSTOP command");
-				commandList.add(new AbletonStopCommand(getCommandParamValue(
-						"trackNumber", c.getParam())));
+				commandList.add(new AbletonStopCommand(getCommandParamValue("trackNumber", c.getParam())));
 				break;
 			case "TOGGLEMUTE":
 				log.log(Level.INFO, "Registering TOGGLEMUTE command");
-				commandList.add(new ToggleMuteCommand(Integer
-						.valueOf(getCommandParamValue("trackNumber",
-								c.getParam()))));
+				commandList.add(new ToggleMuteCommand(Integer.valueOf(getCommandParamValue("trackNumber", c.getParam()))));
 				break;
 			case "MASTERVOLUME":
 				log.log(Level.INFO, "Registering MASTERVOLUME command");
 				commandList.add(new MasterVolumeCommand());
 				break;
-				
+
 			case "SENDSOCKETDATA":
 				log.log(Level.INFO, "Registering SENDSOCKETDATA command");
 				commandList.add(new SendSocketDataCommand(c.getParam()));
 				break;
-				
+
+			case "ABLETONDEVICE":
+				log.log(Level.INFO, "Registering ABLETONDEVICE command");
+				int trackNumber = Integer.valueOf(getCommandParamValue("trackNumber", c.getParam()));
+				int deviceNumber = Integer.valueOf(getCommandParamValue("deviceNumber", c.getParam()));
+				int parameterNumber = Integer.valueOf(getCommandParamValue("parameterNumber", c.getParam()));
+				commandList.add(new AbletonDeviceCommand(trackNumber, deviceNumber,parameterNumber));
+				break;
 
 			default:
 				break;
