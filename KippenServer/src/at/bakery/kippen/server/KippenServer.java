@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import javax.xml.bind.JAXB;
 
 import at.bakery.kippen.common.AbstractData;
+import at.bakery.kippen.common.data.ContainerData;
 import at.bakery.kippen.common.json.JSONDataSerializer;
 import at.bakery.kippen.config.CommandConfig;
 import at.bakery.kippen.config.Configuration;
@@ -73,12 +74,11 @@ public class KippenServer {
 				log.info("Client " + clientId + " connected ...");
 
 				workerExecutor.execute(new Runnable() {
-
 					@Override
 					public void run() {
 						try {
 							BufferedReader ois = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF8"));
-							while (true) {
+							while(!client.isClosed()) {
 								// first line is canonical class name of event
 								String dataType = ois.readLine();
 								if (dataType == null || dataType.isEmpty()) {
@@ -86,19 +86,47 @@ public class KippenServer {
 								}
 
 								// second line is JSON data
-								AbstractData data = JSONDataSerializer.deserialize(dataType, ois.readLine());
-								if (data == null) {
+
+								String dataLine = ois.readLine();
+								AbstractData data = JSONDataSerializer.deserialize(dataType, dataLine);
+								if(data == null) {
 									continue;
 								}
-
+								
+								if(data instanceof ContainerData == false) {
+									// TODO process battery, etc.
+									continue;
+								}
+								
+								// pick the client and process all received data
 								AbstractKippenObject object = objectMap.get(data.getClientId());
 								if (object == null) {
 									log.warning("Client MAC address " + data.getClientId() + " is not registered");
 									return;
 								}
-
-								// pick the client and process received data
-								object.processData(data);
+								
+								// process each data packet
+								ContainerData containerData = (ContainerData)data;
+								
+								// check lag and drop packet if necessary
+								long lag = System.currentTimeMillis() - containerData.getTimestamp();
+								if(lag > 200) {
+									System.err.println("Dropping packet, lag is " + lag + "ms");
+									continue;
+								}
+								
+								// lag in bounds, process ...
+								object.processData(containerData.accData);
+								object.processData(containerData.avgAccData);
+								object.processData(containerData.moveData);
+								object.processData(containerData.shakeData);
+								object.processData(containerData.cubeData);
+								object.processData(containerData.barrelData);
+								
+								System.out.println(containerData.shakeData);
+								System.out.println(containerData.moveData);
+								
+								Thread.sleep(50);
 							}
 						} catch (Exception ex) {
 							log.severe("Client " + clientId + " died ...");

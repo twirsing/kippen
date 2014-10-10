@@ -19,6 +19,8 @@
 			<mac>10:68:3f:49:25:4e</mac>
 			<!-- Little Samsung 1 -->
 			<!-- mac>C8:14:79:2A:A4:44</mac -->
+			<!-- JOHNNY -->
+<!-- 			<mac>18:1E:B0:0A:56:AB</mac> -->
 			<events>
 				<!-- <eventConfig eventType="rollChange"> <commands> <CommandConfig commandType="MASTERVOLUME"> 
 					</CommandConfig> </commands> </eventConfig> -->
@@ -71,89 +73,6 @@
 			</events>
 			<type>cube</type>
 		</objectConfig>
-		<objectConfig>
-			<!-- tomw -->
-			<mac>88:30:8A:38:53:05</mac>
-			<!-- <mac>c4:43:8f:46:34:32</mac> -->
-
-			<events>
-
-				<eventConfig eventType="cubeSideChange">
-					<commands>
-
-						<CommandConfig commandType="ABLETONPLAY">
-							<param key="trackNumber" value="1" />
-						</CommandConfig>
-					</commands>
-				</eventConfig>
-				<eventConfig eventType="shake">
-					<commands>
-						<CommandConfig commandType="TOGGLEMUTE">
-							<param key="trackNumber" value="1" />
-						</CommandConfig>
-					</commands>
-				</eventConfig>
-			</events>
-			<type>cube</type>
-		</objectConfig>
-		<!--<objectConfig> tomw2 HTC <mac>c4:43:8f:46:34:32</mac> <events> <eventConfig 
-			eventType="cubeSideChange"> <commands> <CommandConfig commandType="ABLETONPLAY"> 
-			<param key="trackNumber" value="2" /> </CommandConfig> </commands> </eventConfig> 
-			<eventConfig eventType="shake"> <commands> <CommandConfig commandType="TOGGLEMUTE"> 
-			<param key="trackNumber" value="2" /> </CommandConfig> </commands> </eventConfig> 
-			</events> <type>cube</type> </objectConfig> -->
-		<objectConfig>
-			<!-- FLO -->
-			<mac>8c:3a:e3:1a:83:5a</mac>
-			<events>
-
-				<eventConfig eventType="cubeSideChange">
-					<commands>
-
-						<CommandConfig commandType="ABLETONPLAY">
-							<param key="trackNumber" value="2" />
-						</CommandConfig>
-					</commands>
-				</eventConfig>
-				<eventConfig eventType="shake">
-					<commands>
-						<CommandConfig commandType="TOGGLEMUTE">
-							<param key="trackNumber" value="2" />
-						</CommandConfig>
-					</commands>
-				</eventConfig>
-			</events>
-			<type>cube</type>
-		</objectConfig>
-
-
-		<objectConfig>
-			<!-- tomt -->
-			<mac>c4:43:8f:46:34:32</mac>
-			<events>
-
-				<eventConfig eventType="cubeSideChange">
-					<commands>
-
-						<CommandConfig commandType="ABLETONPLAY">
-							<param key="trackNumber" value="4" />
-						</CommandConfig>
-					</commands>
-				</eventConfig>
-				<eventConfig eventType="shake">
-					<commands>
-						<CommandConfig commandType="TOGGLEMUTE">
-							<param key="trackNumber" value="4" />
-						</CommandConfig>
-					</commands>
-				</eventConfig>
-			</events>
-			<type>cube</type>
-		</objectConfig>
-
-
-
-
 	</objects>
 
 </tns:configuration>

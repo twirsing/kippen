@@ -15,9 +15,7 @@ import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BatteryData;
 import at.bakery.kippen.common.data.CubeOrientationData;
-import at.bakery.kippen.common.data.BarrelOrientationData;
 import at.bakery.kippen.common.data.MoveData;
-import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.data.ShakeData;
 import at.bakery.kippen.common.data.WifiLevelsData;
 import at.bakery.kippen.server.EventTypes;
@@ -30,7 +28,7 @@ public class CubeObject extends AbstractKippenObject {
 	static Logger log = Logger.getLogger(CubeObject.class.getName());
 	private int currentSide = -1;
 
-	private int MOVE_DATA_THRESHHOLD = 1;
+	private double MOVE_DATA_THRESHHOLD = 0.3;
 
 	private Queue<WifiLevelsData> avgWifiLevel = new LinkedList<>();
 	private boolean moveDataWasBelowThreshhold = false;
@@ -54,7 +52,7 @@ public class CubeObject extends AbstractKippenObject {
 		} else if (d instanceof CubeOrientationData) {
 			processCubeOrientationData((CubeOrientationData) d);
 		} else if (d instanceof ShakeData) {
-			processShakeData();
+			processShakeData((ShakeData) d);
 		} else if (d instanceof MoveData) {
 			processMoveData((MoveData) d);
 		} else if (d instanceof BatteryData) {
@@ -81,7 +79,11 @@ public class CubeObject extends AbstractKippenObject {
 	private static final long NEW_SHAKE_AFTER = (long) 1e9;
 	private long lastShook = System.nanoTime();
 
-	private void processShakeData() {
+	private void processShakeData(ShakeData shakeData) {
+		if(shakeData.isShaking() == false) {
+			return;
+		}
+		
 		long curTime = System.nanoTime();
 		if (curTime - lastShook < NEW_SHAKE_AFTER) {
 			// ignore if shake events indifferent
@@ -91,40 +93,42 @@ public class CubeObject extends AbstractKippenObject {
 		lastShook = curTime;
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 
-		for (Command c : eventsOfObject.get(EventTypes.SHAKE)) {
-			try {
-				c.execute(paramMap);
-			} catch (Exception e) {
-				log.warning("Failed to execute command " + c.getClass().getSimpleName());
+		List<Command> sideChangeEvents = eventsOfObject.get(EventTypes.SHAKE);
+		if (sideChangeEvents != null) {
+			for (Command c : eventsOfObject.get(EventTypes.SHAKE)) {
+				try {
+					c.execute(paramMap);
+				} catch (Exception e) {
+					log.warning("Failed to execute command " + c.getClass().getSimpleName());
+				}
 			}
 		}
 	}
 
 	private void processCubeOrientationData(CubeOrientationData data) {
 		CubeOrientationData cd = (CubeOrientationData) data;
-
 		if (cd.getOrientation() == CubeOrientationData.Orientation.UNKNOWN) {
 			return;
 		}
+		
 		int sideInt = cd.getOrientation().ordinal();
 		if (sideInt == currentSide) {
 			return;
 		}
 
 		String sideString = String.valueOf(sideInt);
-		log.log(Level.FINE, "Executing side change with side " + sideString);
+		log.log(Level.FINE,"Executing side change with side " + sideString);
+		
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("clipNumber", sideString);
+		
 		List<Command> sideChangeEvents = eventsOfObject.get(EventTypes.SIDECHANGE);
-
 		if (sideChangeEvents != null) {
-			for (Command c : sideChangeEvents) {
+			for(Command c : sideChangeEvents) {
 				try {
 					c.execute(paramMap);
 				} catch (Exception e) {
 					log.warning("Failed to execute command " + c.getClass().getSimpleName());
-				} finally {
-
 				}
 			}
 
@@ -170,14 +174,10 @@ public class CubeObject extends AbstractKippenObject {
 
 	}
 
-	private void processAccelerationData(AccelerationData data) {
-		// SensorTripleData sd = (SensorTripleData) data;
+	private void processAccelerationData(AccelerationData data) {}
 
-	}
 
-	private void processBatteryData(BatteryData data) {
-
-	}
+	private void processBatteryData(BatteryData data) {}
 
 	private void processMoveData(MoveData data) {
 		double lengthVector = Math.abs(Math.sqrt(data.getX() * data.getX() + data.getY() * data.getY() + data.getZ()

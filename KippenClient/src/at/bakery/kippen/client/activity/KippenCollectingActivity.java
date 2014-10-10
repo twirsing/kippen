@@ -2,16 +2,21 @@ package at.bakery.kippen.client.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import at.bakery.kippen.client.R;
+import at.bakery.kippen.client.sensor.BatterySensing;
 import at.bakery.kippen.client.sensor.MotionSensing;
 import at.bakery.kippen.common.data.PingData;
-import at.bakery.kippen.common.data.SensorTripleData;
 
 /*
  * TODO all-in-one sensor listener
@@ -35,14 +40,14 @@ public class KippenCollectingActivity extends Activity {
 //	private static final String SERVER_IP = "192.168.0.26"; // server ip
 
 	// setting StockEINS
-	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
-	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
-	 private static final String SERVER_IP = "192.168.0.104"; //server ip
+//	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
+//	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
+//	 private static final String SERVER_IP = "192.168.0.109"; //server ip
 	//
 	// setting tomt
-//	 private static final String WIFI_ESSID = "JulesWinnfield";
-//	 private static final String WIFI_PWD = "wuzikrabuzi";
-//	 private static final String SERVER_IP = "192.168.1.141";
+	 private static final String WIFI_ESSID = "JulesWinnfield";
+	 private static final String WIFI_PWD = "wuzikrabuzi";
+	 private static final String SERVER_IP = "192.168.1.141";
 
 	// access to sensors
 	private SensorManager senseMan;
@@ -52,22 +57,16 @@ public class KippenCollectingActivity extends Activity {
 	// INACTIVE private WifiSensing wifiReceiver;
 
 	// used for battery based measurements
-	// INACTIVE private BatterySensing batteryReceiver;
+	private BatterySensing batteryReceiver;
 
 	// used for accelerometer based measurements
 	private Sensor accSense;
 	
 	// move measurements
-	private Sensor moveSenseLinearAcc;
 	private Sensor moveSenseMagnetic;
-	private Sensor moveSenseGravity;
 	
 	private static MotionSensing sensorListener;
-
-	public static SensorTripleData getCacheAccelerationData() {
-		return sensorListener.getCacheAccelerationData();
-	}
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -130,18 +129,16 @@ public class KippenCollectingActivity extends Activity {
 		// INACTIVE config.setConfig(ConfigType.MEASURE_AP_ESSID, essids);
 
 		// send a simple ping to the server to notify about our presence
-		networkTask.sendPackets(new PingData());
+		networkTask.sendPacket(new PingData());
 
 		// the battery status measurement
-		// INACTIVE batteryReceiver = new BatterySensing();
+		batteryReceiver = new BatterySensing();
 
 		// the accelerometer
 		accSense = senseMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
 		// move sensing via orientation and acceleration (TODO)
-		moveSenseLinearAcc = senseMan.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 		moveSenseMagnetic = senseMan.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-		moveSenseGravity = senseMan.getDefaultSensor(Sensor.TYPE_GRAVITY);
 		
 		// general sensor listener
 		sensorListener = new MotionSensing();
@@ -157,9 +154,18 @@ public class KippenCollectingActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		
-		senseMan.registerListener(sensorListener, accSense, 50000);
-		senseMan.registerListener(sensorListener, moveSenseLinearAcc, 50000);
-		senseMan.registerListener(sensorListener, moveSenseMagnetic, 50000);
-		senseMan.registerListener(sensorListener, moveSenseGravity, 50000);
+		senseMan.registerListener(sensorListener, accSense, 100000);
+		senseMan.registerListener(sensorListener, moveSenseMagnetic, 100000);
+		
+		registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		NetworkingTask.getInstance().quit();
+		Log.d("KIPPEN", "Closing client");
+	}
+	
+	
 }

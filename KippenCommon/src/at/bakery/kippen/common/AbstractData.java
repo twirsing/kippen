@@ -1,13 +1,9 @@
 package at.bakery.kippen.common;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-
-import at.bakery.kippen.common.json.JSONDataSerializer;
 
 public abstract class AbstractData {
 	
@@ -15,7 +11,7 @@ public abstract class AbstractData {
 	private long timestamp;
 	
 	// the client id to associate devices
-	private String clientId;
+	private String clientId = "";
 	
 	// the payload of an event, filled by each event definition differently
 	protected Map<String, Object> eventData = new HashMap<String, Object>();
@@ -32,7 +28,7 @@ public abstract class AbstractData {
 		return timestamp;
 	}
 	
-	protected void setTimestamp(long ts) {
+	public void setTimestamp(long ts) {
 		this.timestamp = ts;
 	}
 	

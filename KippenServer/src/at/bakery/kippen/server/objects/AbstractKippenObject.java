@@ -12,15 +12,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import at.bakery.kippen.common.AbstractData;
-import at.bakery.kippen.common.data.AccelerationData;
-import at.bakery.kippen.common.data.BatteryData;
-import at.bakery.kippen.common.data.BarrelOrientationData;
 import at.bakery.kippen.common.data.CubeOrientationData;
-import at.bakery.kippen.common.data.MoveData;
 import at.bakery.kippen.common.data.ShakeData;
-import at.bakery.kippen.common.data.WifiLevelsData;
 import at.bakery.kippen.server.EventTypes;
-import at.bakery.kippen.server.KippenServer;
 import at.bakery.kippen.server.command.Command;
 import at.bakery.kippen.server.outlets.AbstractKippOutlet;
 
@@ -34,7 +28,7 @@ public abstract class AbstractKippenObject {
 
 	protected HashMap<String, List<Command>> eventsOfObject = new HashMap<String, List<Command>>();
 	protected HashSet<AbstractKippOutlet> outletObjects = new HashSet<AbstractKippOutlet>();
-	protected HashMap<String, AbstractData> dataObjects = new HashMap<String, AbstractData>();
+	//protected HashMap<String, AbstractData> dataObjects = new HashMap<String, AbstractData>();
 
 //	private static final long IDLE_AFTER_SECONDS = KippenServer.OBJECT_TIMEOUT_MINUTES * 60;
 	private static final long IDLE_AFTER_SECONDS =  20;
@@ -95,9 +89,10 @@ public abstract class AbstractKippenObject {
 	 *            The received data object.
 	 */
 	public void processData(AbstractData data) {
-		dataObjects.put(data.getClass().toString(), data);
+		//dataObjects.put(data.getClass().toString(), data);
 		
-		//only count as activity when the object did a significt action, like side change etc.
+		// only count as activity when the object did a significant action, like side change etc.
+		// FIXME would be better to do it with check on minimal acceleration occurrence
 		if (data instanceof CubeOrientationData || data instanceof ShakeData){
 			lastActivityTime = System.nanoTime();
 		}

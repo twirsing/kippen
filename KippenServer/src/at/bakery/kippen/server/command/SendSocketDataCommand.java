@@ -1,15 +1,15 @@
 package at.bakery.kippen.server.command;
 
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import at.bakery.kippen.common.data.PingData;
 import at.bakery.kippen.config.Param;
