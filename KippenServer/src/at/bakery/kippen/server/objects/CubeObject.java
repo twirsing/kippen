@@ -68,8 +68,6 @@ public class CubeObject extends AbstractKippenObject {
 			return;
 		}
 
-		System.out.println("FIRE SHAKING");
-
 		lastShook = curTime;
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 

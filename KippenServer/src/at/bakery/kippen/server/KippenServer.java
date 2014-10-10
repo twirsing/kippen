@@ -122,7 +122,7 @@ public class KippenServer {
 
 								// check lag and drop packet if necessary
 								long lag = System.currentTimeMillis() - containerData.getTimestamp();
-								if (lag > 2000) {
+								if (lag > 5000) {
 									System.err.println("Dropping packet, lag is " + lag + "ms");
 									continue;
 								}
@@ -134,8 +134,6 @@ public class KippenServer {
 								object.processData(containerData.shakeData);
 								object.processData(containerData.cubeData);
 								object.processData(containerData.barrelData);
-
-								System.out.println(containerData);
 							}
 						} catch (Exception ex) {
 							log.severe("Client " + clientId + " died ...");

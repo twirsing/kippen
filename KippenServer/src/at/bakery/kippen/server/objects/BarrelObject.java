@@ -60,7 +60,6 @@ public class BarrelObject extends AbstractKippenObject {
 
 		if (Math.abs(barrelValue - lastBarrelValue) > MIN_VALUE_DELTA) {
 
-			System.out.println("barrel change");
 			paramMap.put("value", String.valueOf(barrelValue));
 
 			for (Command c : eventsOfObject.get(EventTypes.ROLLCHANGE)) {

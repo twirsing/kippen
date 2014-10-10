@@ -27,11 +27,11 @@ public abstract class AbstractKippenObject {
 
 	protected HashMap<String, List<Command>> eventsOfObject = new HashMap<String, List<Command>>();
 
-	private static final long IDLE_AFTER_SECONDS = 20;
+	private static final long IDLE_AFTER_SECONDS = 340;
 	private long lastActivityTime = System.nanoTime();
 
 	protected double MOVE_DATA_THRESHHOLD = 0.2;
-	protected static final long NEW_SHAKE_AFTER = (long) 3e9;
+	protected static final long NEW_SHAKE_AFTER = (long) 2e9;
 
 	/**
 	 * @param id
