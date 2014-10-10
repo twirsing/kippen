@@ -31,7 +31,6 @@ public class AbletonOSCListener implements OSCListener {
 
 	@Override
 	public void acceptMessage(Date time, OSCMessage message) {
-		System.out.println("received message");
 		receivedTimestamp = time;
 
 		this.message = message;

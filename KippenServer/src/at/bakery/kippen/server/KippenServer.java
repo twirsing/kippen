@@ -25,6 +25,7 @@ import at.bakery.kippen.config.EventConfig;
 import at.bakery.kippen.config.ObjectConfig;
 import at.bakery.kippen.config.Param;
 import at.bakery.kippen.config.TypeEnum;
+import at.bakery.kippen.server.command.AbletonDeviceCommand;
 import at.bakery.kippen.server.command.AbletonPlayCommand;
 import at.bakery.kippen.server.command.AbletonStopCommand;
 import at.bakery.kippen.server.command.Command;
@@ -35,11 +36,10 @@ import at.bakery.kippen.server.objects.AbstractKippenObject;
 import at.bakery.kippen.server.objects.BarrelObject;
 import at.bakery.kippen.server.objects.CubeObject;
 
+//TODO make server listen to changes in the xml  config file so changes can be applied at runtime.
 public class KippenServer {
 	static Logger log = Logger.getLogger(KippenServer.class.getName());
 	public static Level LOG_LEVEL = Level.INFO;
-
-	public static int OBJECT_TIMEOUT_MINUTES = 5;
 
 	private HashMap<String, AbstractKippenObject> objectMap = new HashMap<String, AbstractKippenObject>();
 
@@ -89,6 +89,7 @@ public class KippenServer {
 								}
 
 								// second line is JSON data
+
 								String dataLine = ois.readLine();
 								if(dataLine == null) {
 									break;
@@ -106,7 +107,7 @@ public class KippenServer {
 								
 								// pick the client and process all received data
 								AbstractKippenObject object = objectMap.get(data.getClientId());
-								if(object == null){
+								if (object == null) {
 									log.warning("Client MAC address " + data.getClientId() + " is not registered");
 									return;
 								}
@@ -150,8 +151,6 @@ public class KippenServer {
 
 		log.info("Setting object timeout to: " + objectTimeout + " minute(s).");
 
-		OBJECT_TIMEOUT_MINUTES = objectTimeout;
-
 		// for each object set the commands and events
 		for (ObjectConfig obj : config.getObjects().getObjectConfig()) {
 			String mac = obj.getMac();
@@ -181,6 +180,10 @@ public class KippenServer {
 					case EventTypes.TIMEOUT:
 						log.info("Registering roll event");
 						cubeKippObject.setCommandsForEvents(EventTypes.TIMEOUT, commands);
+						break;
+					case EventTypes.MOVE:
+						log.info("Registering move event");
+						cubeKippObject.setCommandsForEvents(EventTypes.MOVE, commands);
 						break;
 					// add other events here
 					default:
@@ -228,30 +231,33 @@ public class KippenServer {
 			switch (c.getCommandType()) {
 			case "ABLETONPLAY":
 				log.log(Level.INFO, "Registering ABLETONPLAY command");
-				commandList.add(new AbletonPlayCommand(getCommandParamValue(
-						"trackNumber", c.getParam())));
+				commandList.add(new AbletonPlayCommand(getCommandParamValue("trackNumber", c.getParam())));
 				break;
 			case "STOPTRACK":
 				log.log(Level.INFO, "Registering ABLETONSTOP command");
-				commandList.add(new AbletonStopCommand(getCommandParamValue(
-						"trackNumber", c.getParam())));
+				commandList.add(new AbletonStopCommand(getCommandParamValue("trackNumber", c.getParam())));
 				break;
 			case "TOGGLEMUTE":
 				log.log(Level.INFO, "Registering TOGGLEMUTE command");
-				commandList.add(new ToggleMuteCommand(Integer
-						.valueOf(getCommandParamValue("trackNumber",
-								c.getParam()))));
+				commandList.add(new ToggleMuteCommand(Integer.valueOf(getCommandParamValue("trackNumber", c.getParam()))));
 				break;
 			case "MASTERVOLUME":
 				log.log(Level.INFO, "Registering MASTERVOLUME command");
 				commandList.add(new MasterVolumeCommand());
 				break;
-				
+
 			case "SENDSOCKETDATA":
 				log.log(Level.INFO, "Registering SENDSOCKETDATA command");
 				commandList.add(new SendSocketDataCommand(c.getParam()));
 				break;
-				
+
+			case "ABLETONDEVICE":
+				log.log(Level.INFO, "Registering ABLETONDEVICE command");
+				int trackNumber = Integer.valueOf(getCommandParamValue("trackNumber", c.getParam()));
+				int deviceNumber = Integer.valueOf(getCommandParamValue("deviceNumber", c.getParam()));
+				int parameterNumber = Integer.valueOf(getCommandParamValue("parameterNumber", c.getParam()));
+				commandList.add(new AbletonDeviceCommand(trackNumber, deviceNumber,parameterNumber));
+				break;
 
 			default:
 				break;

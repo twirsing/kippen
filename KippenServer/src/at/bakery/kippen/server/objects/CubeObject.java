@@ -8,6 +8,9 @@ import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.encog.util.arrayutil.NormalizationAction;
+import org.encog.util.arrayutil.NormalizedField;
+
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BatteryData;
@@ -25,6 +28,11 @@ public class CubeObject extends AbstractKippenObject {
 	static Logger log = Logger.getLogger(CubeObject.class.getName());
 	private int currentSide = -1;
 
+	private double MOVE_DATA_THRESHHOLD = 0.3;
+
+	private Queue<WifiLevelsData> avgWifiLevel = new LinkedList<>();
+	private boolean moveDataWasBelowThreshhold = false;
+
 	public CubeObject(String id) {
 		super(id);
 		log.setLevel(KippenServer.LOG_LEVEL);
@@ -36,6 +44,7 @@ public class CubeObject extends AbstractKippenObject {
 
 		log.log(Level.FINEST, "CUBE processes " + d.getClass().getSimpleName() + " -> " + d.toString());
 
+		
 		if (d instanceof WifiLevelsData) {
 			processWifiData((WifiLevelsData) d);
 		} else if (d instanceof AccelerationData) {
@@ -108,7 +117,7 @@ public class CubeObject extends AbstractKippenObject {
 		}
 
 		String sideString = String.valueOf(sideInt);
-		log.info("Executing side change with side " + sideString);
+		log.log(Level.FINE,"Executing side change with side " + sideString);
 		
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		paramMap.put("clipNumber", sideString);
@@ -128,7 +137,6 @@ public class CubeObject extends AbstractKippenObject {
 		}
 	}
 
-	private Queue<WifiLevelsData> avgWifiLevel = new LinkedList<>();
 
 	private void processWifiData(WifiLevelsData data) {
 		WifiLevelsData wd = (WifiLevelsData) data;
@@ -168,10 +176,48 @@ public class CubeObject extends AbstractKippenObject {
 
 	private void processAccelerationData(AccelerationData data) {}
 
+
 	private void processBatteryData(BatteryData data) {}
 
 	private void processMoveData(MoveData data) {
-		System.out.println(data);
-		log.info("Move: " + Math.sqrt(data.getX() * data.getX() + data.getY() * data.getY() + data.getZ() + data.getZ()));
+		double lengthVector = Math.abs(Math.sqrt(data.getX() * data.getX() + data.getY() * data.getY() + data.getZ()
+				* data.getZ()));
+		HashMap<String, String> paramMap = new HashMap<String, String>();
+		if (lengthVector > MOVE_DATA_THRESHHOLD) {
+
+			NormalizedField normalizer = new NormalizedField(NormalizationAction.Normalize, null, 70.0, 0.0, 1.0, 0.0);
+			double normalizedValue = normalizer.normalize(lengthVector);
+			// log.log(Level.FINEST, "Length vector: " + lengthVector);
+			// log.log(Level.FINEST, "Normalized value: " + normalizedValue);
+
+			paramMap.put("value", String.valueOf(normalizedValue));
+
+			System.out.println(normalizedValue);
+			executeCommands(paramMap, EventTypes.MOVE);
+			moveDataWasBelowThreshhold = false;
+		} else {
+			//if we are below threshold set the value to 0
+			if (moveDataWasBelowThreshhold == false) {
+				paramMap.put("value", String.valueOf(0.0f));
+				executeCommands(paramMap, EventTypes.MOVE);
+				moveDataWasBelowThreshhold = true;
+			}
+
+		}
+	}
+
+	private void executeCommands(HashMap<String, String> paramMap, String eventType) {
+		List<Command> commands = eventsOfObject.get(eventType);
+		if (commands != null) {
+			for (Command c : commands) {
+				try {
+					c.execute(paramMap);
+				} catch (Exception e) {
+					log.warning("Failed to execute command " + c.getClass().getSimpleName());
+				} finally {
+
+				}
+			}
+		}
 	}
 }
