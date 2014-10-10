@@ -35,10 +35,9 @@
 
 				<eventConfig eventType="move">
 					<commands>
-						<CommandConfig commandType="ABLETONDEVICE">
-							<param key="trackNumber" value="0" />
+						<CommandConfig commandType="ABLETONMASTERDEVICE">
 							<param key="deviceNumber" value="0" />
-							<param key="parameterNumber" value="1" />
+							<param key="parameterNumber" value="9" />
 						</CommandConfig>
 					</commands>
 				</eventConfig>
