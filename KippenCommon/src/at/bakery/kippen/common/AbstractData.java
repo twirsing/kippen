@@ -28,7 +28,7 @@ public abstract class AbstractData {
 		return timestamp;
 	}
 	
-	protected void setTimestamp(long ts) {
+	public void setTimestamp(long ts) {
 		this.timestamp = ts;
 	}
 	

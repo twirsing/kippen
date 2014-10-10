@@ -55,6 +55,8 @@ public class NetworkingTask extends Thread implements INetworking {
 		flush.release();
 	}
 	
+	private boolean quit = false;
+	
 	private void resetSocket() {
 		try {
 			socket.close();
@@ -65,9 +67,14 @@ public class NetworkingTask extends Thread implements INetworking {
 		}
 	}
 	
+	public void quit() {
+		quit = true;
+		resetSocket();
+	}
+	
 	@Override
 	public void run() {
-		while(true) {
+		while(!quit) {
 			try {
 				Thread.sleep(10);
 			} catch(Exception ex) {}
@@ -91,6 +98,7 @@ public class NetworkingTask extends Thread implements INetworking {
 			try {
 				// set clientId
 				txPackets.setClientId(clientId);
+				txPackets.setTimestamp(System.currentTimeMillis());
 				
 				// JSON serialize and send packet
 				oos.write(JSONDataSerializer.serialize(txPackets));

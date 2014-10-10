@@ -40,14 +40,14 @@ public class KippenCollectingActivity extends Activity {
 //	private static final String SERVER_IP = "192.168.0.26"; // server ip
 
 	// setting StockEINS
-	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
-	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
-	 private static final String SERVER_IP = "192.168.0.109"; //server ip
+//	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
+//	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
+//	 private static final String SERVER_IP = "192.168.0.109"; //server ip
 	//
 	// setting tomt
-//	 private static final String WIFI_ESSID = "JulesWinnfield";
-//	 private static final String WIFI_PWD = "wuzikrabuzi";
-//	 private static final String SERVER_IP = "192.168.1.141";
+	 private static final String WIFI_ESSID = "JulesWinnfield";
+	 private static final String WIFI_PWD = "wuzikrabuzi";
+	 private static final String SERVER_IP = "192.168.1.141";
 
 	// access to sensors
 	private SensorManager senseMan;
@@ -63,29 +63,12 @@ public class KippenCollectingActivity extends Activity {
 	private Sensor accSense;
 	
 	// move measurements
-	private Sensor moveSenseLinearAcc;
 	private Sensor moveSenseMagnetic;
-	private Sensor moveSenseGravity;
 	
 	private static MotionSensing sensorListener;
 	
-	private static KippenCollectingActivity kippenInstance;
-
-	public static Handler getRestartHandler() {
-		return restartHandler;
-	}
-	
-	public static final Handler restartHandler = new Handler(Looper.getMainLooper()) {
-		@Override
-		public void handleMessage(Message msg) {
-			kippenInstance.recreate();
-		}
-    };
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		kippenInstance = this;
-		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_kippen_collecting);
 
@@ -155,9 +138,7 @@ public class KippenCollectingActivity extends Activity {
 		accSense = senseMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
 		// move sensing via orientation and acceleration (TODO)
-		moveSenseLinearAcc = senseMan.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 		moveSenseMagnetic = senseMan.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-		moveSenseGravity = senseMan.getDefaultSensor(Sensor.TYPE_GRAVITY);
 		
 		// general sensor listener
 		sensorListener = new MotionSensing();
@@ -173,11 +154,18 @@ public class KippenCollectingActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		
-		senseMan.registerListener(sensorListener, accSense, 50000);
-		senseMan.registerListener(sensorListener, moveSenseLinearAcc, 50000);
-		senseMan.registerListener(sensorListener, moveSenseMagnetic, 50000);
-		senseMan.registerListener(sensorListener, moveSenseGravity, 50000);
+		senseMan.registerListener(sensorListener, accSense, 100000);
+		senseMan.registerListener(sensorListener, moveSenseMagnetic, 100000);
 		
 		registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		NetworkingTask.getInstance().quit();
+		Log.d("KIPPEN", "Closing client");
+	}
+	
+	
 }

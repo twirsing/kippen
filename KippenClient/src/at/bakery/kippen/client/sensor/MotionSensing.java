@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -42,32 +44,26 @@ public class MotionSensing implements SensorEventListener {
 	 * ------------------------------------------ */
 	// current acc, magnetic field and gravity
 	private float[] accVector = new float[4];
-	private float[] magVector;
-	private float[] gravVector;
+	private float[] magVector = new float[4];
+	private float[] gravVector = new float[4];
 	
 	// the result direction (acc) and position
 	private float[] accMove = new float[4];
+	
+	// linear acceleration
+	private float[] accLinVector = new float[4];
 	
 	/* ------------------------------------------
 	 * SHAKE SENSING
 	 * ------------------------------------------ */
 	// Minimum acceleration needed to count as a shake movement
-    private static final int MIN_SHAKE_ACCELERATION = 5;
+    private static final double MIN_SHAKE_ACCELERATION = 1.2;
     
     // Minimum number of movements to register a shake
-    private static final int MIN_MOVEMENTS = 8;
+    private static final int MIN_MOVEMENTS = 6;
     
     // Maximum time (in milliseconds) for the whole shake to occur
-    private static final int MAX_SHAKE_DURATION = 400;
-	
-    // Arrays to store gravity and linear acceleration values
-	private float[] mGravity = { 0.0f, 0.0f, 0.0f };
-	private float[] mLinearAcceleration = { 0.0f, 0.0f, 0.0f };
-	
-	// Indexes for x, y, and z values
-	private static final int X = 0;
-	private static final int Y = 1;
-	private static final int Z = 2;
+    private static final int MAX_SHAKE_DURATION = 2000;
 	
 	// Start time for the shake detection
 	long startTime = 0;
@@ -112,14 +108,10 @@ public class MotionSensing implements SensorEventListener {
 		CONTAINER_DATA.barrelData = BARREL_DATA;
 	}
 	
-	private void handleAvgAcceleration(SensorEvent se) {
-		if(se.sensor.getType() != Sensor.TYPE_ACCELEROMETER || se.values.length < 3) {
-			return;
-		}
+	private void handleAvgAcceleration() {
+		ACC_DATA.setXYZ(accVector[0], accVector[1], accVector[2]);
 		
-		ACC_DATA.setXYZ(se.values[0], se.values[1], se.values[2]);
-		
-		measureRef.setXYZ(se.values[0], se.values[1], se.values[2]);
+		measureRef.setXYZ(accVector[0], accVector[1], accVector[2]);
 		if(measureRef == measureStart) {
 			measureRef = measureEnd;
 			return;
@@ -150,71 +142,36 @@ public class MotionSensing implements SensorEventListener {
 		}
 	}
 	
-	private void handleMove(SensorEvent se) {
-		if(se.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-			accVector = Arrays.copyOf(se.values, 4);
-			
-			if(gravVector == null || magVector == null) {
-				return;
-			}
-			
-			float[] rotMat = new float[16];
-			float[] incMat = new float[16];
-			SensorManager.getRotationMatrix(rotMat, incMat, gravVector, magVector);
-			
-			float[] invRotMat = new float[16];
-			Matrix.invertM(invRotMat, 0, rotMat, 0);
-			
-			Matrix.multiplyMV(accMove, 0, invRotMat, 0, accVector, 0);
-			
-			// rounded for nicer output
-			float[] tmpAcc = new float[accMove.length];
-			for(int i = 0; i < accMove.length; i++) {
-				tmpAcc[i] = (int)(accMove[i] * 100) / 100.0f;
-			}
-			
-			// FIXME if more precise results are required, use original accWorld
-			accMove = tmpAcc;
-		} else if(se.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-			magVector = Arrays.copyOf(se.values, 4);
-		} else if(se.sensor.getType() == Sensor.TYPE_GRAVITY) {
-			gravVector = Arrays.copyOf(se.values, 4);
-		} else {
-			return;
+	private void handleMove() {
+		float[] rotMat = new float[16];
+		float[] incMat = new float[16];
+		SensorManager.getRotationMatrix(rotMat, incMat, gravVector, magVector);
+		
+		float[] invRotMat = new float[16];
+		Matrix.invertM(invRotMat, 0, rotMat, 0);
+		
+		Matrix.multiplyMV(accMove, 0, invRotMat, 0, accLinVector, 0);
+		
+		// rounded for nicer output
+		float[] tmpAcc = new float[accMove.length];
+		for(int i = 0; i < accMove.length; i++) {
+			tmpAcc[i] = (int)(accMove[i] * 100) / 100.0f;
 		}
+		
+		// FIXME if more precise results are required, use original accWorld
+		accMove = tmpAcc;
 		
 		MOVE_DATA.setXYZ(accMove[0], accMove[1], accMove[2]);
 		
 		Log.d("KIPPEN", "MOVE: " + MOVE_DATA);
 	}
 	
-	private void handleShake(SensorEvent se) {
+	private void handleShake() {
 		// reset shake
 		SHAKE_DATA.setShaking(false);
 		
-		final float alpha = 0.8f;
-
-        // gravity
-        mGravity[X] = alpha * mGravity[X] + (1 - alpha) * (float)ACC_DATA.getX();
-        mGravity[Y] = alpha * mGravity[Y] + (1 - alpha) * (float)ACC_DATA.getY();
-        mGravity[Z] = alpha * mGravity[Z] + (1 - alpha) * (float)ACC_DATA.getZ();
-
-        // linear acceleration along the x, y, and z axes (gravity effects removed)
-        mLinearAcceleration[X] = (float)ACC_DATA.getX() - mGravity[X];
-        mLinearAcceleration[Y] = (float)ACC_DATA.getY() - mGravity[Y];
-        mLinearAcceleration[Z] = (float)ACC_DATA.getZ() - mGravity[Z];
-         
-        // max linear acceleration in any direction
-        float maxLinearAcceleration = mLinearAcceleration[X];
-        if(mLinearAcceleration[Y] > maxLinearAcceleration) {
-        	maxLinearAcceleration = mLinearAcceleration[Y];
-        }
-        if(mLinearAcceleration[Z] > maxLinearAcceleration) {
-        	maxLinearAcceleration = mLinearAcceleration[Z];
-        }
-        
-        // check threshold
-        if(maxLinearAcceleration > MIN_SHAKE_ACCELERATION) {
+		double linAccAmpl = Math.sqrt(accLinVector[0]*accLinVector[0] + accLinVector[1]*accLinVector[1] + accLinVector[2]*accLinVector[2]);
+        if(linAccAmpl > MIN_SHAKE_ACCELERATION) {
         	long now = System.currentTimeMillis();
         	if(startTime == 0) {
         		startTime = now;
@@ -227,7 +184,7 @@ public class MotionSensing implements SensorEventListener {
             	moveCount = 0;
         	} else {
         		moveCount++;
-        		if(moveCount > MIN_MOVEMENTS) {
+        		if(moveCount >= MIN_MOVEMENTS) {
         			SHAKE_DATA.setShaking(true);
         			
         			Log.d("KIPPEN", "SHAKE: !");
@@ -240,7 +197,7 @@ public class MotionSensing implements SensorEventListener {
         }
 	}
 	
-	private void handleOrientation(SensorEvent se) {
+	private void handleOrientation() {
         int orientation = -1;
         double X = -ACC_DATA.getX();
         double Y = -ACC_DATA.getY();
@@ -327,10 +284,18 @@ public class MotionSensing implements SensorEventListener {
 	
 	@Override
 	public void onSensorChanged(SensorEvent se) {
-		handleAvgAcceleration(se);
-		handleMove(se);
-		handleShake(se);
-		handleOrientation(se);
+		if(se.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+			magVector = Arrays.copyOf(se.values, 4);
+		} else if(se.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+			accVector = Arrays.copyOf(se.values, 4);
+		}
+		
+		computeLinearAccelerationAndGravity();
+		
+		handleAvgAcceleration();
+		handleMove();
+		handleShake();
+		handleOrientation();
 		
 		// send all sensor data at once
 		net.sendPacket(CONTAINER_DATA);
@@ -348,71 +313,63 @@ public class MotionSensing implements SensorEventListener {
 	 * HELPERS
 	 */
 	
-	/*public float[] computeLinearAcceleration() {
+	public void computeLinearAccelerationAndGravity() {
         // Get a local copy of the sensor values
-		float[] acceleration = new float[] {(float)ACC_DATA.getX(), (float)ACC_DATA.getY(), (float)ACC_DATA.getZ()};
-		float[] magnetic = new float[3];
- 
-        // Get a local copy of the sensor values
-        System.arraycopy(magnetic, 0, this.magVector, 0, acceleration.length);
+		float[] acceleration = Arrays.copyOf(this.accVector,  4);
+		float[] magnetic = Arrays.copyOf(this.magVector, 4);
  
         // Get the rotation matrix to put our local device coordinates
         // into the world-coordinate system.
-        float[] r = new float[9];
-        if (SensorManager.getRotationMatrix(r, null, acceleration, magnetic)) {
-            // values[0]: azimuth/yaw, rotation around the Z axis.
-            // values[1]: pitch, rotation around the X axis.
-            // values[2]: roll, rotation around the Y axis.
-            float[] values = new float[3];
+        float[] r = new float[16];
+        SensorManager.getRotationMatrix(r, null, acceleration, magnetic);
+        float[] values = new float[3];
  
-            // NOTE: the reference coordinate-system used is different
-            // from the world coordinate-system defined for the rotation
-            // matrix:
-            // X is defined as the vector product Y.Z (It is tangential
-            // to the ground at the device's current location and
-            // roughly points West). Y is tangential to the ground at
-            // the device's current location and points towards the
-            // magnetic North Pole. Z points towards the center of the
-            // Earth and is perpendicular to the ground.
-            SensorManager.getOrientation(r, values);
+        SensorManager.getOrientation(r, values);
  
-            float magnitude = (float) (Math.sqrt(Math.pow(acceleration[0], 2)
-                    + Math.pow(acceleration[1], 2)
-                    + Math.pow(acceleration[2], 2)) / SensorManager.GRAVITY_EARTH);
+        float magnitude = (float) (Math.sqrt(Math.pow(acceleration[0], 2)
+                + Math.pow(acceleration[1], 2)
+                + Math.pow(acceleration[2], 2)) / SensorManager.GRAVITY_EARTH);
  
-            double var = varianceAccel.addSample(magnitude);
-             
-            // Attempt to estimate the gravity components when the device is
-            // stable and not experiencing linear acceleration.
-            if (var < 0.03)
-            {
-                //values[0]: azimuth, rotation around the Z axis.
-                //values[1]: pitch, rotation around the X axis.
-                //values[2]: roll, rotation around the Y axis.
-                 
-                // Find the gravity component of the X-axis
-                // = g*-cos(pitch)*sin(roll);
-                components[0] = (float) (SensorManager.GRAVITY_EARTH * -Math.cos(values[1]) * Math
-                        .sin(values[2]));
-                 
-                // Find the gravity component of the Y-axis
-                // = g*-sin(pitch);
-                components[1] = (float) (SensorManager.GRAVITY_EARTH * -Math.sin(values[1]));
- 
-                // Find the gravity component of the Z-axis
-                // = g*cos(pitch)*cos(roll);
-                components[2] = (float) (SensorManager.GRAVITY_EARTH * Math.cos(values[1]) * Math
-                        .cos(values[2]));
-            }
- 
-            // Subtract the gravity component of the signal
-            // from the input acceleration signal to get the
-            // tilt compensated output.
-            linearAcceleration[0] = (this.acceleration[0] - components[0])/SensorManager.GRAVITY_EARTH;
-            linearAcceleration[1] = (this.acceleration[1] - components[1])/SensorManager.GRAVITY_EARTH;
-            linearAcceleration[2] = (this.acceleration[2] - components[2])/SensorManager.GRAVITY_EARTH;
+        double var = varianceAccel.addSample(magnitude);
+        if (var < 0.03) {
+         	this.gravVector[0] = (float)(0.8 * SensorManager.GRAVITY_EARTH * -Math.cos(values[1]) * Math.sin(values[2]));
+           	this.gravVector[1] = (float)(0.8 * SensorManager.GRAVITY_EARTH * -Math.sin(values[1]));
+           	this.gravVector[2] = (float)(0.8 * SensorManager.GRAVITY_EARTH * Math.cos(values[1]) * Math.cos(values[2]));
         }
  
-        return linearAcceleration;
-    }*/
+        accLinVector[0] = (accVector[0] - gravVector[0])/SensorManager.GRAVITY_EARTH;
+        accLinVector[1] = (accVector[1] - gravVector[1])/SensorManager.GRAVITY_EARTH;
+        accLinVector[2] = (accVector[2] - gravVector[2])/SensorManager.GRAVITY_EARTH;
+    }
+	
+	private StdDev varianceAccel = new StdDev();
+	
+	private class StdDev {
+		private LinkedList<Double> list = new LinkedList<Double>();
+		private double stdDev;
+		private DescriptiveStatistics stats = new DescriptiveStatistics();
+
+		public double addSample(double value) {
+			list.addLast(value);
+			enforceWindow();
+			return calculateStdDev();
+		}
+
+		private void enforceWindow() {
+			if (list.size() > 50) {
+				list.removeFirst();
+			}
+		}
+
+		private double calculateStdDev() {
+			if (list.size() > 5) {
+				stats.clear();
+				for (int i = 0; i < list.size(); i++) {
+					stats.addValue(list.get(i));
+				}
+				stdDev = stats.getStandardDeviation();
+			}
+			return stdDev;
+		}
+	}
 }

@@ -78,7 +78,7 @@ public class KippenServer {
 					public void run() {
 						try {
 							BufferedReader ois = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF8"));
-							while(true) {
+							while(!client.isClosed()) {
 								// first line is canonical class name of event
 								String dataType = ois.readLine();
 								if(dataType == null || dataType.isEmpty()) {
@@ -106,6 +106,15 @@ public class KippenServer {
 								
 								// process each data packet
 								ContainerData containerData = (ContainerData)data;
+								
+								// check lag and drop packet if necessary
+								long lag = System.currentTimeMillis() - containerData.getTimestamp();
+								if(lag > 200) {
+									System.err.println("Dropping packet, lag is " + lag + "ms");
+									continue;
+								}
+								
+								// lag in bounds, process ...
 								object.processData(containerData.accData);
 								object.processData(containerData.avgAccData);
 								object.processData(containerData.moveData);
@@ -115,6 +124,8 @@ public class KippenServer {
 								
 								System.out.println(containerData.shakeData);
 								System.out.println(containerData.moveData);
+								
+								Thread.sleep(50);
 							}
 						} catch (Exception ex) {
 							log.severe("Client " + clientId + " died ...");
