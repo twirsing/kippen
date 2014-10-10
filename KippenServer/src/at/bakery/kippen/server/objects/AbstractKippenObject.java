@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.CubeOrientationData;
+import at.bakery.kippen.common.data.MoveData;
 import at.bakery.kippen.common.data.ShakeData;
 import at.bakery.kippen.server.EventTypes;
 import at.bakery.kippen.server.command.Command;
@@ -28,11 +29,12 @@ public abstract class AbstractKippenObject {
 
 	protected HashMap<String, List<Command>> eventsOfObject = new HashMap<String, List<Command>>();
 	protected HashSet<AbstractKippOutlet> outletObjects = new HashSet<AbstractKippOutlet>();
-	//protected HashMap<String, AbstractData> dataObjects = new HashMap<String, AbstractData>();
 
-//	private static final long IDLE_AFTER_SECONDS = KippenServer.OBJECT_TIMEOUT_MINUTES * 60;
 	private static final long IDLE_AFTER_SECONDS =  20;
 	private long lastActivityTime = System.nanoTime();
+	
+	protected double MOVE_DATA_THRESHHOLD = 0.3;
+	protected static final long NEW_SHAKE_AFTER = (long) 1e9;
 
 	/**
 	 * @param id
@@ -89,12 +91,13 @@ public abstract class AbstractKippenObject {
 	 *            The received data object.
 	 */
 	public void processData(AbstractData data) {
-		//dataObjects.put(data.getClass().toString(), data);
-		
-		// only count as activity when the object did a significant action, like side change etc.
-		// FIXME would be better to do it with check on minimal acceleration occurrence
-		if (data instanceof CubeOrientationData || data instanceof ShakeData){
-			lastActivityTime = System.nanoTime();
+		// only count as activity when the object did a significant action
+		if(data instanceof MoveData){
+			MoveData move = (MoveData)data;
+			double moveAmpl = Math.sqrt(move.getX()*move.getX() + move.getY()*move.getY() + move.getZ()*move.getZ());
+			if(moveAmpl > MOVE_DATA_THRESHHOLD) {
+				lastActivityTime = System.nanoTime();
+			}
 		}
 	}
 

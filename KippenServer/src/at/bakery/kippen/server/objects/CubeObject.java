@@ -28,8 +28,6 @@ public class CubeObject extends AbstractKippenObject {
 	static Logger log = Logger.getLogger(CubeObject.class.getName());
 	private int currentSide = -1;
 
-	private double MOVE_DATA_THRESHHOLD = 0.3;
-
 	private Queue<WifiLevelsData> avgWifiLevel = new LinkedList<>();
 	private boolean moveDataWasBelowThreshhold = false;
 
@@ -75,8 +73,6 @@ public class CubeObject extends AbstractKippenObject {
 		// FIXME implement ableton stop
 	}
 
-	// 2 seconds delay before a new shake is processed
-	private static final long NEW_SHAKE_AFTER = (long) 1e9;
 	private long lastShook = System.nanoTime();
 
 	private void processShakeData(ShakeData shakeData) {

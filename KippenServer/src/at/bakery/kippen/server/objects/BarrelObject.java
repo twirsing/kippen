@@ -79,8 +79,6 @@ public class BarrelObject extends AbstractKippenObject {
 		
 	}
 
-	// 2 seconds delay before a new shake is processed
-	private static final long NEW_SHAKE_AFTER = (long)2e9;
 	private long lastShook = System.nanoTime();
 	
 	private void processShakeData() {
