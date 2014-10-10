@@ -79,16 +79,24 @@ public class KippenServer {
 					public void run() {
 						try {
 							BufferedReader ois = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF8"));
-							while (!client.isClosed()) {
+
+							while(true) {
 								// first line is canonical class name of event
 								String dataType = ois.readLine();
-								if (dataType == null || dataType.isEmpty()) {
+								if(dataType == null) {
+									break;
+								}
+								if(dataType.isEmpty()) {
 									continue;
 								}
 
 								// second line is JSON data
 
 								String dataLine = ois.readLine();
+								if(dataLine == null) {
+									break;
+								}
+								
 								AbstractData data = JSONDataSerializer.deserialize(dataType, dataLine);
 								if (data == null) {
 									continue;
@@ -111,10 +119,10 @@ public class KippenServer {
 
 								// check lag and drop packet if necessary
 								long lag = System.currentTimeMillis() - containerData.getTimestamp();
-								if (lag > 200) {
-									System.err.println("Dropping packet, lag is " + lag + "ms");
-									continue;
-								}
+//								if (lag > 200) {
+//									System.err.println("Dropping packet, lag is " + lag + "ms");
+//									continue;
+//								}
 
 								// lag in bounds, process ...
 								object.processData(containerData.accData);
@@ -123,11 +131,8 @@ public class KippenServer {
 								object.processData(containerData.shakeData);
 								object.processData(containerData.cubeData);
 								object.processData(containerData.barrelData);
-
-								System.out.println(containerData.shakeData);
-								System.out.println(containerData.moveData);
-
-								Thread.sleep(50);
+					
+								System.out.println(containerData);
 							}
 						} catch (Exception ex) {
 							log.severe("Client " + clientId + " died ...");

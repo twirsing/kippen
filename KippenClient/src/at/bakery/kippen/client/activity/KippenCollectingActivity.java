@@ -40,14 +40,14 @@ public class KippenCollectingActivity extends Activity {
 //	private static final String SERVER_IP = "192.168.0.26"; // server ip
 
 	// setting StockEINS
-//	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
-//	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
-//	 private static final String SERVER_IP = "192.168.0.109"; //server ip
+	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
+	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
+	 private static final String SERVER_IP = "192.168.0.103"; //server ip
 	//
 	// setting tomt
-	 private static final String WIFI_ESSID = "JulesWinnfield";
-	 private static final String WIFI_PWD = "wuzikrabuzi";
-	 private static final String SERVER_IP = "192.168.1.141";
+//	 private static final String WIFI_ESSID = "JulesWinnfield";
+//	 private static final String WIFI_PWD = "wuzikrabuzi";
+//	 private static final String SERVER_IP = "192.168.1.141";
 
 	// access to sensors
 	private SensorManager senseMan;
@@ -154,8 +154,8 @@ public class KippenCollectingActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		
-		senseMan.registerListener(sensorListener, accSense, 100000);
-		senseMan.registerListener(sensorListener, moveSenseMagnetic, 100000);
+		senseMan.registerListener(sensorListener, accSense, 200000);
+		senseMan.registerListener(sensorListener, moveSenseMagnetic, 200000);
 		
 		registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 	}

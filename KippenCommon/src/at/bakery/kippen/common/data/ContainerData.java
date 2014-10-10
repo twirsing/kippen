@@ -13,4 +13,12 @@ public class ContainerData extends AbstractData {
 	public ShakeData shakeData;
 	public CubeOrientationData cubeData;
 	public BarrelOrientationData barrelData;
+	
+	@Override
+	public String toString() {
+		return "Sensor Container\n----------------\n" + 
+				"ACC " + accData + "\n" + "AVG ACC " + avgAccData + "\n" + 
+				"MOVE " + moveData + "\n" + shakeData + "\n" +
+				cubeData + "\n" + barrelData + "\n";
+	}
 }

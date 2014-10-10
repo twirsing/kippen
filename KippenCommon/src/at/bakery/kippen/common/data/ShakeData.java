@@ -24,6 +24,6 @@ public class ShakeData extends AbstractData {
 
 	@Override
 	public String toString() {
-		return "SENSOR shaking? " + (isShaking() ? "YEEEEES!!!!" : "no");
+		return "SHAKE ? " + (isShaking() ? "YEEEEES!!!!" : "no");
 	}
 }

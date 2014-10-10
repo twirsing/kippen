@@ -20,6 +20,6 @@ public class BarrelOrientationData extends SensorSingleData {
 	
 	@Override
 	public String toString() {
-		return "SENSOR orientation = " + getOrientation();
+		return "BARREL rotation % " + getOrientation();
 	}
 }

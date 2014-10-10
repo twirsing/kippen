@@ -28,7 +28,7 @@ public class CubeObject extends AbstractKippenObject {
 	static Logger log = Logger.getLogger(CubeObject.class.getName());
 	private int currentSide = -1;
 
-	private double MOVE_DATA_THRESHHOLD = 0.3;
+	private double MOVE_DATA_THRESHHOLD = 0.1;
 
 	private Queue<WifiLevelsData> avgWifiLevel = new LinkedList<>();
 	private boolean moveDataWasBelowThreshhold = false;
@@ -42,7 +42,7 @@ public class CubeObject extends AbstractKippenObject {
 	public void processData(AbstractData d) {
 		super.processData(d);
 
-		log.log(Level.FINEST, "CUBE processes " + d.getClass().getSimpleName() + " -> " + d.toString());
+		System.out.println("CUBE processes " + d.getClass().getSimpleName() + " -> " + d.toString());
 
 		
 		if (d instanceof WifiLevelsData) {
@@ -54,6 +54,7 @@ public class CubeObject extends AbstractKippenObject {
 		} else if (d instanceof ShakeData) {
 			processShakeData((ShakeData) d);
 		} else if (d instanceof MoveData) {
+			System.out.println("moving");
 			processMoveData((MoveData) d);
 		} else if (d instanceof BatteryData) {
 			processBatteryData((BatteryData) d);
@@ -72,7 +73,6 @@ public class CubeObject extends AbstractKippenObject {
 
 	protected void timeout() {
 		super.timeout();
-		// FIXME implement ableton stop
 	}
 
 	// 2 seconds delay before a new shake is processed
@@ -183,6 +183,9 @@ public class CubeObject extends AbstractKippenObject {
 		double lengthVector = Math.abs(Math.sqrt(data.getX() * data.getX() + data.getY() * data.getY() + data.getZ()
 				* data.getZ()));
 		HashMap<String, String> paramMap = new HashMap<String, String>();
+		
+		
+		System.out.println("length " + lengthVector);
 		if (lengthVector > MOVE_DATA_THRESHHOLD) {
 
 			NormalizedField normalizer = new NormalizedField(NormalizationAction.Normalize, null, 70.0, 0.0, 1.0, 0.0);
