@@ -26,6 +26,7 @@ import at.bakery.kippen.config.ObjectConfig;
 import at.bakery.kippen.config.Param;
 import at.bakery.kippen.config.TypeEnum;
 import at.bakery.kippen.server.command.AbletonDeviceCommand;
+import at.bakery.kippen.server.command.AbletonMasterDeviceCommand;
 import at.bakery.kippen.server.command.AbletonPlayCommand;
 import at.bakery.kippen.server.command.AbletonStopCommand;
 import at.bakery.kippen.server.command.Command;
@@ -78,7 +79,7 @@ public class KippenServer {
 					public void run() {
 						try {
 							BufferedReader ois = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF8"));
-							while(!client.isClosed()) {
+							while (!client.isClosed()) {
 								// first line is canonical class name of event
 								String dataType = ois.readLine();
 								if (dataType == null || dataType.isEmpty()) {
@@ -89,32 +90,32 @@ public class KippenServer {
 
 								String dataLine = ois.readLine();
 								AbstractData data = JSONDataSerializer.deserialize(dataType, dataLine);
-								if(data == null) {
+								if (data == null) {
 									continue;
 								}
-								
-								if(data instanceof ContainerData == false) {
+
+								if (data instanceof ContainerData == false) {
 									// TODO process battery, etc.
 									continue;
 								}
-								
+
 								// pick the client and process all received data
 								AbstractKippenObject object = objectMap.get(data.getClientId());
 								if (object == null) {
 									log.warning("Client MAC address " + data.getClientId() + " is not registered");
 									return;
 								}
-								
+
 								// process each data packet
-								ContainerData containerData = (ContainerData)data;
-								
+								ContainerData containerData = (ContainerData) data;
+
 								// check lag and drop packet if necessary
 								long lag = System.currentTimeMillis() - containerData.getTimestamp();
-								if(lag > 200) {
+								if (lag > 200) {
 									System.err.println("Dropping packet, lag is " + lag + "ms");
 									continue;
 								}
-								
+
 								// lag in bounds, process ...
 								object.processData(containerData.accData);
 								object.processData(containerData.avgAccData);
@@ -122,10 +123,10 @@ public class KippenServer {
 								object.processData(containerData.shakeData);
 								object.processData(containerData.cubeData);
 								object.processData(containerData.barrelData);
-								
+
 								System.out.println(containerData.shakeData);
 								System.out.println(containerData.moveData);
-								
+
 								Thread.sleep(50);
 							}
 						} catch (Exception ex) {
@@ -252,7 +253,14 @@ public class KippenServer {
 				int trackNumber = Integer.valueOf(getCommandParamValue("trackNumber", c.getParam()));
 				int deviceNumber = Integer.valueOf(getCommandParamValue("deviceNumber", c.getParam()));
 				int parameterNumber = Integer.valueOf(getCommandParamValue("parameterNumber", c.getParam()));
-				commandList.add(new AbletonDeviceCommand(trackNumber, deviceNumber,parameterNumber));
+				commandList.add(new AbletonDeviceCommand(trackNumber, deviceNumber, parameterNumber));
+				break;
+
+			case "ABLETONMASTERDEVICE":
+				log.log(Level.INFO, "Registering ABLETONMASTERDEVICE command");
+				int masterDeviceNumber = Integer.valueOf(getCommandParamValue("deviceNumber", c.getParam()));
+				int masterParameterNumber = Integer.valueOf(getCommandParamValue("parameterNumber", c.getParam()));
+				commandList.add(new AbletonMasterDeviceCommand(masterDeviceNumber, masterParameterNumber));
 				break;
 
 			default:
