@@ -9,9 +9,9 @@
 package com.illposed.osc.utility;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.illposed.osc.OSCBundle;
 import com.illposed.osc.OSCListener;
@@ -27,7 +27,7 @@ import com.illposed.osc.OSCPacket;
 public class OSCPacketDispatcher {
 
 	private Map<String, OSCListener> addressToListener
-			= new HashMap<String, OSCListener>();
+			= new ConcurrentHashMap<String, OSCListener>();
 
 	/**
 	 *

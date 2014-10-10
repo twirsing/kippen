@@ -60,8 +60,6 @@ public class LiveController {
 	 * @return
 	 */
 	public boolean isClipPlaying(int trackNumber, int clipNumber) {
-		final boolean isPlaying = false;
-
 		OSCMessage message = this.sendReceive("/live/track/info", null, trackNumber);
 
 		TrackInfo trackInfo = new TrackInfo(message.getArguments());
@@ -70,13 +68,13 @@ public class LiveController {
 	}
 
 	public List<Device> getDevices(int track) {
-		OSCMessage message = this.sendReceive("/live/devicelist", null, track);
+		OSCMessage devicesMessage = this.sendReceive("/live/devicelist", null, track);
 
 		ArrayList<Device> devices = new ArrayList<Device>();
 
-		Object[] arguments = message.getArguments();
-		// (int track, int device, str name, ...)
+		Object[] arguments = devicesMessage.getArguments();
 
+		// (int track, int device, str name, ...)
 		List<List<Object>> pairs = Lists.partition(Arrays.asList(Arrays.copyOfRange(arguments, 1, arguments.length)), 2);
 		for (List<Object> pair : pairs) {
 			Device device = new Device((int) arguments[0], (int) pair.get(0), (String) pair.get(1));
@@ -86,14 +84,63 @@ public class LiveController {
 		return devices;
 	}
 
-	public List<DeviceParameter> getDeviceParameters(int trackNumber, int deviceNumber) {
+	public List<Device> getMasterDevices() {
+		OSCMessage devicesMessage = this.sendReceive("/live/master/devicelist", null);
+
+		ArrayList<Device> devices = new ArrayList<Device>();
+
+		Object[] arguments = devicesMessage.getArguments();
+
+		// (int track, int device, str name, ...)
+		List<List<Object>> pairs = Lists.partition(Arrays.asList(Arrays.copyOfRange(arguments, 0, arguments.length)), 2);
+		for (List<Object> pair : pairs) {
+			Device device = new Device(-1, (int) pair.get(0), (String) pair.get(1));
+			devices.add(device);
+		}
+
+		return devices;
+	}
+
+	public List<DeviceParameter> getMasterDeviceParameters(int deviceNumber) {
+		// returns: /live/master/device (int device, int parameter int value,
+		// str name, ...)
+		OSCMessage message = this.sendReceive("/live/master/device", "/live/master/device", deviceNumber);
+
 		ArrayList<DeviceParameter> deviceParameters = new ArrayList<DeviceParameter>();
 
-		// (int track, int device, int parameter int value, str name, ...)
+		Object[] arguments = message.getArguments();
+
+		List<List<Object>> triples = Lists.partition(Arrays.asList(Arrays.copyOfRange(arguments, 1, arguments.length)), 3);
+
+		for (List<Object> triple : triples) {
+			Object value = triple.get(1);
+			DeviceParameter deviceParameter;
+			if (value instanceof Integer) {
+				deviceParameter = new DeviceParameter(-1, (int) arguments[1], (int) triple.get(0), (int) value,
+						(String) triple.get(2));
+			} else {
+				deviceParameter = new DeviceParameter(-1, (int) arguments[1], (int) triple.get(0), (float) value,
+						(String) triple.get(2));
+			}
+
+			deviceParameters.add(deviceParameter);
+		}
+
+		return deviceParameters;
+	}
+
+	public List<DeviceParameter> getDeviceParameters(int trackNumber, int deviceNumber) {
+
+		// returns (int track, int device, int parameter int value, str name,
+		// ...)
 		OSCMessage message = this.sendReceive("/live/device", "/live/device/allparam", trackNumber, deviceNumber);
 
 		Object[] arguments = message.getArguments();
-		// triples: paramternum, value, paramname
+
+		ArrayList<DeviceParameter> deviceParameters = new ArrayList<DeviceParameter>();
+
+		// triples: (int track, int device, int parameter int value, str name,
+		// ...)
 		List<List<Object>> triples = Lists.partition(Arrays.asList(Arrays.copyOfRange(arguments, 2, arguments.length)), 3);
 
 		for (List<Object> triple : triples) {
@@ -113,19 +160,31 @@ public class LiveController {
 		return deviceParameters;
 	}
 
+	public void setMasterDeviceParameter(int deviceNumber, int parameterNumber, float value) {
+		this.sendMessage("/live/master/device", new Object[] { deviceNumber, parameterNumber, value });
+	}
+
 	public void setDeviceParameter(int trackNumber, int deviceNumber, int parameterNumber, float value) {
 		this.sendMessage("/live/device", new Object[] { trackNumber, deviceNumber, parameterNumber, value });
 	}
-	
+
 	public void setDeviceParameterNormalized(int trackNumber, int deviceNumber, int parameterNumber, float value) {
 		ParameterRange parameterRange = this.getDeviceParameterRange(trackNumber, deviceNumber, parameterNumber);
-		
+
 		double normalizedValue = normalizeParameterInputValue(value, parameterRange);
 		this.setDeviceParameter(trackNumber, deviceNumber, parameterNumber, (float) normalizedValue);
 	}
+	
+	public void setMasterDeviceParameterNormalized(int deviceNumber, int parameterNumber, float value) {
+		ParameterRange parameterRange = this.getMasterDeviceParameterRange(deviceNumber, parameterNumber);
+
+		double normalizedValue = normalizeParameterInputValue(value, parameterRange);
+		this.setMasterDeviceParameter(deviceNumber, parameterNumber, (float) normalizedValue);
+	}
 
 	protected double normalizeParameterInputValue(float value, ParameterRange parameterRange) {
-		NormalizedField normalizer = new NormalizedField(NormalizationAction.Normalize, null, 1.0, 0.0, parameterRange.getHigh(), parameterRange.getLow());
+		NormalizedField normalizer = new NormalizedField(NormalizationAction.Normalize, null, 1.0, 0.0, parameterRange.getHigh(),
+				parameterRange.getLow());
 		double normalizedValue = normalizer.normalize(value);
 		return normalizedValue;
 	}
@@ -142,6 +201,18 @@ public class LiveController {
 
 	public float getDeviceParameterValue(int trackNumber, int deviceNumber, int parameterNumber) {
 		return this.getDeviceParameter(trackNumber, deviceNumber, parameterNumber).getValue();
+	}
+
+	public ParameterRange getMasterDeviceParameterRange(int deviceNumber, int parameterNumber) {
+		// return /live/master/device/range
+
+		OSCMessage message = this.sendReceive("/live/master/device/range", null, new Object[] { deviceNumber, parameterNumber });
+
+		// /live/master/device/range ( int device, int/float min, int/float
+		// max)
+		Object[] m = message.getArguments();
+
+		return new ParameterRange((float) m[2], (float) m[3]);
 	}
 
 	public ParameterRange getDeviceParameterRange(int trackNumber, int deviceNumber, int parameterNumber) {
@@ -222,7 +293,6 @@ public class LiveController {
 		arrayList.addAll(Arrays.asList(params));
 		OSCMessage oscMessage = new OSCMessage(message, arrayList);
 
-		System.out.println("Sending message " + message + " with params: " + arrayList);
 		try {
 			sender.send(oscMessage);
 		} catch (IOException e) {
