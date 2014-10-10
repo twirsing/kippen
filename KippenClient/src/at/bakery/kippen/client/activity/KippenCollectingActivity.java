@@ -154,8 +154,8 @@ public class KippenCollectingActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		
-		senseMan.registerListener(sensorListener, accSense, 200000);
-		senseMan.registerListener(sensorListener, moveSenseMagnetic, 200000);
+		senseMan.registerListener(sensorListener, accSense, 100000);
+		senseMan.registerListener(sensorListener, moveSenseMagnetic, 100000);
 		
 		registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 	}
