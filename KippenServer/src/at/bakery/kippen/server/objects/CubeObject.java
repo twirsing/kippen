@@ -42,8 +42,6 @@ public class CubeObject extends AbstractKippenObject {
 	public void processData(AbstractData d) {
 		super.processData(d);
 
-		System.out.println("CUBE processes " + d.getClass().getSimpleName() + " -> " + d.toString());
-
 		
 		if (d instanceof WifiLevelsData) {
 			processWifiData((WifiLevelsData) d);
@@ -188,7 +186,7 @@ public class CubeObject extends AbstractKippenObject {
 		System.out.println("length " + lengthVector);
 		if (lengthVector > MOVE_DATA_THRESHHOLD) {
 
-			NormalizedField normalizer = new NormalizedField(NormalizationAction.Normalize, null, 70.0, 0.0, 1.0, 0.0);
+			NormalizedField normalizer = new NormalizedField(NormalizationAction.Normalize, null, 3.0, 0.0, 1.0, 0.0);
 			double normalizedValue = normalizer.normalize(lengthVector);
 			// log.log(Level.FINEST, "Length vector: " + lengthVector);
 			// log.log(Level.FINEST, "Normalized value: " + normalizedValue);
