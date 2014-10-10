@@ -92,12 +92,14 @@ public class KippenServer {
 								}
 
 								// second line is JSON data
-
 								String dataLine = ois.readLine();
 								if (dataLine == null) {
 									break;
 								}
-
+								
+								// set receive time stamp
+								long receiveTime = System.currentTimeMillis();
+								
 								AbstractData data = JSONDataSerializer.deserialize(dataType, dataLine);
 								if (data == null) {
 									continue;
@@ -133,7 +135,7 @@ public class KippenServer {
 								object.processData(containerData.cubeData);
 								object.processData(containerData.barrelData);
 
-//								System.out.println(containerData);
+								System.out.println(containerData);
 							}
 						} catch (Exception ex) {
 							log.severe("Client " + clientId + " died ...");

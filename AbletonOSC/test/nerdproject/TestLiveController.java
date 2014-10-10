@@ -63,7 +63,7 @@ public class TestLiveController extends TestCase {
 
 	@Test
 	public void testGetDeviceParameters() {
-		List<DeviceParameter> deviceParams = lc.getDeviceParameters(0, 0);
+		List<DeviceParameter> deviceParams = lc.getDeviceParameters(1,1);
 
 		for (DeviceParameter p : deviceParams) {
 			System.out.println(p.getParameterNumner() + ": " + p.getName());

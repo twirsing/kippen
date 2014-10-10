@@ -8,7 +8,6 @@ import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.data.AccelerationData;
 import at.bakery.kippen.common.data.BatteryData;
@@ -25,7 +24,6 @@ public class CubeObject extends AbstractKippenObject {
 	private int currentSide = -1;
 
 	private Queue<WifiLevelsData> avgWifiLevel = new LinkedList<>();
-	
 
 	public CubeObject(String id) {
 		super(id);
@@ -36,6 +34,7 @@ public class CubeObject extends AbstractKippenObject {
 	public void processData(AbstractData d) {
 		super.processData(d);
 
+		log.log(Level.FINEST, "CUBE processes " + d.getClass().getSimpleName() + " -> " + d.toString());
 		if (d instanceof WifiLevelsData) {
 			processWifiData((WifiLevelsData) d);
 		} else if (d instanceof AccelerationData) {
@@ -45,7 +44,6 @@ public class CubeObject extends AbstractKippenObject {
 		} else if (d instanceof ShakeData) {
 			processShakeData((ShakeData) d);
 		} else if (d instanceof MoveData) {
-			System.out.println("moving");
 			processMoveData((MoveData) d);
 		} else if (d instanceof BatteryData) {
 			processBatteryData((BatteryData) d);
@@ -57,8 +55,6 @@ public class CubeObject extends AbstractKippenObject {
 		super.timeout();
 	}
 
-	// 2 seconds delay before a new shake is processed
-	private static final long NEW_SHAKE_AFTER = (long) 1e9;
 	private long lastShook = System.nanoTime();
 
 	private void processShakeData(ShakeData shakeData) {
@@ -71,6 +67,8 @@ public class CubeObject extends AbstractKippenObject {
 			// ignore if shake events indifferent
 			return;
 		}
+
+		System.out.println("FIRE SHAKING");
 
 		lastShook = curTime;
 		HashMap<String, String> paramMap = new HashMap<String, String>();
@@ -162,8 +160,6 @@ public class CubeObject extends AbstractKippenObject {
 	}
 
 	private void processMoveData(MoveData data) {
-	
 	}
-
 
 }

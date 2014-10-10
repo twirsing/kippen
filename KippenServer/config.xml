@@ -3,6 +3,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.bakery.at/kippen config.xsd ">
 
+	<!-- tomw <mac>88:30:8A:38:53:05</mac> -->
+	<!-- tommy? <mac>c4:43:8f:46:34:32</mac> -->
+	<!-- matthias -->
+	<!-- <mac>10:68:3f:49:25:4e</mac> -->
+
 	<!-- Specififies the time after which a timeout even for an object is called -->
 	<timeoutMinutes>1</timeoutMinutes>
 
@@ -12,45 +17,40 @@
 	</ableton>
 
 	<objects>
-		<objectConfig>
-			<!-- tomw <mac>88:30:8A:38:53:05</mac> -->
-			<!-- tommy? <mac>c4:43:8f:46:34:32</mac> -->
-			<!-- matthias -->
-			<mac>10:68:3f:49:25:4e</mac>
-			<!-- Little Samsung 1 -->
-			<!-- mac>C8:14:79:2A:A4:44</mac -->
-			<!-- JOHNNY -->
-<!-- 			<mac>18:1E:B0:0A:56:AB</mac> -->
-			<events>
-				<!-- <eventConfig eventType="rollChange"> <commands> <CommandConfig commandType="MASTERVOLUME"> 
-					</CommandConfig> </commands> </eventConfig> -->
-				<!-- eventConfig eventType="cubeSideChange"> <commands> <CommandConfig 
-					commandType="ABLETONPLAY"> <param key="trackNumber" value="0" /> </CommandConfig>
-					
-					 
-					<CommandConfig commandType="SENDSOCKETDATA"> <param key="command" value="switchrelay" 
-					/> <param key="destinationIP" value="192.168.0.106" /> <param key="destinationPort" 
-					value="9999" /> <param key="channel" value="1" /> <param key="switchcommand" 
-					value="high" /> </CommandConfig> </commands> </eventConfig -->
 
-				<eventConfig eventType="move">
+		<!-- 1: Cube -->
+		<objectConfig>
+
+			<mac>BC:79:AD:D8:3E:47</mac>
+			<events>
+				<eventConfig eventType="cubeSideChange">
 					<commands>
-						<CommandConfig commandType="ABLETONMASTERDEVICE">
-							<param key="deviceNumber" value="0" />
-							<param key="parameterNumber" value="9" />
+						<CommandConfig commandType="ABLETONPLAY">
+							<param key="trackNumber" value="0" />
 						</CommandConfig>
+
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> -->
+						<!-- <param key="command" value="switchrelay" /> -->
+						<!-- <param key="destinationIP" value="192.168.0.106" /> -->
+						<!-- <param key="destinationPort" value="9999" /> -->
+						<!-- <param key="channel" value="1" /> -->
+						<!-- <param key="switchcommand" value="high" /> -->
+						<!-- </CommandConfig> -->
 					</commands>
 				</eventConfig>
+
 
 				<eventConfig eventType="timeout">
 					<commands>
 						<CommandConfig commandType="STOPTRACK">
 							<param key="trackNumber" value="0" />
 						</CommandConfig>
-						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" 
-							value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" /> 
-							<param key="destinationPort" value="9999" /> <param key="channel" value="0" 
-							/> <param key="switchcommand" value="low" /> </CommandConfig> -->
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" -->
+						<!-- value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" 
+							/> -->
+						<!-- <param key="destinationPort" value="9999" /> <param key="channel" 
+							value="0" -->
+						<!-- /> <param key="switchcommand" value="low" /> </CommandConfig> -->
 					</commands>
 				</eventConfig>
 				<eventConfig eventType="shake">
@@ -64,13 +64,216 @@
 							/> <param key="switchcommand" value="flash" /> </CommandConfig> -->
 					</commands>
 				</eventConfig>
-				<!-- <eventConfig eventType="cubeSideChange"> <commands> <CommandConfig 
-					commandType="ABLETONPLAY"> <param key="trackNumber" value="0" /> </CommandConfig> 
-					</commands> </eventConfig> <eventConfig eventType="shake"> <commands> <CommandConfig 
-					commandType="TOGGLEMUTE"> <param key="trackNumber" value="0" /> </CommandConfig> 
-					</commands> </eventConfig> -->
 			</events>
 			<type>cube</type>
+		</objectConfig>
+
+
+		<!-- 2: Cube -->
+		<objectConfig>
+
+			<mac>BC:79:AD:D8:37:7D</mac>
+			<events>
+				<eventConfig eventType="cubeSideChange">
+					<commands>
+						<CommandConfig commandType="ABLETONPLAY">
+							<param key="trackNumber" value="1" />
+						</CommandConfig>
+
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> -->
+						<!-- <param key="command" value="switchrelay" /> -->
+						<!-- <param key="destinationIP" value="192.168.0.106" /> -->
+						<!-- <param key="destinationPort" value="9999" /> -->
+						<!-- <param key="channel" value="1" /> -->
+						<!-- <param key="switchcommand" value="high" /> -->
+						<!-- </CommandConfig> -->
+					</commands>
+				</eventConfig>
+
+
+				<eventConfig eventType="timeout">
+					<commands>
+						<CommandConfig commandType="STOPTRACK">
+							<param key="trackNumber" value="1" />
+						</CommandConfig>
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" -->
+						<!-- value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" 
+							/> -->
+						<!-- <param key="destinationPort" value="9999" /> <param key="channel" 
+							value="0" -->
+						<!-- /> <param key="switchcommand" value="low" /> </CommandConfig> -->
+					</commands>
+				</eventConfig>
+				<eventConfig eventType="shake">
+					<commands>
+						<CommandConfig commandType="TOGGLEMUTE">
+							<param key="trackNumber" value="1" />
+						</CommandConfig>
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" 
+							value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" /> 
+							<param key="destinationPort" value="9999" /> <param key="channel" value="0" 
+							/> <param key="switchcommand" value="flash" /> </CommandConfig> -->
+					</commands>
+				</eventConfig>
+			</events>
+			<type>cube</type>
+		</objectConfig>
+		
+		
+		
+		<!-- 3: Cube -->
+		<objectConfig>
+
+			<mac>18:1E:B0:0A:56:AB</mac>
+			<events>
+				<eventConfig eventType="cubeSideChange">
+					<commands>
+						<CommandConfig commandType="ABLETONPLAY">
+							<param key="trackNumber" value="2" />
+						</CommandConfig>
+
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> -->
+						<!-- <param key="command" value="switchrelay" /> -->
+						<!-- <param key="destinationIP" value="192.168.0.106" /> -->
+						<!-- <param key="destinationPort" value="9999" /> -->
+						<!-- <param key="channel" value="1" /> -->
+						<!-- <param key="switchcommand" value="high" /> -->
+						<!-- </CommandConfig> -->
+					</commands>
+				</eventConfig>
+
+	
+				<eventConfig eventType="timeout">
+					<commands>
+						<CommandConfig commandType="STOPTRACK">
+							<param key="trackNumber" value="2" />
+						</CommandConfig>
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" -->
+						<!-- value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" 
+							/> -->
+						<!-- <param key="destinationPort" value="9999" /> <param key="channel" 
+							value="0" -->
+						<!-- /> <param key="switchcommand" value="low" /> </CommandConfig> -->
+					</commands>
+				</eventConfig>
+				<eventConfig eventType="shake">
+					<commands>
+						<CommandConfig commandType="TOGGLEMUTE">
+							<param key="trackNumber" value="2" />
+						</CommandConfig>
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" 
+							value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" /> 
+							<param key="destinationPort" value="9999" /> <param key="channel" value="0" 
+							/> <param key="switchcommand" value="flash" /> </CommandConfig> -->
+					</commands>
+				</eventConfig>
+			</events>
+			<type>cube</type>
+		</objectConfig>
+
+		<!-- 4: Cube -->
+		<objectConfig>
+
+			<mac>BC:79:AD:D8:3C:67</mac>
+			<events>
+				<eventConfig eventType="cubeSideChange">
+					<commands>
+						<CommandConfig commandType="ABLETONPLAY">
+							<param key="trackNumber" value="3" />
+						</CommandConfig>
+
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> -->
+						<!-- <param key="command" value="switchrelay" /> -->
+						<!-- <param key="destinationIP" value="192.168.0.106" /> -->
+						<!-- <param key="destinationPort" value="9999" /> -->
+						<!-- <param key="channel" value="1" /> -->
+						<!-- <param key="switchcommand" value="high" /> -->
+						<!-- </CommandConfig> -->
+					</commands>
+				</eventConfig>
+
+
+				<eventConfig eventType="timeout">
+					<commands>
+						<CommandConfig commandType="STOPTRACK">
+							<param key="trackNumber" value="3" />
+						</CommandConfig>
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" -->
+						<!-- value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" 
+							/> -->
+						<!-- <param key="destinationPort" value="9999" /> <param key="channel" 
+							value="0" -->
+						<!-- /> <param key="switchcommand" value="low" /> </CommandConfig> -->
+					</commands>
+				</eventConfig>
+				<eventConfig eventType="shake">
+					<commands>
+						<CommandConfig commandType="TOGGLEMUTE">
+							<param key="trackNumber" value="3" />
+						</CommandConfig>
+						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" 
+							value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" /> 
+							<param key="destinationPort" value="9999" /> <param key="channel" value="0" 
+							/> <param key="switchcommand" value="flash" /> </CommandConfig> -->
+					</commands>
+				</eventConfig>
+			</events>
+			<type>cube</type>
+		</objectConfig>
+
+		<!-- 5: Barrel -->
+		<objectConfig>
+			<mac>BC:79:AD:C7:46:0A</mac>
+			<events>
+				<eventConfig eventType="rollChange">
+					<commands>
+						<CommandConfig commandType="ABLETONDEVICE">
+							<param key="trackNumber" value="0" />
+							<param key="deviceNumber" value="0" />
+							<param key="parameterNumber" value="1" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+
+			</events>
+			<type>barrel</type>
+		</objectConfig>
+
+		<!-- 6: Barrel -->
+		<objectConfig>
+			<mac>C8:14:79:2A:A4:44</mac>
+			<events>
+				<eventConfig eventType="rollChange">
+					<commands>
+						<CommandConfig commandType="ABLETONDEVICE">
+							<param key="trackNumber" value="1" />
+							<param key="deviceNumber" value="1" />
+							<param key="parameterNumber" value="3" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+
+			</events>
+			<type>barrel</type>
+		</objectConfig>
+
+
+
+		<!-- 9: Ball -->
+		<objectConfig>
+			<mac>6C:B7:F4:AD:BE:BF</mac>
+			<events>
+				<eventConfig eventType="move">
+					<commands>
+						<CommandConfig commandType="ABLETONMASTERDEVICE">
+							<param key="deviceNumber" value="0" />
+							<param key="parameterNumber" value="9" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+
+			</events>
+			<type>ball</type>
 		</objectConfig>
 	</objects>
 
