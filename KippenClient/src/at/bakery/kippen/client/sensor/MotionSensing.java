@@ -60,7 +60,7 @@ public class MotionSensing implements SensorEventListener {
 	 * SHAKE SENSING
 	 * ------------------------------------------ */
 	// Minimum acceleration needed to count as a shake movement
-    private static final double MIN_SHAKE_ACCELERATION = 1.2;
+    private static final double MIN_SHAKE_ACCELERATION = 1.5;
     
     // Minimum number of movements to register a shake
     private static final int MIN_MOVEMENTS = 6;
@@ -360,13 +360,13 @@ public class MotionSensing implements SensorEventListener {
 		}
 
 		private void enforceWindow() {
-			if (list.size() > 50) {
+			if (list.size() > 15) {
 				list.removeFirst();
 			}
 		}
 
 		private double calculateStdDev() {
-			if (list.size() > 5) {
+			if (list.size() > 3) {
 				stats.clear();
 				for (int i = 0; i < list.size(); i++) {
 					stats.addValue(list.get(i));
