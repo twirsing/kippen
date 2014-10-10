@@ -18,11 +18,13 @@ import at.bakery.kippen.common.data.WifiLevelsData;
 import at.bakery.kippen.server.EventTypes;
 import at.bakery.kippen.server.KippenServer;
 import at.bakery.kippen.server.command.Command;
-import at.bakery.kippen.server.outlets.AbstractKippOutlet;
-import at.bakery.kippen.server.outlets.CsvKippOutlet;
 
 public class BarrelObject extends AbstractKippenObject {
-	static Logger log =  Logger.getLogger(BarrelObject.class.getName());
+	static Logger log = Logger.getLogger(BarrelObject.class.getName());
+
+	double lastBarrelValue = 0;
+
+	private static double MIN_VALUE_DELTA = 0.01;
 
 	public BarrelObject(String id) {
 		super(id);
@@ -32,78 +34,52 @@ public class BarrelObject extends AbstractKippenObject {
 	@Override
 	public void processData(AbstractData d) {
 		super.processData(d);
-		
-		log.log(Level.FINEST , "BARREL processes " + d.getClass().getSimpleName() + " -> " + d.toString());
-		
+
+		log.log(Level.FINEST, "BARREL processes " + d.getClass().getSimpleName() + " -> " + d.toString());
+
 		if (d instanceof WifiLevelsData) {
 			processWifiData((WifiLevelsData) d);
 		} else if (d instanceof BarrelOrientationData) {
 			processOrientationData((BarrelOrientationData) d);
-		} else if (d instanceof ShakeData) {
-			processShakeData();
-		} else if(d instanceof MoveData) {
-			processMoveData((MoveData)d);
-		} else if(d instanceof BatteryData) {
-			processBatteryData((BatteryData)d);
+		} else if (d instanceof BatteryData) {
+			processBatteryData((BatteryData) d);
 		}
 
-		output();
 	}
-	
-	protected void output() {
-		for (AbstractKippOutlet aOutlet : outletObjects) {
-			if (aOutlet instanceof CsvKippOutlet) {
-				aOutlet.output();
-			}
-		}
-	}
-	
+
 	@Override
 	protected void timeout() {
 		super.timeout();
 	}
-	
-	private void processOrientationData(BarrelOrientationData data) {
-		log.log(Level.FINEST ,"Barrel relative orientation " + data.getValue());
-		HashMap<String, String> paramMap = new HashMap<String, String>();
-		
-		paramMap.put("volume", String.valueOf(data.getValue()));
-		
-		for(Command c : eventsOfObject.get(EventTypes.ROLLCHANGE)) {
-			try {
-				c.execute(paramMap);
-			} catch (Exception e) {
-				log.warning("Failed to execute command " + c.getClass().getSimpleName());
-			}
-		}
-		
-	}
 
-	// 2 seconds delay before a new shake is processed
-	private static final long NEW_SHAKE_AFTER = (long)2e9;
-	private long lastShook = System.nanoTime();
-	
-	private void processShakeData() {
-		long curTime = System.nanoTime();
-		if(curTime - lastShook < NEW_SHAKE_AFTER) {
-			// ignore if shake events indifferent
-			return;
-		}
-		
-		lastShook = curTime;
+	private void processOrientationData(BarrelOrientationData data) {
+		log.log(Level.FINEST, "Barrel relative orientation " + data.getValue());
 		HashMap<String, String> paramMap = new HashMap<String, String>();
-		
-		for(Command c : eventsOfObject.get(EventTypes.SHAKE)) {
-			try {
-				c.execute(paramMap);
-			} catch (Exception e) {
-				log.warning("Failed to execute command " + c.getClass().getSimpleName());
+
+		double barrelValue = Double.valueOf(data.getValue());
+
+		if (Math.abs(barrelValue - lastBarrelValue) > MIN_VALUE_DELTA) {
+
+			System.out.println("barrel change");
+			paramMap.put("value", String.valueOf(barrelValue));
+
+			for (Command c : eventsOfObject.get(EventTypes.ROLLCHANGE)) {
+				try {
+					c.execute(paramMap);
+				} catch (Exception e) {
+					e.printStackTrace();
+					log.warning("Failed to execute command " + c.getClass().getSimpleName());
+				}
 			}
+
+			lastBarrelValue = barrelValue;
+
 		}
+
 	}
 
 	private Queue<WifiLevelsData> avgWifiLevel = new LinkedList<>();
-	
+
 	private void processWifiData(WifiLevelsData data) {
 		WifiLevelsData wd = (WifiLevelsData) data;
 
@@ -120,7 +96,7 @@ public class BarrelObject extends AbstractKippenObject {
 
 				// for each measured wifi in the item ...
 				for (Entry<String, Object> val : w.getNetworks()) {
-					innerAvgLevel += (double)val.getValue();
+					innerAvgLevel += (double) val.getValue();
 				}
 
 				// ... compute average
@@ -130,7 +106,7 @@ public class BarrelObject extends AbstractKippenObject {
 
 			// RSSI to meters conversion
 			double dist = Math.pow(10, ((27.55 - (67.6 + avgLevel)) / 20.0));
-			log.log(Level.FINEST , "~ " + dist + "m (level: " + avgLevel + ")");
+			log.log(Level.FINEST, "~ " + dist + "m (level: " + avgLevel + ")");
 
 			// remember the last to measurements, remove others
 			if (avgWifiLevel.size() > 10) {
@@ -142,9 +118,13 @@ public class BarrelObject extends AbstractKippenObject {
 
 	private void processAccelerationData(AccelerationData data) {
 		SensorTripleData sd = (SensorTripleData) data;
-		//log.info("" + Math.sqrt(sd.getX() * sd.getX() + sd.getY() * sd.getY() + sd.getZ() + sd.getZ()));
+		// log.info("" + Math.sqrt(sd.getX() * sd.getX() + sd.getY() * sd.getY()
+		// + sd.getZ() + sd.getZ()));
 	}
 
-	private void processBatteryData(BatteryData data) {}
-	private void processMoveData(MoveData data) {}
+	private void processBatteryData(BatteryData data) {
+	}
+
+	private void processMoveData(MoveData data) {
+	}
 }

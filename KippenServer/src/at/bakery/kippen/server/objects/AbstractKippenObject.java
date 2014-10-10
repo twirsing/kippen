@@ -4,7 +4,6 @@
 package at.bakery.kippen.server.objects;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,7 +15,6 @@ import at.bakery.kippen.common.data.CubeOrientationData;
 import at.bakery.kippen.common.data.ShakeData;
 import at.bakery.kippen.server.EventTypes;
 import at.bakery.kippen.server.command.Command;
-import at.bakery.kippen.server.outlets.AbstractKippOutlet;
 
 /**
  * @author thomasw
@@ -27,8 +25,6 @@ public abstract class AbstractKippenObject {
 	protected String id;
 
 	protected HashMap<String, List<Command>> eventsOfObject = new HashMap<String, List<Command>>();
-	protected HashSet<AbstractKippOutlet> outletObjects = new HashSet<AbstractKippOutlet>();
-	//protected HashMap<String, AbstractData> dataObjects = new HashMap<String, AbstractData>();
 
 //	private static final long IDLE_AFTER_SECONDS = KippenServer.OBJECT_TIMEOUT_MINUTES * 60;
 	private static final long IDLE_AFTER_SECONDS =  20;
@@ -55,18 +51,13 @@ public abstract class AbstractKippenObject {
 		}, IDLE_AFTER_SECONDS, 10, TimeUnit.SECONDS);
 	}
 
-	public void addOutlet(AbstractKippOutlet aKippOutlet) {
-		outletObjects.add(aKippOutlet);
-	}
 
 	public void setCommandsForEvents(String eventID, List<Command> commandList) {
 		this.eventsOfObject.put(eventID, commandList);
 	}
 
-	protected abstract void output();
 
 	protected void timeout() {
-
 		// FIXME implement ableton stop
 		System.out.println("Calling TIMOUT on object with " + id);
 		HashMap<String, String> paramMap = new HashMap<String, String>();
@@ -95,6 +86,24 @@ public abstract class AbstractKippenObject {
 		// FIXME would be better to do it with check on minimal acceleration occurrence
 		if (data instanceof CubeOrientationData || data instanceof ShakeData){
 			lastActivityTime = System.nanoTime();
+		}
+	}
+	
+	/**
+	 * Looks for the commands of this object that are registed for this specific event type.
+	 */
+	protected void executeCommands(HashMap<String, String> paramMap, String eventType) {
+		List<Command> commands = eventsOfObject.get(eventType);
+		if (commands != null) {
+			for (Command c : commands) {
+				try {
+					c.execute(paramMap);
+				} catch (Exception e) {
+					log.warning("Failed to execute command " + c.getClass().getSimpleName());
+				} finally {
+
+				}
+			}
 		}
 	}
 

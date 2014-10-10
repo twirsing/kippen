@@ -18,7 +18,7 @@ public class AbletonDeviceCommand implements Command {
 	@Override
 	public void execute(Map<String, String> params) throws Exception {
 		float value = Float.valueOf(params.get("value"));
-		LiveController.getInstance().setDeviceParameter(trackNumber, deviceNumber, parameterNumber, value);
+		LiveController.getInstance().setDeviceParameterNormalized(trackNumber, deviceNumber, parameterNumber, value);
 	}
 
 }

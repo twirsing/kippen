@@ -31,7 +31,7 @@ public class DeviceParameter {
 		this.trackNumber = trackNumber;
 	}
 
-	public int getDeviceNumner() {
+	public int getDeviceNumber() {
 		return deviceNumner;
 	}
 
