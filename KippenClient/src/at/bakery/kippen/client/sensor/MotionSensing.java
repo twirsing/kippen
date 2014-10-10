@@ -60,13 +60,13 @@ public class MotionSensing implements SensorEventListener {
 	 * SHAKE SENSING
 	 * ------------------------------------------ */
 	// Minimum acceleration needed to count as a shake movement
-    private static final double MIN_SHAKE_ACCELERATION = 1.5;
+    private static final double MIN_SHAKE_ACCELERATION = 2.0;
     
     // Minimum number of movements to register a shake
-    private static final int MIN_MOVEMENTS = 6;
+    private static final int MIN_MOVEMENTS = 2;
     
     // Maximum time (in milliseconds) for the whole shake to occur
-    private static final int MAX_SHAKE_DURATION = 2000;
+    private static final int MAX_SHAKE_DURATION = 600;
 	
 	// Start time for the shake detection
 	long startTime = 0;

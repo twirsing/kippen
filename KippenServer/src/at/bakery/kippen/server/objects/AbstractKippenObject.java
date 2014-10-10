@@ -33,8 +33,8 @@ public abstract class AbstractKippenObject {
 	private static final long IDLE_AFTER_SECONDS =  20;
 	private long lastActivityTime = System.nanoTime();
 	
-	protected double MOVE_DATA_THRESHHOLD = 0.3;
-	protected static final long NEW_SHAKE_AFTER = (long) 1e9;
+	protected double MOVE_DATA_THRESHHOLD = 0.2;
+	protected static final long NEW_SHAKE_AFTER = (long)3e9;
 
 	/**
 	 * @param id
@@ -43,10 +43,8 @@ public abstract class AbstractKippenObject {
 	public AbstractKippenObject(String id) {
 		this.id = id;
 
-		// periodically checks whether the object is idle or not (defined by the
-		// constant)
-		ScheduledExecutorService scheduler = Executors
-				.newScheduledThreadPool(1);
+		// periodically checks whether the object is idle or not (defined by the constant)
+		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
@@ -68,9 +66,7 @@ public abstract class AbstractKippenObject {
 	protected abstract void output();
 
 	protected void timeout() {
-
-		// FIXME implement ableton stop
-		System.out.println("Calling TIMOUT on object with " + id);
+		System.out.println("Calling TIMOUT on object " + id);
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 		for (Command c : eventsOfObject.get(EventTypes.TIMEOUT)) {
 			try {

@@ -11,7 +11,7 @@ public class ShakeData extends AbstractData {
 	public ShakeData(long timestamp) {
 		super(timestamp);
 		
-		setBoolean("shaking", false);
+		setShaking(false);
 	}
 	
 	public boolean isShaking() {

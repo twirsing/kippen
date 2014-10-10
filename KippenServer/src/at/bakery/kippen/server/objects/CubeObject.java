@@ -41,7 +41,6 @@ public class CubeObject extends AbstractKippenObject {
 		super.processData(d);
 
 		log.log(Level.FINEST, "CUBE processes " + d.getClass().getSimpleName() + " -> " + d.toString());
-
 		
 		if (d instanceof WifiLevelsData) {
 			processWifiData((WifiLevelsData) d);
@@ -85,6 +84,8 @@ public class CubeObject extends AbstractKippenObject {
 			// ignore if shake events indifferent
 			return;
 		}
+		
+		System.out.println("FIRE SHAKING");
 
 		lastShook = curTime;
 		HashMap<String, String> paramMap = new HashMap<String, String>();
@@ -188,7 +189,6 @@ public class CubeObject extends AbstractKippenObject {
 
 			paramMap.put("value", String.valueOf(normalizedValue));
 
-			System.out.println(normalizedValue);
 			executeCommands(paramMap, EventTypes.MOVE);
 			moveDataWasBelowThreshhold = false;
 		} else {

@@ -89,11 +89,13 @@ public class KippenServer {
 								}
 
 								// second line is JSON data
-
 								String dataLine = ois.readLine();
 								if(dataLine == null) {
 									break;
 								}
+								
+								// set receive time stamp
+								long receiveTime = System.currentTimeMillis();
 								
 								AbstractData data = JSONDataSerializer.deserialize(dataType, dataLine);
 								if(data == null) {
@@ -116,8 +118,8 @@ public class KippenServer {
 								ContainerData containerData = (ContainerData)data;
 								
 								// check lag and drop packet if necessary
-								long lag = System.currentTimeMillis() - containerData.getTimestamp();
-								if(lag > 200) {
+								long lag = receiveTime - containerData.getTimestamp();
+								if(lag > 1000) {
 									System.err.println("Dropping packet, lag is " + lag + "ms");
 									continue;
 								}
