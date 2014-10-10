@@ -69,10 +69,13 @@ public class MotionSensing implements SensorEventListener {
     private static final int MAX_SHAKE_DURATION = 600;
 	
 	// Start time for the shake detection
-	long startTime = 0;
+	private long startTime = 0;
 	
 	// Counter for shake movements
-	int moveCount = 0;
+	private int moveCount = 0;
+	
+	// timer for shake is on keeping
+	private long shakeIsOn;
 	
 	/* ------------------------------------------
 	 * AVERAGED ACCELERATION SENSING
@@ -171,12 +174,9 @@ public class MotionSensing implements SensorEventListener {
 	}
 	
 	private void handleShake() {
-		// reset shake
-		SHAKE_DATA.setShaking(false);
-		
+		long now = System.currentTimeMillis();
 		double linAccAmpl = Math.sqrt(accLinVector[0]*accLinVector[0] + accLinVector[1]*accLinVector[1] + accLinVector[2]*accLinVector[2]);
         if(linAccAmpl > MIN_SHAKE_ACCELERATION) {
-        	long now = System.currentTimeMillis();
         	if(startTime == 0) {
         		startTime = now;
         	}
@@ -191,6 +191,8 @@ public class MotionSensing implements SensorEventListener {
         		if(moveCount >= MIN_MOVEMENTS) {
         			SHAKE_DATA.setShaking(true);
         			
+        			shakeIsOn = now;
+        			
         			Log.d("KIPPEN", "SHAKE: !");
         			
         			// reset
@@ -198,6 +200,11 @@ public class MotionSensing implements SensorEventListener {
         	    	moveCount = 0;
         		}
         	}
+        }
+        
+        if(now - shakeIsOn > MAX_SHAKE_DURATION) {
+        	SHAKE_DATA.setShaking(false);
+        	shakeIsOn = 0;
         }
 	}
 	
