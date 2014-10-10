@@ -7,9 +7,9 @@ public class ContainerData extends AbstractData {
 	/* all data to be send, need to do it explicitly
 	 * (i.e. not using a generic list), otherwise 
 	 * serialization would get pretty complex! */ 
-	public SensorTripleData accData;
-	public SensorTripleData avgAccData;
-	public SensorTripleData moveData;
+	public AccelerationData accData;
+	public AverageAccelerationData avgAccData;
+	public MoveData moveData;
 	public ShakeData shakeData;
 	public CubeOrientationData cubeData;
 	public BarrelOrientationData barrelData;

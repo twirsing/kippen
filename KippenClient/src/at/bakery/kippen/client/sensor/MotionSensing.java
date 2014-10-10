@@ -14,9 +14,12 @@ import android.opengl.Matrix;
 import android.util.Log;
 import at.bakery.kippen.client.activity.INetworking;
 import at.bakery.kippen.client.activity.NetworkingTask;
+import at.bakery.kippen.common.data.AccelerationData;
+import at.bakery.kippen.common.data.AverageAccelerationData;
 import at.bakery.kippen.common.data.BarrelOrientationData;
 import at.bakery.kippen.common.data.ContainerData;
 import at.bakery.kippen.common.data.CubeOrientationData;
+import at.bakery.kippen.common.data.MoveData;
 import at.bakery.kippen.common.data.CubeOrientationData.Orientation;
 import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.data.ShakeData;
@@ -29,10 +32,10 @@ public class MotionSensing implements SensorEventListener {
 	/* ------------------------------------------
 	 * SENSOR DATA CACHES - LATEST ONES
 	 * ------------------------------------------ */
-	private final SensorTripleData ACC_DATA = new SensorTripleData(0, 0, 0);
-	private final SensorTripleData AVG_ACC_DATA = new SensorTripleData(0, 0, 0);
+	private final AccelerationData ACC_DATA = new AccelerationData(0, 0, 0);
+	private final AverageAccelerationData AVG_ACC_DATA = new AverageAccelerationData(0, 0, 0);
 	private final ShakeData SHAKE_DATA = new ShakeData();
-	private final SensorTripleData MOVE_DATA = new SensorTripleData(0, 0, 0);
+	private final MoveData MOVE_DATA = new MoveData(0, 0, 0);
 	private final CubeOrientationData CUBE_DATA = new CubeOrientationData(Orientation.UNKNOWN);
 	private final BarrelOrientationData BARREL_DATA = new BarrelOrientationData(0);
 	
