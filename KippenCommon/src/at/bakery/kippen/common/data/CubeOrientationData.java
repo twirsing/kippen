@@ -34,6 +34,6 @@ public class CubeOrientationData extends AbstractData {
 	}
 	
 	public String toString() {
-		return "SENSOR cube = " + getOrientation();
+		return "CUBE side " + getOrientation();
 	}
 }
