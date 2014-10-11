@@ -40,6 +40,49 @@ public class SendSocketDataCommand implements Command{
 	private int destinationPort;
 	static Logger log = Logger.getLogger(KippenServer.class.getName());
 	
+	
+	private static class MessageProcessor implements Runnable {
+
+		private String jsCommand;
+//		private Socket socket;
+		private String destinationIP;
+		private int destinationPort;
+		
+		public MessageProcessor(String destinationIP, int destinationPort, String jsCommand){
+			this.destinationIP = destinationIP;
+			this.destinationPort = destinationPort;
+			this.jsCommand = jsCommand;
+		}
+		
+		@Override
+	    public void run() {
+	    	
+			OutputStream oos;
+			BufferedReader ois;
+			
+	    	try {
+	    		Socket socket = new Socket(InetAddress.getByName(this.destinationIP), this.destinationPort);
+//	    		System.out.println("execute: "+this.socket);
+//	    		System.out.println("jsCommand: "+this.jsCommand.getBytes("UTF8"));
+	    		oos = socket.getOutputStream();
+	    		oos.write(this.jsCommand.getBytes("UTF8"));
+				oos.flush();
+				oos.close();
+//				ois = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF8"));
+//				
+//			    StringBuilder responseStrBuilder = new StringBuilder();
+//			    String response = ois.readLine();
+//			    String status = new Gson().fromJson(response, String.class);
+//				
+				socket.close();
+	    	} catch (Exception ex) {
+	    		ex.printStackTrace();
+				System.err.println("Failed to send packets");
+			}
+//	    	
+	    }
+	}
+	
 	public SendSocketDataCommand(List<Param>  param){
 		this.param = param;
 		this.jsCommand = "";
@@ -48,51 +91,23 @@ public class SendSocketDataCommand implements Command{
 			else if(aParam.getKey().equalsIgnoreCase("destinationPort"))  this.destinationPort = Integer.parseInt(aParam.getValue());
 			else this.jsCommand = this.jsCommand + "\""+aParam.getKey()+"\":\""+aParam.getValue()+"\", ";
 		}
-		
 	}
 	
 	@Override
-	public void execute(Map<String, String> params) {
-		System.out.println("execute: "+this.jsCommand);
-
-		OutputStream oos;
-		BufferedReader ois;
-		Socket socket;
+	public void execute(Map<String, String> params) throws IOException {
+		
 		try {
-
-			try {
-				socket = new Socket(InetAddress.getByName(this.destinationIP), this.destinationPort);
-				oos = socket.getOutputStream();
-				ois = new BufferedReader(
-						new InputStreamReader(socket.getInputStream(), "UTF8"));
-			} catch (Exception e) {
-				return;
-			}
-			try {
-				Object myobj = new PingData();
-				//String json = "{\"command\":\""+this.command+"\", \"data1\":\""+this.data1+"\", \"data2\":\""+this.data2+"\"}";
-				oos.write(this.jsCommand.getBytes("UTF8"));
-				oos.flush();
-			    StringBuilder responseStrBuilder = new StringBuilder();
-			    String response = ois.readLine();
-			    String status = new Gson().fromJson(response, String.class);
-
-			} catch(Exception ex) {
-				ex.printStackTrace();
-				System.err.println("Failed to send packets");
-			}
-			oos.close();
-			ois.close();
-		
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//socket = new Socket(InetAddress.getByName(this.destinationIP), this.destinationPort);
+			MessageProcessor MessageProcessor = new MessageProcessor(this.destinationIP, this.destinationPort, this.jsCommand);
+			Thread t = new Thread(MessageProcessor);
+	        t.start();
+	        
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return;
 		}
-
 		
+		
+	
 	}
-
 }
