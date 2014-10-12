@@ -59,20 +59,23 @@ public class MotionSensing implements SensorEventListener {
 	/* ------------------------------------------
 	 * SHAKE SENSING
 	 * ------------------------------------------ */
-	// Minimum acceleration needed to count as a shake movement
-    private static final double MIN_SHAKE_ACCELERATION = 2.0;
-    
-    // Minimum number of movements to register a shake
-    private static final int MIN_MOVEMENTS = 2;
-    
-    // Maximum time (in milliseconds) for the whole shake to occur
-    private static final int MAX_SHAKE_DURATION = 600;
+	// some constants regarding intensity and timing
+	private static final int FORCE_THRESHOLD = 350;
+	private static final int TIME_THRESHOLD = 100;
+	private static final int SHAKE_TIMEOUT = 500;
+	private static final int SHAKE_DURATION = 1000;
+	private static final int SHAKE_COUNT = 3;
 	
-	// Start time for the shake detection
-	private long startTime = 0;
-	
-	// Counter for shake movements
-	private int moveCount = 0;
+	// Maximum time (in milliseconds) for the whole shake to occur
+    private static final int MAX_SHAKE_DURATION = 800;
+
+	// remember all you need to remember
+	private float mLastX = -1.0f, mLastY = -1.0f, mLastZ = -1.0f;
+	private long mLastTime;
+	private int mShakeCount = 0;
+	private long mLastShake;
+	private long mLastForce;
+	private Orientation compareLastCube = Orientation.UNKNOWN;
 	
 	// timer for shake is on keeping
 	private long shakeIsOn;
@@ -100,7 +103,7 @@ public class MotionSensing implements SensorEventListener {
 	 * BARREL
 	 * ------------------------------------------- */
 	//TODO make this configurable via the XML file
-	private static final int MAX_DEGREES = 10 * 360;
+	private static final int MAX_DEGREES = 3 * 360;
 	private int degrees = 0;
 	private int lastAbsDegrees = 0;
 	
@@ -175,34 +178,43 @@ public class MotionSensing implements SensorEventListener {
 	
 	private void handleShake() {
 		long now = System.currentTimeMillis();
-		double linAccAmpl = Math.sqrt(accLinVector[0]*accLinVector[0] + accLinVector[1]*accLinVector[1] + accLinVector[2]*accLinVector[2]);
-        if(linAccAmpl > MIN_SHAKE_ACCELERATION) {
-        	if(startTime == 0) {
-        		startTime = now;
-        	}
-        	
-        	long elapsedTime = now - startTime;
-        	if(elapsedTime > MAX_SHAKE_DURATION) {
-        		// reset
-        		startTime = 0;
-            	moveCount = 0;
-        	} else {
-        		moveCount++;
-        		if(moveCount >= MIN_MOVEMENTS) {
-        			SHAKE_DATA.setShaking(true);
-        			
-        			shakeIsOn = now;
-        			
-        			Log.d("KIPPEN", "SHAKE: !");
-        			
-        			// reset
-        			startTime = 0;
-        	    	moveCount = 0;
-        		}
-        	}
-        }
-        
-        if(now - shakeIsOn > MAX_SHAKE_DURATION) {
+
+		if((now - mLastForce) > SHAKE_TIMEOUT) {
+			mShakeCount = 0;
+			compareLastCube = Orientation.UNKNOWN;
+		}
+
+		if((now - mLastTime) > TIME_THRESHOLD) {
+			long diff = now - mLastTime;
+			float speed = Math.abs(accVector[0] + accVector[1] + accVector[2] - mLastX - mLastY - mLastZ) / diff * 10000;
+			if(speed > FORCE_THRESHOLD) {
+				if((++mShakeCount >= SHAKE_COUNT) && (now - mLastShake > SHAKE_DURATION)) {
+					// if all indicates a shake, check that we did no rotation
+					System.out.println("this one is " + CUBE_DATA.getOrientation());
+					if(compareLastCube == CUBE_DATA.getOrientation() && CUBE_DATA.getOrientation() != Orientation.UNKNOWN) {
+						System.out.println("YEEEES");
+						SHAKE_DATA.setShaking(true);
+						mLastShake = now;
+						shakeIsOn = now;
+					}
+					
+					// reset, anyway
+					mShakeCount = 0;
+					compareLastCube = Orientation.UNKNOWN;
+				} else if(compareLastCube == Orientation.UNKNOWN) {
+					compareLastCube = CUBE_DATA.getOrientation();
+					System.out.println("last one is " + compareLastCube);
+				}
+				mLastForce = now;
+			}
+			mLastTime = now;
+			mLastX = accVector[0];
+			mLastY = accVector[1];
+			mLastZ = accVector[2];
+		}
+		
+		// stop sending after this
+		if(now - shakeIsOn > MAX_SHAKE_DURATION) {
         	SHAKE_DATA.setShaking(false);
         	shakeIsOn = 0;
         }
@@ -296,17 +308,17 @@ public class MotionSensing implements SensorEventListener {
 	@Override
 	public void onSensorChanged(SensorEvent se) {
 		if(se.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-			System.arraycopy(se.values, 0, magVector, 0, 4);
+			System.arraycopy(se.values, 0, magVector, 0, 3);
 		} else if(se.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-			System.arraycopy(se.values, 0, accVector, 0, 4);
+			System.arraycopy(se.values, 0, accVector, 0, 3);
 		}
 		
 		computeLinearAccelerationAndGravity();
 		
 		handleAvgAcceleration();
 		handleMove();
-		handleShake();
 		handleOrientation();
+		handleShake();
 		
 		// send all sensor data at once
 		net.sendPacket(CONTAINER_DATA);

@@ -43,14 +43,15 @@
 
 
 
-    <simpleType name="typeEnum">
-    <restriction base="string">
-      <enumeration value="cube"/>
-      <enumeration value="barrel"/>
-    </restriction>
-  </simpleType>
+	<simpleType name="typeEnum">
+		<restriction base="string">
+			<enumeration value="cube" />
+			<enumeration value="barrel" />
+			<enumeration value="ball"></enumeration>
+		</restriction>
+	</simpleType>
 
-    <complexType name="CommandConfig">
+	<complexType name="CommandConfig">
     	<sequence>
     		<element name="param" type="tns:param" maxOccurs="unbounded" minOccurs="0"></element>
     	</sequence>

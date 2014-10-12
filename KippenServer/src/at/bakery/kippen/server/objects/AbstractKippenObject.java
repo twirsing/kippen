@@ -4,7 +4,6 @@
 package at.bakery.kippen.server.objects;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -17,7 +16,6 @@ import at.bakery.kippen.common.data.MoveData;
 import at.bakery.kippen.common.data.ShakeData;
 import at.bakery.kippen.server.EventTypes;
 import at.bakery.kippen.server.command.Command;
-import at.bakery.kippen.server.outlets.AbstractKippOutlet;
 
 /**
  * @author thomasw
@@ -28,22 +26,23 @@ public abstract class AbstractKippenObject {
 	protected String id;
 
 	protected HashMap<String, List<Command>> eventsOfObject = new HashMap<String, List<Command>>();
-	protected HashSet<AbstractKippOutlet> outletObjects = new HashSet<AbstractKippOutlet>();
 
-	private static final long IDLE_AFTER_SECONDS =  20;
+	private static  long IDLE_AFTER_SECONDS = 340;
 	private long lastActivityTime = System.nanoTime();
-	
+
 	protected double MOVE_DATA_THRESHHOLD = 0.2;
-	protected static final long NEW_SHAKE_AFTER = (long)3e9;
+	protected static final long NEW_SHAKE_AFTER = (long) 2e9;
 
 	/**
 	 * @param id
 	 *            usually mac address
 	 */
-	public AbstractKippenObject(String id) {
+	public AbstractKippenObject(String id, int timeout) {
 		this.id = id;
-
-		// periodically checks whether the object is idle or not (defined by the constant)
+		IDLE_AFTER_SECONDS = timeout * 60;
+		
+		// periodically checks whether the object is idle or not (defined by the
+		// constant)
 		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			@Override
@@ -55,15 +54,9 @@ public abstract class AbstractKippenObject {
 		}, IDLE_AFTER_SECONDS, 10, TimeUnit.SECONDS);
 	}
 
-	public void addOutlet(AbstractKippOutlet aKippOutlet) {
-		outletObjects.add(aKippOutlet);
-	}
-
 	public void setCommandsForEvents(String eventID, List<Command> commandList) {
 		this.eventsOfObject.put(eventID, commandList);
 	}
-
-	protected abstract void output();
 
 	protected void timeout() {
 		System.out.println("Calling TIMOUT on object " + id);
@@ -72,8 +65,7 @@ public abstract class AbstractKippenObject {
 			try {
 				c.execute(paramMap);
 			} catch (Exception e) {
-				log.warning("Failed to execute command "
-						+ c.getClass().getSimpleName());
+				log.warning("Failed to execute command " + c.getClass().getSimpleName());
 			}
 		}
 	}
@@ -88,11 +80,30 @@ public abstract class AbstractKippenObject {
 	 */
 	public void processData(AbstractData data) {
 		// only count as activity when the object did a significant action
-		if(data instanceof MoveData){
-			MoveData move = (MoveData)data;
-			double moveAmpl = Math.sqrt(move.getX()*move.getX() + move.getY()*move.getY() + move.getZ()*move.getZ());
-			if(moveAmpl > MOVE_DATA_THRESHHOLD) {
+		if (data instanceof MoveData) {
+			MoveData move = (MoveData) data;
+			double moveAmpl = Math.sqrt(move.getX() * move.getX() + move.getY() * move.getY() + move.getZ() * move.getZ());
+			if (moveAmpl > MOVE_DATA_THRESHHOLD) {
 				lastActivityTime = System.nanoTime();
+			}
+		}
+	}
+
+	/**
+	 * Looks for the commands of this object that are registed for this specific
+	 * event type.
+	 */
+	protected void executeCommands(HashMap<String, String> paramMap, String eventType) {
+		List<Command> commands = eventsOfObject.get(eventType);
+		if (commands != null) {
+			for (Command c : commands) {
+				try {
+					c.execute(paramMap);
+				} catch (Exception e) {
+					log.warning("Failed to execute command " + c.getClass().getSimpleName());
+				} finally {
+
+				}
 			}
 		}
 	}

@@ -26,6 +26,7 @@ import at.bakery.kippen.config.ObjectConfig;
 import at.bakery.kippen.config.Param;
 import at.bakery.kippen.config.TypeEnum;
 import at.bakery.kippen.server.command.AbletonDeviceCommand;
+import at.bakery.kippen.server.command.AbletonMasterDeviceCommand;
 import at.bakery.kippen.server.command.AbletonPlayCommand;
 import at.bakery.kippen.server.command.AbletonStopCommand;
 import at.bakery.kippen.server.command.Command;
@@ -33,6 +34,7 @@ import at.bakery.kippen.server.command.MasterVolumeCommand;
 import at.bakery.kippen.server.command.SendSocketDataCommand;
 import at.bakery.kippen.server.command.ToggleMuteCommand;
 import at.bakery.kippen.server.objects.AbstractKippenObject;
+import at.bakery.kippen.server.objects.BallObject;
 import at.bakery.kippen.server.objects.BarrelObject;
 import at.bakery.kippen.server.objects.CubeObject;
 
@@ -40,7 +42,9 @@ import at.bakery.kippen.server.objects.CubeObject;
 public class KippenServer {
 	static Logger log = Logger.getLogger(KippenServer.class.getName());
 	public static Level LOG_LEVEL = Level.INFO;
-
+	private Configuration _config;
+	
+	
 	private HashMap<String, AbstractKippenObject> objectMap = new HashMap<String, AbstractKippenObject>();
 
 	public static void main(String args[]) {
@@ -78,19 +82,20 @@ public class KippenServer {
 					public void run() {
 						try {
 							BufferedReader ois = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF8"));
-							while(true) {
+
+							while (true) {
 								// first line is canonical class name of event
 								String dataType = ois.readLine();
-								if(dataType == null) {
+								if (dataType == null) {
 									break;
 								}
-								if(dataType.isEmpty()) {
+								if (dataType.isEmpty()) {
 									continue;
 								}
 
 								// second line is JSON data
 								String dataLine = ois.readLine();
-								if(dataLine == null) {
+								if (dataLine == null) {
 									break;
 								}
 								
@@ -98,32 +103,32 @@ public class KippenServer {
 								long receiveTime = System.currentTimeMillis();
 								
 								AbstractData data = JSONDataSerializer.deserialize(dataType, dataLine);
-								if(data == null) {
+								if (data == null) {
 									continue;
 								}
-								
-								if(data instanceof ContainerData == false) {
+
+								if (data instanceof ContainerData == false) {
 									// TODO process battery, etc.
 									continue;
 								}
-								
+
 								// pick the client and process all received data
 								AbstractKippenObject object = objectMap.get(data.getClientId());
 								if (object == null) {
 									log.warning("Client MAC address " + data.getClientId() + " is not registered");
 									return;
 								}
-								
+
 								// process each data packet
-								ContainerData containerData = (ContainerData)data;
-								
+								ContainerData containerData = (ContainerData) data;
+
 								// check lag and drop packet if necessary
-								long lag = receiveTime - containerData.getTimestamp();
-								if(lag > 1000) {
+								long lag = System.currentTimeMillis() - containerData.getTimestamp();
+								if (lag > 5000) {
 									System.err.println("Dropping packet, lag is " + lag + "ms");
 									continue;
 								}
-								
+
 								// lag in bounds, process ...
 								object.processData(containerData.accData);
 								object.processData(containerData.avgAccData);
@@ -132,7 +137,7 @@ public class KippenServer {
 								object.processData(containerData.cubeData);
 								object.processData(containerData.barrelData);
 								
-								//System.out.println(containerData);
+								System.out.println(containerData);
 							}
 						} catch (Exception ex) {
 							log.severe("Client " + clientId + " died ...");
@@ -145,29 +150,29 @@ public class KippenServer {
 			serverSock.close();
 		}
 	}
+	
+	public Configuration getConfiguration(){
+		return _config;
+	}
 
 	private void initObjects() {
-		Configuration config = JAXB.unmarshal(new File("config.xml"), Configuration.class);
-
-		int objectTimeout = config.getTimeoutMinutes();
-
-		log.info("Setting object timeout to: " + objectTimeout + " minute(s).");
-
+		_config = JAXB.unmarshal(new File("config.xml"), Configuration.class);
+		
 		// for each object set the commands and events
-		for (ObjectConfig obj : config.getObjects().getObjectConfig()) {
-			String mac = obj.getMac();
+		for (ObjectConfig objectConfig : _config.getObjects().getObjectConfig()) {
+			String mac = objectConfig.getMac();
 
-			if (obj.getType() == TypeEnum.CUBE) {
+			if (objectConfig.getType() == TypeEnum.CUBE) {
 				log.info("Registering a CUBE with MAC " + mac);
 
 				// make new kippen object
-				CubeObject cubeKippObject = new CubeObject(mac);
+				CubeObject cubeKippObject = new CubeObject(mac, _config.getTimeoutMinutes());
 
 				// add the new object to the server object map
-				objectMap.put(obj.getMac(), cubeKippObject);
+				objectMap.put(objectConfig.getMac(), cubeKippObject);
 
 				// for all events the object reacts to
-				for (EventConfig e : obj.getEvents().getEventConfig()) {
+				for (EventConfig e : objectConfig.getEvents().getEventConfig()) {
 					List<Command> commands = makeCommands(e.getCommands().getCommandConfig());
 
 					switch (e.getEventType()) {
@@ -180,7 +185,7 @@ public class KippenServer {
 						cubeKippObject.setCommandsForEvents(EventTypes.SHAKE, commands);
 						break;
 					case EventTypes.TIMEOUT:
-						log.info("Registering roll event");
+						log.info("Registering timeout event");
 						cubeKippObject.setCommandsForEvents(EventTypes.TIMEOUT, commands);
 						break;
 					case EventTypes.MOVE:
@@ -192,34 +197,51 @@ public class KippenServer {
 						break;
 					}
 				}
-			} else if (obj.getType() == TypeEnum.BARREL) {
+			} else if (objectConfig.getType() == TypeEnum.BARREL) {
 				log.info("Registering a BARREL with MAC " + mac);
 
 				// make new kippen object
-				BarrelObject barrelKippObject = new BarrelObject(mac);
+				BarrelObject barrelKippObject = new BarrelObject(mac,_config.getTimeoutMinutes());
 
 				// add the new object to the server object map
-				objectMap.put(obj.getMac(), barrelKippObject);
+				objectMap.put(objectConfig.getMac(), barrelKippObject);
 
 				// for all events the object reacts to
-				for (EventConfig e : obj.getEvents().getEventConfig()) {
+				for (EventConfig e : objectConfig.getEvents().getEventConfig()) {
 					List<Command> commands = makeCommands(e.getCommands().getCommandConfig());
 
 					switch (e.getEventType()) {
-					case EventTypes.SHAKE:
-						log.info("Registering shake event");
-						barrelKippObject.setCommandsForEvents(EventTypes.SHAKE, commands);
-						break;
+//					case EventTypes.SHAKE:
+//						log.info("Registering shake event");
+//						barrelKippObject.setCommandsForEvents(EventTypes.SHAKE, commands);
+//						break; 
 					case EventTypes.ROLLCHANGE:
 						log.info("Registering roll event");
 						barrelKippObject.setCommandsForEvents(EventTypes.ROLLCHANGE, commands);
 						break;
-					case EventTypes.TIMEOUT:
-						log.info("Registering roll event");
-						barrelKippObject.setCommandsForEvents(EventTypes.TIMEOUT, commands);
-						break;
+//					case EventTypes.TIMEOUT:
+//						log.info("Registering roll event");
+//						barrelKippObject.setCommandsForEvents(EventTypes.TIMEOUT, commands);
+//						break;
 					// add other events here
 					default:
+						break;
+					}
+				}
+			} else if (objectConfig.getType() == TypeEnum.BALL) {
+				log.info("Registering a BALL with MAC " + mac);
+
+				BallObject ballObject = new BallObject(mac, _config.getTimeoutMinutes());
+				
+				// add the new object to the server object map
+				objectMap.put(mac, ballObject);
+				
+				for (EventConfig e : objectConfig.getEvents().getEventConfig()) {
+					List<Command> commands = makeCommands(e.getCommands().getCommandConfig());
+					switch (e.getEventType()) {
+					case EventTypes.MOVE:
+						log.info("Registering move event for ball");
+						ballObject.setCommandsForEvents(EventTypes.MOVE, commands);
 						break;
 					}
 				}
@@ -258,7 +280,14 @@ public class KippenServer {
 				int trackNumber = Integer.valueOf(getCommandParamValue("trackNumber", c.getParam()));
 				int deviceNumber = Integer.valueOf(getCommandParamValue("deviceNumber", c.getParam()));
 				int parameterNumber = Integer.valueOf(getCommandParamValue("parameterNumber", c.getParam()));
-				commandList.add(new AbletonDeviceCommand(trackNumber, deviceNumber,parameterNumber));
+				commandList.add(new AbletonDeviceCommand(trackNumber, deviceNumber, parameterNumber));
+				break;
+
+			case "ABLETONMASTERDEVICE":
+				log.log(Level.INFO, "Registering ABLETONMASTERDEVICE command");
+				int masterDeviceNumber = Integer.valueOf(getCommandParamValue("deviceNumber", c.getParam()));
+				int masterParameterNumber = Integer.valueOf(getCommandParamValue("parameterNumber", c.getParam()));
+				commandList.add(new AbletonMasterDeviceCommand(masterDeviceNumber, masterParameterNumber));
 				break;
 
 			default:

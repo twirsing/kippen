@@ -3,6 +3,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.bakery.at/kippen config.xsd ">
 
+	<!-- tomw <mac>88:30:8A:38:53:05</mac> -->
+	<!-- tommy? <mac>c4:43:8f:46:34:32</mac> -->
+	<!-- matthias -->
+	<!-- <mac>10:68:3f:49:25:4e</mac> -->
+
 	<!-- Specififies the time after which a timeout even for an object is called -->
 	<timeoutMinutes>1</timeoutMinutes>
 
@@ -19,6 +24,7 @@
 			</events>
 			<type>cube</type>
 		</objectConfig>
+
 	</objects>
 
 </tns:configuration>
