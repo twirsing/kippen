@@ -15,8 +15,8 @@ public class BallObject extends AbstractKippenObject {
 	private double MAX_LENGTH_VECTOR = 3.0;
 	private boolean moveDataWasBelowThreshhold = false;
 
-	public BallObject(String id) {
-		super(id);
+	public BallObject(String id, int timeout) {
+		super(id,timeout);
 	}
 
 	@Override

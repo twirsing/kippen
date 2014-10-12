@@ -26,8 +26,8 @@ public class BarrelObject extends AbstractKippenObject {
 
 	private static double MIN_VALUE_DELTA = 0.01;
 
-	public BarrelObject(String id) {
-		super(id);
+	public BarrelObject(String id, int timeout) {
+		super(id, timeout);
 		log.setLevel(KippenServer.LOG_LEVEL);
 	}
 

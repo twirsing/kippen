@@ -60,13 +60,13 @@ public class MotionSensing implements SensorEventListener {
 	 * SHAKE SENSING
 	 * ------------------------------------------ */
 	// Minimum acceleration needed to count as a shake movement
-    private static final double MIN_SHAKE_ACCELERATION = 1.5;
+    private static final double MIN_SHAKE_ACCELERATION = 1.6;
     
     // Minimum number of movements to register a shake
-    private static final int MIN_MOVEMENTS = 2;
+    private static final int MIN_MOVEMENTS = 4;
     
     // Maximum time (in milliseconds) for the whole shake to occur
-    private static final int MAX_SHAKE_DURATION = 600;
+    private static final int MAX_SHAKE_DURATION = 800;
 	
 	// Start time for the shake detection
 	private long startTime = 0;
@@ -100,7 +100,7 @@ public class MotionSensing implements SensorEventListener {
 	 * BARREL
 	 * ------------------------------------------- */
 	//TODO make this configurable via the XML file
-	private static final int MAX_DEGREES = 7 * 360;
+	private static final int MAX_DEGREES = 3 * 360;
 	private int degrees = 0;
 	private int lastAbsDegrees = 0;
 	
@@ -175,6 +175,7 @@ public class MotionSensing implements SensorEventListener {
 	
 	private void handleShake() {
 		long now = System.currentTimeMillis();
+		
 		double linAccAmpl = Math.sqrt(accLinVector[0]*accLinVector[0] + accLinVector[1]*accLinVector[1] + accLinVector[2]*accLinVector[2]);
         if(linAccAmpl > MIN_SHAKE_ACCELERATION) {
         	if(startTime == 0) {

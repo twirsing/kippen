@@ -25,8 +25,8 @@ public class CubeObject extends AbstractKippenObject {
 
 	private Queue<WifiLevelsData> avgWifiLevel = new LinkedList<>();
 
-	public CubeObject(String id) {
-		super(id);
+	public CubeObject(String id, int timeout) {
+		super(id, timeout);
 		log.setLevel(KippenServer.LOG_LEVEL);
 	}
 

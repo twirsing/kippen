@@ -27,7 +27,7 @@ public abstract class AbstractKippenObject {
 
 	protected HashMap<String, List<Command>> eventsOfObject = new HashMap<String, List<Command>>();
 
-	private static final long IDLE_AFTER_SECONDS = 340;
+	private static  long IDLE_AFTER_SECONDS = 340;
 	private long lastActivityTime = System.nanoTime();
 
 	protected double MOVE_DATA_THRESHHOLD = 0.2;
@@ -37,9 +37,10 @@ public abstract class AbstractKippenObject {
 	 * @param id
 	 *            usually mac address
 	 */
-	public AbstractKippenObject(String id) {
+	public AbstractKippenObject(String id, int timeout) {
 		this.id = id;
-
+		IDLE_AFTER_SECONDS = timeout * 60;
+		
 		// periodically checks whether the object is idle or not (defined by the
 		// constant)
 		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);

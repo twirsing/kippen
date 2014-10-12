@@ -42,7 +42,9 @@ import at.bakery.kippen.server.objects.CubeObject;
 public class KippenServer {
 	static Logger log = Logger.getLogger(KippenServer.class.getName());
 	public static Level LOG_LEVEL = Level.INFO;
-
+	private Configuration _config;
+	
+	
 	private HashMap<String, AbstractKippenObject> objectMap = new HashMap<String, AbstractKippenObject>();
 
 	public static void main(String args[]) {
@@ -146,23 +148,23 @@ public class KippenServer {
 			serverSock.close();
 		}
 	}
+	
+	public Configuration getConfiguration(){
+		return _config;
+	}
 
 	private void initObjects() {
-		Configuration config = JAXB.unmarshal(new File("config.xml"), Configuration.class);
-
-		int objectTimeout = config.getTimeoutMinutes();
-
-		log.info("Setting object timeout to: " + objectTimeout + " minute(s).");
-
+		_config = JAXB.unmarshal(new File("config.xml"), Configuration.class);
+		
 		// for each object set the commands and events
-		for (ObjectConfig objectConfig : config.getObjects().getObjectConfig()) {
+		for (ObjectConfig objectConfig : _config.getObjects().getObjectConfig()) {
 			String mac = objectConfig.getMac();
 
 			if (objectConfig.getType() == TypeEnum.CUBE) {
 				log.info("Registering a CUBE with MAC " + mac);
 
 				// make new kippen object
-				CubeObject cubeKippObject = new CubeObject(mac);
+				CubeObject cubeKippObject = new CubeObject(mac, _config.getTimeoutMinutes());
 
 				// add the new object to the server object map
 				objectMap.put(objectConfig.getMac(), cubeKippObject);
@@ -197,7 +199,7 @@ public class KippenServer {
 				log.info("Registering a BARREL with MAC " + mac);
 
 				// make new kippen object
-				BarrelObject barrelKippObject = new BarrelObject(mac);
+				BarrelObject barrelKippObject = new BarrelObject(mac,_config.getTimeoutMinutes());
 
 				// add the new object to the server object map
 				objectMap.put(objectConfig.getMac(), barrelKippObject);
@@ -227,7 +229,7 @@ public class KippenServer {
 			} else if (objectConfig.getType() == TypeEnum.BALL) {
 				log.info("Registering a BALL with MAC " + mac);
 
-				BallObject ballObject = new BallObject(mac);
+				BallObject ballObject = new BallObject(mac, _config.getTimeoutMinutes());
 				
 				// add the new object to the server object map
 				objectMap.put(mac, ballObject);
