@@ -296,9 +296,9 @@ public class MotionSensing implements SensorEventListener {
 	@Override
 	public void onSensorChanged(SensorEvent se) {
 		if(se.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-			magVector = Arrays.copyOf(se.values, 4);
+			System.arraycopy(se.values, 0, magVector, 0, 4);
 		} else if(se.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-			accVector = Arrays.copyOf(se.values, 4);
+			System.arraycopy(se.values, 0, accVector, 0, 4);
 		}
 		
 		computeLinearAccelerationAndGravity();
@@ -326,8 +326,10 @@ public class MotionSensing implements SensorEventListener {
 	
 	public void computeLinearAccelerationAndGravity() {
         // Get a local copy of the sensor values
-		float[] acceleration = Arrays.copyOf(this.accVector,  4);
-		float[] magnetic = Arrays.copyOf(this.magVector, 4);
+		float[] acceleration = new float[4];
+		float[] magnetic = new float[4];
+		System.arraycopy(accVector, 0, acceleration, 0, 4);
+		System.arraycopy(magVector, 0, magnetic, 0, 4);
  
         // Get the rotation matrix to put our local device coordinates
         // into the world-coordinate system.
