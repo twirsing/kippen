@@ -31,9 +31,19 @@
 
 						<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="sideChange" />
-							<param key="destinationIP" value="192.168.0.100" />
+							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
 							<param key="trackNumber" value="0" />
+						</CommandConfig>
+
+		
+						
+							<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="switchrelay" />
+							<param key="destinationIP" value="192.168.10.20" />
+							<param key="destinationPort" value="9999" />
+							<param key="channel" value="0" />
+							<param key="switchcommand" value="high" />
 						</CommandConfig>
 					</commands>
 				</eventConfig>
@@ -47,9 +57,17 @@
 
 						<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="stop" />
-							<param key="destinationIP" value="192.168.0.100" />
+							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
 							<param key="trackNumber" value="0" />
+						</CommandConfig>
+						
+							<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="switchrelay" />
+							<param key="destinationIP" value="192.168.10.20" />
+							<param key="destinationPort" value="9999" />
+							<param key="channel" value="0" />
+							<param key="switchcommand" value="low" />
 						</CommandConfig>
 						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" -->
 						<!-- value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" 
@@ -87,9 +105,17 @@
 						</CommandConfig>
 						<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="sideChange" />
-							<param key="destinationIP" value="192.168.0.100" />
+							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
 							<param key="trackNumber" value="1" />
+						</CommandConfig>
+						
+						<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="switchrelay" />
+							<param key="destinationIP" value="192.168.10.20" />
+							<param key="destinationPort" value="9999" />
+							<param key="channel" value="1" />
+							<param key="switchcommand" value="high" />
 						</CommandConfig>
 						<!-- <CommandConfig commandType="SENDSOCKETDATA"> -->
 						<!-- <param key="command" value="switchrelay" /> -->
@@ -110,9 +136,17 @@
 
 						<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="stop" />
-							<param key="destinationIP" value="192.168.0.100" />
+							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
 							<param key="trackNumber" value="1" />
+						</CommandConfig>
+						
+							<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="switchrelay" />
+							<param key="destinationIP" value="192.168.10.20" />
+							<param key="destinationPort" value="9999" />
+							<param key="channel" value="1" />
+							<param key="switchcommand" value="low" />
 						</CommandConfig>
 
 						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" -->
@@ -152,9 +186,17 @@
 						</CommandConfig>
 						<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="sideChange" />
-							<param key="destinationIP" value="192.168.0.100" />
+							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
 							<param key="trackNumber" value="2" />
+						</CommandConfig>
+						
+							<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="switchrelay" />
+							<param key="destinationIP" value="192.168.10.20" />
+							<param key="destinationPort" value="9999" />
+							<param key="channel" value="2" />
+							<param key="switchcommand" value="high" />
 						</CommandConfig>
 						<!-- <CommandConfig commandType="SENDSOCKETDATA"> -->
 						<!-- <param key="command" value="switchrelay" /> -->
@@ -174,11 +216,19 @@
 						</CommandConfig>
 						<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="stop" />
-							<param key="destinationIP" value="192.168.0.100" />
+							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
 							<param key="trackNumber" value="2" />
 						</CommandConfig>
 
+							<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="switchrelay" />
+							<param key="destinationIP" value="192.168.10.20" />
+							<param key="destinationPort" value="9999" />
+							<param key="channel" value="2" />
+							<param key="switchcommand" value="low" />
+						</CommandConfig>
+						
 						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" -->
 						<!-- value="switchrelay" /> <param key="destinationIP" value="192.168.0.106" 
 							/> -->
@@ -214,9 +264,17 @@
 						</CommandConfig>
 						<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="sideChange" />
-							<param key="destinationIP" value="192.168.0.100" />
+							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
 							<param key="trackNumber" value="3" />
+						</CommandConfig>
+						
+							<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="switchrelay" />
+							<param key="destinationIP" value="192.168.10.20" />
+							<param key="destinationPort" value="9999" />
+							<param key="channel" value="3" />
+							<param key="switchcommand" value="high" />
 						</CommandConfig>
 						<!-- <CommandConfig commandType="SENDSOCKETDATA"> -->
 						<!-- <param key="command" value="switchrelay" /> -->
@@ -236,9 +294,17 @@
 						</CommandConfig>
 						<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="stop" />
-							<param key="destinationIP" value="192.168.0.100" />
+							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
 							<param key="trackNumber" value="3" />
+						</CommandConfig>
+						
+							<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="switchrelay" />
+							<param key="destinationIP" value="192.168.10.20" />
+							<param key="destinationPort" value="9999" />
+							<param key="channel" value="3" />
+							<param key="switchcommand" value="low" />
 						</CommandConfig>
 
 						<!-- <CommandConfig commandType="SENDSOCKETDATA"> <param key="command" -->
@@ -275,15 +341,15 @@
 							<param key="deviceNumber" value="0" />
 							<param key="parameterNumber" value="1" />
 						</CommandConfig>
-						
-						
+
+
 						<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="barrelRoll" />
-							<param key="destinationIP" value="192.168.0.100" />
+							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
 							<param key="trackNumber" value="0" />
 						</CommandConfig>
-						
+
 					</commands>
 				</eventConfig>
 
@@ -304,11 +370,11 @@
 						</CommandConfig>
 					</commands>
 					<CommandConfig commandType="SENDSOCKETDATA">
-							<param key="command" value="barrelRoll" />
-							<param key="destinationIP" value="192.168.0.100" />
-							<param key="destinationPort" value="9876" />
-							<param key="trackNumber" value="0" />
-						</CommandConfig>
+						<param key="command" value="barrelRoll" />
+						<param key="destinationIP" value="localhost" />
+						<param key="destinationPort" value="9876" />
+						<param key="trackNumber" value="0" />
+					</CommandConfig>
 				</eventConfig>
 
 			</events>

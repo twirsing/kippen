@@ -3,6 +3,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Calendar;
+import java.util.Date;
 
 import processing.core.PApplet;
 import processing.data.JSONObject;
@@ -18,8 +20,9 @@ public class Visuals extends PApplet {
 	public void setup() {
 		size(displayWidth, displayHeight);
 		
-		this.reset();
 		frameRate(20);
+		background(0);
+		text("UM-KIPPEN", (width / 2) - 40, 40);
 
 		objects[0] = new CubeObject(this, random(width), random(height), color(255, 204, 0), color(255, 100, 50, 15));
 		objects[1] = new CubeObject(this, random(width), random(height), color(50, 55, 100), color(255, 120, 0, 15));
@@ -30,9 +33,10 @@ public class Visuals extends PApplet {
 	}
 	
 	private void reset(){
+		 Date date = Calendar.getInstance().getTime();
+		saveFrame("kippen-" + date.getHours() + ":" + date.getMinutes()  + ":" + date.getSeconds() + ".png");
 		background(0);
 		text("UM-KIPPEN", (width / 2) - 40, 40);
-		System.out.println("RESET");
 	}
 
 	private class MessageServer implements Runnable {

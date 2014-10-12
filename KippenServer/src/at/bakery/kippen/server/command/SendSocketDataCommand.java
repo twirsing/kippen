@@ -76,8 +76,7 @@ public class SendSocketDataCommand implements Command {
 				//
 				socket.close();
 			} catch (Exception ex) {
-				ex.printStackTrace();
-				System.err.println("Failed to send packets");
+				System.err.println("Failed to send packets to ip " + destinationIP + " on port " + destinationPort);
 			}
 			//
 		}
@@ -103,7 +102,6 @@ public class SendSocketDataCommand implements Command {
 
 	@Override
 	public void execute(Map<String, String> params) throws IOException {
-		System.out.println("sending socket");
 		try {
 			// socket = new Socket(InetAddress.getByName(this.destinationIP),
 			// this.destinationPort);
@@ -116,15 +114,13 @@ public class SendSocketDataCommand implements Command {
 				newCommand += "\"" + param.getKey() + "\":\"" + param.getValue() + "\",";
 				newJSON.addProperty(param.getKey(), param.getValue());
 			}
-			System.out.println(newCommand);
-			System.out.println(newJSON);
 			
 			MessageProcessor MessageProcessor = new MessageProcessor(this.destinationIP, this.destinationPort, newJSON.toString());
 			Thread t = new Thread(MessageProcessor);
 			t.start();
 
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			System.err.println("Could not communicate with ip " + destinationIP + " on port " + destinationPort);
 			return;
 		}
 
