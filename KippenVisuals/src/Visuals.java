@@ -34,9 +34,9 @@ public class Visuals extends PApplet {
 		new Thread(new MessageServer(this)).start();
 	}
 
-	private void reset() {
-		Date date = Calendar.getInstance().getTime();
-		saveFrame("kippen-" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + ".png");
+	
+	private void reset(){
+		saveFrame();
 		background(0);
 		session++;
 		text("UM-KIPPEN V1.0: Session#" + this.session, (width / 2) - 40, 40);

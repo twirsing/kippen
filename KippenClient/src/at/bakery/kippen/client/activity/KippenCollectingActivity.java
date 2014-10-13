@@ -27,9 +27,9 @@ public class KippenCollectingActivity extends Activity {
 
 	// the WIFI to which the server is connected and the server IP
 
-	 private static final String WIFI_ESSID = "UmkippenWlanderl"; //StockEINS
-	 private static final String WIFI_PWD = "IchBinKeinLustigesPasswort";
-	 private static final String SERVER_IP = "192.168.10.10"; //server ip
+//	 private static final String WIFI_ESSID = "UmkippenWlanderl"; //StockEINS
+//	 private static final String WIFI_PWD = "IchBinKeinLustigesPasswort";
+//	 private static final String SERVER_IP = "192.168.10.10"; //server ip
 //	
 	// setting tomw
 	/*
@@ -44,9 +44,9 @@ public class KippenCollectingActivity extends Activity {
 //	private static final String SERVER_IP = "192.168.0.100"; // server ip
 
 	// setting StockEINS
-//	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
-//	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
-//	 private static final String SERVER_IP = "192.168.0.100"; //server ip
+	 private static final String WIFI_ESSID = "StockEINS"; //StockEINS
+	 private static final String WIFI_PWD = "IchBinEinLustigesPasswort";
+	 private static final String SERVER_IP = "192.168.0.116"; //server ip
 	//
 	// setting tomt
 //	 private static final String WIFI_ESSID = "JulesWinnfield";

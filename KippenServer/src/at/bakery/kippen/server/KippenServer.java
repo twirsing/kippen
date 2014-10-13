@@ -136,6 +136,8 @@ public class KippenServer {
 								object.processData(containerData.shakeData);
 								object.processData(containerData.cubeData);
 								object.processData(containerData.barrelData);
+								
+								System.out.println(containerData);
 							}
 						} catch (Exception ex) {
 							log.severe("Client " + clientId + " died ...");
