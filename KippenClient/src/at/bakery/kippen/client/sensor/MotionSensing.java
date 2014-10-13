@@ -56,18 +56,24 @@ public class MotionSensing implements SensorEventListener {
 	// linear acceleration
 	private float[] accLinVector = new float[4];
 	
+	// magnitude of move, helper
+	private double moveAmplitude = 0.0;
+	
+	// amplitude which at most counts as motionless
+	private static final double MAX_MOTIONLESS_MOVE_AMPL = 0.3;
+	
 	/* ------------------------------------------
 	 * SHAKE SENSING
 	 * ------------------------------------------ */
 	// some constants regarding intensity and timing
 	private static final int FORCE_THRESHOLD = 350;
-	private static final int TIME_THRESHOLD = 100;
+	private static final int TIME_THRESHOLD = 50;
 	private static final int SHAKE_TIMEOUT = 500;
-	private static final int SHAKE_DURATION = 1000;
-	private static final int SHAKE_COUNT = 3;
+	private static final int SHAKE_DURATION = 500;
+	private static final int SHAKE_COUNT = 4;
 	
-	// Maximum time (in milliseconds) for the whole shake to occur
-    private static final int MAX_SHAKE_DURATION = 800;
+	// Maximum time (in milliseconds) for the whole shake to be sent and reset
+    private static final int MAX_SHAKE_DURATION = 1000;
 
 	// remember all you need to remember
 	private float mLastX = -1.0f, mLastY = -1.0f, mLastZ = -1.0f;
@@ -76,6 +82,7 @@ public class MotionSensing implements SensorEventListener {
 	private long mLastShake;
 	private long mLastForce;
 	private Orientation compareLastCube = Orientation.UNKNOWN;
+	private long compareLastCubeTime = 0;
 	
 	// timer for shake is on keeping
 	private long shakeIsOn;
@@ -97,13 +104,14 @@ public class MotionSensing implements SensorEventListener {
 	/* -------------------------------------------
 	 * CUBE
 	 * ------------------------------------------- */
-	// doesn't need anything
+	private Orientation lastMotionlessCube = Orientation.UNKNOWN;
+	private long lastMotionlessCubeTime = 0;
 	
 	/* -------------------------------------------
 	 * BARREL
 	 * ------------------------------------------- */
 	//TODO make this configurable via the XML file
-	private static final int MAX_DEGREES = 3 * 360;
+	private static final int MAX_DEGREES = 10 * 360;
 	private int degrees = 0;
 	private int lastAbsDegrees = 0;
 	
@@ -170,6 +178,7 @@ public class MotionSensing implements SensorEventListener {
 		
 		// FIXME if more precise results are required, use original accWorld
 		accMove = tmpAcc;
+		moveAmplitude = Math.sqrt(Math.pow(accMove[0], 2) + Math.pow(accMove[1], 2) + Math.pow(accMove[2], 2));
 		
 		MOVE_DATA.setXYZ(accMove[0], accMove[1], accMove[2]);
 		
@@ -181,7 +190,6 @@ public class MotionSensing implements SensorEventListener {
 
 		if((now - mLastForce) > SHAKE_TIMEOUT) {
 			mShakeCount = 0;
-			compareLastCube = Orientation.UNKNOWN;
 		}
 
 		if((now - mLastTime) > TIME_THRESHOLD) {
@@ -190,20 +198,10 @@ public class MotionSensing implements SensorEventListener {
 			if(speed > FORCE_THRESHOLD) {
 				if((++mShakeCount >= SHAKE_COUNT) && (now - mLastShake > SHAKE_DURATION)) {
 					// if all indicates a shake, check that we did no rotation
-					System.out.println("this one is " + CUBE_DATA.getOrientation());
-					if(compareLastCube == CUBE_DATA.getOrientation() && CUBE_DATA.getOrientation() != Orientation.UNKNOWN) {
-						System.out.println("YEEEES");
-						SHAKE_DATA.setShaking(true);
-						mLastShake = now;
-						shakeIsOn = now;
-					}
-					
-					// reset, anyway
-					mShakeCount = 0;
-					compareLastCube = Orientation.UNKNOWN;
+					shakeIsOn = now;
 				} else if(compareLastCube == Orientation.UNKNOWN) {
-					compareLastCube = CUBE_DATA.getOrientation();
-					System.out.println("last one is " + compareLastCube);
+					compareLastCube = lastMotionlessCube;
+					compareLastCubeTime = lastMotionlessCubeTime;
 				}
 				mLastForce = now;
 			}
@@ -213,10 +211,21 @@ public class MotionSensing implements SensorEventListener {
 			mLastZ = accVector[2];
 		}
 		
-		// stop sending after this
+		// start sending after threshold and stop sending after this
 		if(now - shakeIsOn > MAX_SHAKE_DURATION) {
         	SHAKE_DATA.setShaking(false);
         	shakeIsOn = 0;
+        } else if(now - shakeIsOn > MAX_SHAKE_DURATION * 0.75) {
+			if(compareLastCube == lastMotionlessCube && lastMotionlessCube != Orientation.UNKNOWN &&
+					compareLastCubeTime < lastMotionlessCubeTime) {
+				SHAKE_DATA.setShaking(true);
+				mLastShake = now;
+			}
+			
+			// reset, anyway
+			mShakeCount = 0;
+			compareLastCube = Orientation.UNKNOWN;
+			compareLastCubeTime = 0;
         }
 	}
 	
@@ -269,6 +278,12 @@ public class MotionSensing implements SensorEventListener {
 			} else {
 				orientationData.setOrientation(Orientation.TOP);
 			}
+		}
+		
+		// record a cube side that is not in motion
+		if(moveAmplitude <= MAX_MOTIONLESS_MOVE_AMPL) {
+			lastMotionlessCube = orientationData.getOrientation();
+			lastMotionlessCubeTime = System.currentTimeMillis();
 		}
 		
 		Log.d("KIPPEN", "CUBE: " + orientationData);
