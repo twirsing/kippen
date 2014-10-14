@@ -15,7 +15,7 @@ public class KippenInterface extends PApplet {
 
 	public int cubeWidth = 170;
 	public int cubeY = 100;
-	public int rectHeight = 400;
+	public int rectHeight = 250;
 	public int rectWidth = cubeWidth;
 	public int rectY = 300;
 
