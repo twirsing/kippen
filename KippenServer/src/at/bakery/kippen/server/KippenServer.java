@@ -43,8 +43,7 @@ public class KippenServer {
 	static Logger log = Logger.getLogger(KippenServer.class.getName());
 	public static Level LOG_LEVEL = Level.INFO;
 	private Configuration _config;
-	
-	
+
 	private HashMap<String, AbstractKippenObject> objectMap = new HashMap<String, AbstractKippenObject>();
 
 	public static void main(String args[]) {
@@ -98,10 +97,10 @@ public class KippenServer {
 								if (dataLine == null) {
 									break;
 								}
-								
+
 								// set receive time stamp
 								long receiveTime = System.currentTimeMillis();
-								
+
 								AbstractData data = JSONDataSerializer.deserialize(dataType, dataLine);
 								if (data == null) {
 									continue;
@@ -125,8 +124,9 @@ public class KippenServer {
 								// check lag and drop packet if necessary
 								long lag = System.currentTimeMillis() - containerData.getTimestamp();
 								if (lag > 5000) {
-									System.err.println("Dropping packet, lag is " + lag + "ms");
-									continue;
+									// System.err.println("Dropping packet, lag is "
+									// + lag + "ms");
+									// continue;
 								}
 
 								// lag in bounds, process ...
@@ -136,8 +136,7 @@ public class KippenServer {
 								object.processData(containerData.shakeData);
 								object.processData(containerData.cubeData);
 								object.processData(containerData.barrelData);
-								
-								System.out.println(containerData);
+
 							}
 						} catch (Exception ex) {
 							log.severe("Client " + clientId + " died ...");
@@ -150,14 +149,14 @@ public class KippenServer {
 			serverSock.close();
 		}
 	}
-	
-	public Configuration getConfiguration(){
+
+	public Configuration getConfiguration() {
 		return _config;
 	}
 
 	private void initObjects() {
 		_config = JAXB.unmarshal(new File("config.xml"), Configuration.class);
-		
+
 		// for each object set the commands and events
 		for (ObjectConfig objectConfig : _config.getObjects().getObjectConfig()) {
 			String mac = objectConfig.getMac();
@@ -201,7 +200,7 @@ public class KippenServer {
 				log.info("Registering a BARREL with MAC " + mac);
 
 				// make new kippen object
-				BarrelObject barrelKippObject = new BarrelObject(mac,_config.getTimeoutMinutes());
+				BarrelObject barrelKippObject = new BarrelObject(mac, _config.getTimeoutMinutes());
 
 				// add the new object to the server object map
 				objectMap.put(objectConfig.getMac(), barrelKippObject);
@@ -211,18 +210,20 @@ public class KippenServer {
 					List<Command> commands = makeCommands(e.getCommands().getCommandConfig());
 
 					switch (e.getEventType()) {
-//					case EventTypes.SHAKE:
-//						log.info("Registering shake event");
-//						barrelKippObject.setCommandsForEvents(EventTypes.SHAKE, commands);
-//						break; 
+					// case EventTypes.SHAKE:
+					// log.info("Registering shake event");
+					// barrelKippObject.setCommandsForEvents(EventTypes.SHAKE,
+					// commands);
+					// break;
 					case EventTypes.ROLLCHANGE:
 						log.info("Registering roll event");
 						barrelKippObject.setCommandsForEvents(EventTypes.ROLLCHANGE, commands);
 						break;
-//					case EventTypes.TIMEOUT:
-//						log.info("Registering roll event");
-//						barrelKippObject.setCommandsForEvents(EventTypes.TIMEOUT, commands);
-//						break;
+					// case EventTypes.TIMEOUT:
+					// log.info("Registering roll event");
+					// barrelKippObject.setCommandsForEvents(EventTypes.TIMEOUT,
+					// commands);
+					// break;
 					// add other events here
 					default:
 						break;
@@ -232,10 +233,10 @@ public class KippenServer {
 				log.info("Registering a BALL with MAC " + mac);
 
 				BallObject ballObject = new BallObject(mac, _config.getTimeoutMinutes());
-				
+
 				// add the new object to the server object map
 				objectMap.put(mac, ballObject);
-				
+
 				for (EventConfig e : objectConfig.getEvents().getEventConfig()) {
 					List<Command> commands = makeCommands(e.getCommands().getCommandConfig());
 					switch (e.getEventType()) {

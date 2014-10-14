@@ -3,8 +3,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Calendar;
-import java.util.Date;
 
 import processing.core.PApplet;
 import processing.data.JSONObject;
@@ -14,17 +12,19 @@ public class Visuals extends PApplet {
 
 	private int session = 1;
 
+	private boolean isRunning = true;
+
 	// static ServerSocket variable
 	private static ServerSocket server;
 	// socket server port on which it will listen
-	private static int port = 9876;
+	private static int PORT = 9876;
 
 	public void setup() {
 		size(displayWidth, displayHeight);
 
 		frameRate(20);
 		background(0);
-		text("UM-KIPPEN V1.0 Session#" + this.session, (width / 2) - 80, 40);
+		text("UM-KIPPEN V1. Session#" + this.session, (width / 2) - 80, 40);
 
 		objects[0] = new CubeObject(this, random(width), random(height), color(255, 204, 0), color(255, 100, 200, 15));
 		objects[1] = new CubeObject(this, random(width), random(height), color(50, 200, 100), color(255, 250, 0, 15));
@@ -34,12 +34,11 @@ public class Visuals extends PApplet {
 		new Thread(new MessageServer(this)).start();
 	}
 
-	
-	private void reset(){
-		saveFrame();
-		background(0);
-		session++;
-		text("UM-KIPPEN V1.0: Session#" + this.session, (width / 2) - 40, 40);
+	private void reset() {
+			saveFrame();
+			background(0);
+			session++;
+			text("UM-KIPPEN V1.0: Session#" + this.session, (width / 2) - 80, 40);
 	}
 
 	private class MessageServer implements Runnable {
@@ -51,10 +50,10 @@ public class Visuals extends PApplet {
 
 		public void run() {
 			try {
-				server = new ServerSocket(port);
+				server = new ServerSocket(PORT);
 
 				while (true) {
-					System.out.println("Waiting for client request on port " + port);
+					System.out.println("Waiting for client request on port " + PORT);
 					// creating socket and waiting for client connection
 					Socket socket = server.accept();
 					// read from socket to ObjectInputStream object
@@ -62,13 +61,11 @@ public class Visuals extends PApplet {
 					// convert ObjectInputStream object to String
 
 					JSONObject jsonObject = new JSONObject(new InputStreamReader(ois));
-					System.out.println("Message Received: " + jsonObject);
 
 					if (jsonObject.hasKey("command")) {
 						if (jsonObject.getString("command").equals("sideChange")) {
 							int cubeNumber = jsonObject.getInt("trackNumber");
 							int clipNumber = jsonObject.getInt("clipNumber");
-							System.out.println(cubeNumber);
 							canvas.objects[cubeNumber].start();
 							canvas.objects[cubeNumber].sideChange(cubeNumber);
 						}
@@ -80,11 +77,8 @@ public class Visuals extends PApplet {
 							boolean oneRunning = false;
 							// check if all are stopped
 							for (CubeObject o : objects) {
-							//	if (o.isRunning() && !o.getCurrentSide() == 0) {
-								if (o.isRunning() ) {
 									oneRunning = true;
 									break;
-								}
 							}
 
 							if (!oneRunning)
@@ -121,9 +115,9 @@ public class Visuals extends PApplet {
 		}
 	}
 
-	public static void main(String args[]) {
-		PApplet.main(new String[] { "--present", "Visuals" });
-	}
+//	public static void main(String args[]) {
+//		PApplet.main(new String[] { "--present", "Visuals" });
+//	}
 
 }
 
@@ -134,7 +128,6 @@ class CubeObject {
 	public int getCurrentSide() {
 		return currentSide;
 	}
-
 
 	PApplet canvas;
 	private int stroke;
