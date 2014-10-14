@@ -386,6 +386,14 @@
 							<param key="parameterNumber" value="3" />
 						</CommandConfig>
 
+						
+						<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="barrelRoll" />
+							<param key="destinationIP" value="localhost" />
+							<param key="destinationPort" value="9876" />
+							<param key="trackNumber" value="1" />
+						</CommandConfig>
+						
 					</commands>
 
 				</eventConfig>

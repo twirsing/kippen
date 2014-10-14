@@ -81,7 +81,7 @@ public class KippenInterface extends PApplet {
 				server = new ServerSocket(PORT);
 
 				while (true) {
-					System.out.println("Waiting for client request on port " + PORT);
+					//System.out.println("Waiting for client request on port " + PORT);
 					// creating socket and waiting for client connection
 					Socket socket = server.accept();
 					// read from socket to ObjectInputStream object
@@ -95,13 +95,11 @@ public class KippenInterface extends PApplet {
 							int cubeNumber = jsonObject.getInt("trackNumber");
 							int clipNumber = jsonObject.getInt("clipNumber");
 							// canvas.objects[cubeNumber].start();
-							System.out.println("sidechange " + clipNumber);
 							canvas.cubes[cubeNumber].sideChange(clipNumber);
 						}
 
 						else if (jsonObject.getString("command").equals("stop")) {
 							int cubeNumber = jsonObject.getInt("trackNumber");
-							System.out.println("stop");
 							canvas.cubes[cubeNumber].stop();
 						}
 
@@ -109,7 +107,6 @@ public class KippenInterface extends PApplet {
 							int trackNumber = jsonObject.getInt("trackNumber");
 							Double value = Double.valueOf(jsonObject.getString("value"));
 							int valueInt = (int) (value * rectHeight);
-							System.out.println("roll " + valueInt + " cube num " + trackNumber);
 							canvas.barrels[trackNumber].setValue(valueInt);
 						}
 						
@@ -160,11 +157,8 @@ class BarrelObject {
 	}
 
 	public void setValue(int value) {
-		canvas.background(canvas.color(255,0,0));
-		System.out.println("getting value " + value);
 		this.value = value;
 
-		System.out.println("set value " + this.value);
 	}
 }
 
@@ -193,10 +187,8 @@ class CubeObject {
 	}
 
 	public void sideChange(int clipNumber) {
-		canvas.background(255);
 
 		this.state = clipNumber;
-		System.out.println("change state to " + state + "clipnum " + clipNumber);
 	}
 
 	private String getClipnumberString(int clipNumber) {
@@ -217,7 +209,7 @@ class CubeObject {
 		case -1:
 			return "TOUCH ME!";
 		case -2:
-			return "STOPPED";
+			return "TOUCH ME!";
 		}
 		return "err";
 	}
