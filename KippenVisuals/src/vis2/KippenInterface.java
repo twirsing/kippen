@@ -11,7 +11,7 @@ import processing.data.JSONObject;
 
 public class KippenInterface extends PApplet {
 	public CubeObject[] cubes = new CubeObject[4];
-	public BarrelObject[] barrels = new BarrelObject[2];
+	public BarrelObject[] barrels = new BarrelObject[3];
 
 	public int cubeWidth = 170;
 	public int cubeY = 100;
@@ -34,15 +34,16 @@ public class KippenInterface extends PApplet {
 		int offset = (width - (4 * cubeWidth)) / 5;
 
 		// add cubes
-		cubes[0] = new CubeObject(this, offset, cubeY, cubeWidth);
-		cubes[1] = new CubeObject(this, 2 * offset + cubeWidth, cubeY, cubeWidth);
-		cubes[2] = new CubeObject(this, 3 * offset + 2 * cubeWidth, cubeY, cubeWidth);
-		cubes[3] = new CubeObject(this, 4 * offset + 3 * cubeWidth, cubeY, cubeWidth);
+		cubes[0] = new CubeObject(this, offset, cubeY, cubeWidth, color(252, 87, 122));
+		cubes[1] = new CubeObject(this, 2 * offset + cubeWidth, cubeY, cubeWidth, color(255, 146, 88));
+		cubes[2] = new CubeObject(this, 3 * offset + 2 * cubeWidth, cubeY, cubeWidth, color(83, 243, 195));
+		cubes[3] = new CubeObject(this, 4 * offset + 3 * cubeWidth, cubeY, cubeWidth, color(143, 250, 86));
 
 		noFill();
 		// add rectangles
 		barrels[0] = new BarrelObject(this, offset, rectY);
 		barrels[1] = new BarrelObject(this, offset * 2 + rectWidth, rectY);
+		barrels[2] = new BarrelObject(this, offset * 3 +  2 * rectWidth, rectY);
 
 		new Thread(new MessageServer(this)).start();
 	}
@@ -140,6 +141,8 @@ class BarrelObject {
 
 	int value = 50;
 	KippenInterface canvas;
+	int flashCount = 0;
+	
 	int x, y;
 
 	public BarrelObject(KippenInterface canvas, int x, int y) {
@@ -149,7 +152,7 @@ class BarrelObject {
 	}
 
 	public void draw() {
-		canvas.noFill();
+	
 		canvas.rect(x, y, canvas.rectWidth, canvas.rectHeight);
 
 		canvas.fill(canvas.color(255, 255, 255, 50));
@@ -158,24 +161,30 @@ class BarrelObject {
 
 	public void setValue(int value) {
 		this.value = value;
+	
 
 	}
 }
 
 class CubeObject {
 	KippenInterface canvas;
+	
+	int flashColor;
 
 	float x;
 	float y;
 	int cubeWidth;
+	
+	int flashCount = 0;
 
 	private int state = -1;
 
-	public CubeObject(KippenInterface canvas, int x, int y, int cubeWidth) {
+	public CubeObject(KippenInterface canvas, int x, int y, int cubeWidth, int flashColor) {
 		this.canvas = canvas;
 		this.x = x;
 		this.y = y;
 		this.cubeWidth = cubeWidth;
+		this.flashColor = flashColor;
 	}
 
 	public int getCubeState() {
@@ -187,7 +196,7 @@ class CubeObject {
 	}
 
 	public void sideChange(int clipNumber) {
-
+		this.flashCount = 3;
 		this.state = clipNumber;
 	}
 
@@ -221,7 +230,13 @@ class CubeObject {
 		canvas.textAlign(canvas.CENTER, canvas.CENTER);
 		canvas.stroke(canvas.color(255, 255, 255));
 		canvas.text(this.getClipnumberString(this.state), x + cubeWidth / 2, y + cubeWidth / 2);
-		canvas.noFill();
+		if(flashCount > 0){
+			canvas.fill(flashColor);
+			this.flashCount--;
+			System.out.println("flash");
+		}
+		else
+			canvas.noFill();
 		canvas.rect(x, y, cubeWidth, cubeWidth);
 	}
 }
