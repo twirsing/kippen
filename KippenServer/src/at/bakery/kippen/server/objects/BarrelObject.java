@@ -13,7 +13,6 @@ import at.bakery.kippen.common.data.BarrelOrientationData;
 import at.bakery.kippen.common.data.BatteryData;
 import at.bakery.kippen.common.data.MoveData;
 import at.bakery.kippen.common.data.SensorTripleData;
-import at.bakery.kippen.common.data.ShakeData;
 import at.bakery.kippen.common.data.WifiLevelsData;
 import at.bakery.kippen.server.EventTypes;
 import at.bakery.kippen.server.KippenServer;

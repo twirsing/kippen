@@ -11,9 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import at.bakery.kippen.common.AbstractData;
-import at.bakery.kippen.common.data.CubeOrientationData;
 import at.bakery.kippen.common.data.MoveData;
-import at.bakery.kippen.common.data.ShakeData;
 import at.bakery.kippen.server.EventTypes;
 import at.bakery.kippen.server.command.Command;
 

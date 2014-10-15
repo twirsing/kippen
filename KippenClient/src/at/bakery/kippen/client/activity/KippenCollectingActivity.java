@@ -9,9 +9,6 @@ import android.hardware.SensorManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 import at.bakery.kippen.client.R;
 import at.bakery.kippen.client.sensor.BatterySensing;
@@ -19,8 +16,7 @@ import at.bakery.kippen.client.sensor.MotionSensing;
 import at.bakery.kippen.common.data.PingData;
 
 /*
- * TODO all-in-one sensor listener
- * TODO deposit job for activity.recreate on any error (e.g. network task)
+ * TODO implement alerts on phone screen for quick diagnosis
  */
 
 public class KippenCollectingActivity extends Activity {
@@ -30,6 +26,10 @@ public class KippenCollectingActivity extends Activity {
 	 private static final String WIFI_ESSID = "UmkippenWlanderl"; //StockEINS
 	 private static final String WIFI_PWD = "IchBinKeinLustigesPasswort";
 	 private static final String SERVER_IP = "192.168.10.10"; //server ip
+	 
+//	 private static final String WIFI_ESSID = "dsl"; //StockEINS
+//	 private static final String WIFI_PWD = "dsldsldsl";
+//	 private static final String SERVER_IP = "192.168.43.152"; //server ip
 //	
 	// setting tomw
 	/*
@@ -107,19 +107,8 @@ public class KippenCollectingActivity extends Activity {
 		}
 		wc.status = WifiConfiguration.Status.ENABLED;
 
-		// add and enable might fail e.g., in case it exists already in the
-		// manager
-		wifiMan.enableNetwork(wifiMan.addNetwork(wc), true);
-		if (!wifiMan.reconnect()) {
-			Log.e("KIPPEN", "The device was not able to connect to the host network. Please check your AP and client-side wifi configurations! Quit for now ...");
-			this.finish();
-		}
-
-		// store the client id (MAC) for re-use
-		String clientId = wifiMan.getConnectionInfo().getMacAddress();
-
 		// create the client socket for data transmission
-		NetworkingTask.setup(SERVER_IP, 10001, clientId);
+		NetworkingTask.setup(SERVER_IP, 10001, wifiMan, wc);
 		NetworkingTask networkTask = NetworkingTask.getInstance();
 		networkTask.start();
 

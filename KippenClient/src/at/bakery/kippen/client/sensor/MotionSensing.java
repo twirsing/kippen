@@ -1,6 +1,5 @@
 package at.bakery.kippen.client.sensor;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -19,8 +18,8 @@ import at.bakery.kippen.common.data.AverageAccelerationData;
 import at.bakery.kippen.common.data.BarrelOrientationData;
 import at.bakery.kippen.common.data.ContainerData;
 import at.bakery.kippen.common.data.CubeOrientationData;
-import at.bakery.kippen.common.data.MoveData;
 import at.bakery.kippen.common.data.CubeOrientationData.Orientation;
+import at.bakery.kippen.common.data.MoveData;
 import at.bakery.kippen.common.data.SensorTripleData;
 import at.bakery.kippen.common.data.ShakeData;
 
@@ -111,7 +110,7 @@ public class MotionSensing implements SensorEventListener {
 	 * BARREL
 	 * ------------------------------------------- */
 	//TODO make this configurable via the XML file
-	private static final int MAX_DEGREES = 4 * 360;
+	private static final int MAX_DEGREES = 3 * 360;
 	private int degrees = 0;
 	private int lastAbsDegrees = 0;
 	
