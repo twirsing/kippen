@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:configuration xmlns:tns="http://www.bakery.at/kippen"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.bakery.at/kippen config.xsd ">
+
+	<!-- Specififies the time after which a timeout even for an object is called -->
+	<timeoutMinutes>1</timeoutMinutes>
+
+	<ableton>
+		<ip>ip</ip>
+		<port>0</port>
+	</ableton>
+
+	<objects>
+		<!-- 3: Cube -->
+		<objectConfig>
+			<!-- mac>18:1E:B0:0A:56:AB</mac -->
+			<mac>c4:43:8f:46:34:32</mac>
+			<events>
+			    <eventConfig eventType="rollChange">
+					<commands>
+						<CommandConfig commandType="SENDSOCKETDATA">
+							<param key="command" value="barrelRoll" />
+							<param key="destinationIP" value="localhost" />
+							<param key="destinationPort" value="9876" />
+							<param key="trackNumber" value="1" />
+						</CommandConfig>
+					</commands>
+				</eventConfig>
+			</events>
+			<type>barrel</type>
+		</objectConfig>
+	</objects>
+</tns:configuration>
+
+

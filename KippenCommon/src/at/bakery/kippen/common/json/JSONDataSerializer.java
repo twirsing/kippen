@@ -3,7 +3,6 @@ package at.bakery.kippen.common.json;
 import java.io.UnsupportedEncodingException;
 
 import at.bakery.kippen.common.AbstractData;
-import at.bakery.kippen.common.data.ContainerData;
 
 import com.google.gson.Gson;
 

@@ -2,21 +2,17 @@ package at.bakery.kippen.server.command;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import at.bakery.kippen.common.data.PingData;
 import at.bakery.kippen.config.Param;
 import at.bakery.kippen.server.KippenServer;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 /*

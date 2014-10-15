@@ -5,7 +5,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
-import android.os.Message;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.util.Log;
 import at.bakery.kippen.common.AbstractData;
 import at.bakery.kippen.common.json.JSONDataSerializer;
@@ -24,26 +25,30 @@ public class NetworkingTask extends Thread implements INetworking {
 	private int port;
 	private String clientId;
 	
+	private WifiManager wifiMan;
+	private WifiConfiguration wifiConf;
+	
 	// singleton instance
 	private static NetworkingTask instance;
 	
-	protected static void setup(String host, int port, String clientId) {
-		instance = new NetworkingTask(host, port, clientId);
+	protected static void setup(String host, int port, WifiManager wifiMan, WifiConfiguration wifiConf) {
+		instance = new NetworkingTask(host, port, wifiMan, wifiConf);
 	}
 	
 	public static NetworkingTask getInstance() {
 		if(instance == null) {
 			Log.e("KIPPEN", "It is likely that you failed setup IP and port, using default localhost:8080");
-			setup("127.0.0.1", 8080, "anonymousClient");
+			throw new RuntimeException("You forgot to properly setup the NetworkingTask! Call setup(...)!");
 		}
 		
 		return instance;
 	}
 	
-	private NetworkingTask(String host, int port, String clientId) {
+	private NetworkingTask(String host, int port, WifiManager wifiMan, WifiConfiguration wifiConf) {
 		this.host = host;
 		this.port = port;
-		this.clientId = clientId;
+		this.wifiMan = wifiMan;
+		this.wifiConf = wifiConf;
 	}
 	
 	@Override
@@ -85,8 +90,18 @@ public class NetworkingTask extends Thread implements INetworking {
 			
 			if(socket == null) {
 				try {
-					socket = new Socket(InetAddress.getByName(host), port);
-					oos = socket.getOutputStream();
+					boolean wifiStatus = false;
+					wifiStatus = wifiMan.enableNetwork(wifiMan.addNetwork(wifiConf), true);
+					wifiStatus &= wifiMan.reconnect();
+					
+					if(wifiStatus) {
+						// store the client id (MAC) for re-use
+						clientId = wifiMan.getConnectionInfo().getMacAddress();
+						socket = new Socket(InetAddress.getByName(host), port);
+						oos = socket.getOutputStream();
+					} else {
+						Log.e("KIPPEN", "The device was not able to connect to the host network. Please check your AP and client-side wifi configurations! Quit for now ...");
+					}
 				} catch (Exception ex) {
 					Log.e("KIPPEN", "Failed to open socket", ex);
 					resetSocket();
