@@ -100,6 +100,7 @@ public abstract class AbstractKippenObject {
 				try {
 					c.execute(paramMap);
 				} catch (Exception e) {
+					e.printStackTrace();
 					log.warning("Failed to execute command " + c.getClass().getSimpleName());
 				} finally {
 
