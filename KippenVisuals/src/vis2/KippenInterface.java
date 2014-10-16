@@ -35,7 +35,7 @@ public class KippenInterface extends PApplet {
 
 		// add cubes
 		cubes[0] = new CubeObject(this, offset, cubeY, cubeWidth, color(252, 87, 122));
-		cubes[1] = new CubeObject(this, 2 * offset + cubeWidth, cubeY, cubeWidth, color(255, 146, 88));
+		cubes[1] = new CubeObject(this, 2 * offset + cubeWidth, cubeY, cubeWidth, color(255, 200, 200));
 		cubes[2] = new CubeObject(this, 3 * offset + 2 * cubeWidth, cubeY, cubeWidth, color(83, 243, 195));
 		cubes[3] = new CubeObject(this, 4 * offset + 3 * cubeWidth, cubeY, cubeWidth, color(143, 250, 86));
 
@@ -66,6 +66,7 @@ public class KippenInterface extends PApplet {
 		}
 
 		for (int i = 0; i < barrels.length; i++) {
+			noFill();
 			barrels[i].draw();
 		}
 	}
@@ -233,7 +234,6 @@ class CubeObject {
 		if(flashCount > 0){
 			canvas.fill(flashColor);
 			this.flashCount--;
-			System.out.println("flash");
 		}
 		else
 			canvas.noFill();

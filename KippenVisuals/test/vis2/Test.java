@@ -18,8 +18,8 @@ public class Test {
 	public void setBarrelValue() throws UnknownHostException, IOException {
 		JSONObject object = new JSONObject();
 		object.setString("command", "barrelRoll");
-		object.setString("trackNumber", "2");
-		object.setString("value", "0.9");
+		object.setString("trackNumber", "1");
+		object.setString("value", "0.4");
 		this.send(object);
 	}
 
@@ -28,8 +28,8 @@ public class Test {
 	public void setCubeValue() throws UnknownHostException, IOException {
 		JSONObject object = new JSONObject();
 		object.setString("command", "sideChange");
-		object.setString("trackNumber", "0");
-		object.setString("clipNumber", "1");
+		object.setString("trackNumber", "1");
+		object.setString("clipNumber", "3");
 		this.send(object);
 	}
 	
