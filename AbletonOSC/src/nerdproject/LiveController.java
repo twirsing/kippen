@@ -335,7 +335,7 @@ public class LiveController {
 		return response;
 	}
 
-	public static LiveController getInstance() {
+	public synchronized static LiveController getInstance() {
 		if (instance == null) {
 			System.out.println("Working Directory = " + System.getProperty("user.dir"));
 			Properties properties = new Properties();
@@ -364,8 +364,8 @@ public class LiveController {
 				e.printStackTrace();
 				throw new RuntimeException("properties file cannot be read");
 			}
-			LiveController.instance = new LiveController(hostAddress, liveOSCPort, incommingPort);
-			return LiveController.instance;
+			instance = new LiveController(hostAddress, liveOSCPort, incommingPort);
+			return instance;
 		}
 		return instance;
 	}

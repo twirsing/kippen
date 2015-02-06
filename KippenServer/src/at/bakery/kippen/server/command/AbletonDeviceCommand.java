@@ -17,6 +17,7 @@ public class AbletonDeviceCommand implements Command {
 
 	@Override
 	public void execute(Map<String, String> params) throws Exception {
+		System.out.println("sending barrel orientation");
 		float value = Float.valueOf(params.get("value"));
 		LiveController.getInstance().setDeviceParameterNormalized(trackNumber, deviceNumber, parameterNumber, value);
 	}

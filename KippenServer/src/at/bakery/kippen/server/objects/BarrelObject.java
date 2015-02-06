@@ -52,7 +52,8 @@ public class BarrelObject extends AbstractKippenObject {
 	}
 
 	private void processOrientationData(BarrelOrientationData data) {
-		log.log(Level.FINEST, "Barrel relative orientation " + data.getValue());
+		
+		System.out.println(this.getId().substring(0,4) +  " " + 	 data.getValue());
 		HashMap<String, String> paramMap = new HashMap<String, String>();
 
 		double barrelValue = Double.valueOf(data.getValue());
@@ -69,9 +70,7 @@ public class BarrelObject extends AbstractKippenObject {
 					log.warning("Failed to execute command " + c.getClass().getSimpleName());
 				}
 			}
-
 			lastBarrelValue = barrelValue;
-
 		}
 
 	}
@@ -115,7 +114,7 @@ public class BarrelObject extends AbstractKippenObject {
 	}
 
 	private void processAccelerationData(AccelerationData data) {
-		SensorTripleData sd = (SensorTripleData) data;
+//		SensorTripleData sd = (SensorTripleData) data;
 		// log.info("" + Math.sqrt(sd.getX() * sd.getX() + sd.getY() * sd.getY()
 		// + sd.getZ() + sd.getZ()));
 	}

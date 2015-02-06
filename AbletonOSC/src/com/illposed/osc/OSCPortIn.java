@@ -84,8 +84,10 @@ public class OSCPortIn extends OSCPort implements Runnable {
 					socket.receive(packet);
 				} catch (SocketException ex) {
 					if (listening) {
+						ex.printStackTrace();
 						throw ex;
 					} else {
+						ex.printStackTrace();
 						// if we closed the socket while receiving data,
 						// the exception is expected/normal, so we hide it
 						continue;

@@ -117,7 +117,9 @@ public class NetworkingTask extends Thread implements INetworking {
 				
 				// JSON serialize and send packet
 				byte[] serData = JSONDataSerializer.serialize(txPackets);
+				
 				oos.write(serData);
+				Log.d("SENDING", "sent data " + txPackets);
 			} catch(Exception ex) {
 				Log.e("KIPPEN", "Failed to send packets", ex);
 				resetSocket();

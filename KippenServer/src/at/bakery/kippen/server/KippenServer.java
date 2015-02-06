@@ -113,6 +113,7 @@ public class KippenServer {
 
 								// pick the client and process all received data
 								AbstractKippenObject object = objectMap.get(data.getClientId());
+								System.out.println(data.getClientId().substring(0,3));
 								if (object == null) {
 									log.warning("Client MAC address " + data.getClientId() + " is not registered");
 									return;
@@ -136,6 +137,11 @@ public class KippenServer {
 								object.processData(containerData.shakeData);
 								object.processData(containerData.cubeData);
 								object.processData(containerData.barrelData);
+								
+								System.out.println(containerData.getClientId());
+//								System.out.println(object);
+//								System.out.println(containerData);
+								
 
 							}
 						} catch (Exception ex) {
@@ -228,6 +234,8 @@ public class KippenServer {
 					default:
 						break;
 					}
+					
+				//	objectMap.put(mac, barrelKippObject);
 				}
 			} else if (objectConfig.getType() == TypeEnum.BALL) {
 				log.info("Registering a BALL with MAC " + mac);

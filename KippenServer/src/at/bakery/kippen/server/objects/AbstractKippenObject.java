@@ -25,7 +25,7 @@ public abstract class AbstractKippenObject {
 
 	protected HashMap<String, List<Command>> eventsOfObject = new HashMap<String, List<Command>>();
 
-	private static  long IDLE_AFTER_SECONDS = 340;
+	private static long IDLE_AFTER_SECONDS = 340;
 	private long lastActivityTime = System.nanoTime();
 
 	protected double MOVE_DATA_THRESHHOLD = 0.2;
@@ -38,7 +38,7 @@ public abstract class AbstractKippenObject {
 	public AbstractKippenObject(String id, int timeout) {
 		this.id = id;
 		IDLE_AFTER_SECONDS = timeout * 60;
-		
+
 		// periodically checks whether the object is idle or not (defined by the
 		// constant)
 		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -59,11 +59,14 @@ public abstract class AbstractKippenObject {
 	protected void timeout() {
 		System.out.println("Calling TIMOUT on object " + id);
 		HashMap<String, String> paramMap = new HashMap<String, String>();
-		for (Command c : eventsOfObject.get(EventTypes.TIMEOUT)) {
-			try {
-				c.execute(paramMap);
-			} catch (Exception e) {
-				log.warning("Failed to execute command " + c.getClass().getSimpleName());
+		List<Command> list = eventsOfObject.get(EventTypes.TIMEOUT);
+		if (list != null) {
+			for (Command c : eventsOfObject.get(EventTypes.TIMEOUT)) {
+				try {
+					c.execute(paramMap);
+				} catch (Exception e) {
+					log.warning("Failed to execute command " + c.getClass().getSimpleName());
+				}
 			}
 		}
 	}

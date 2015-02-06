@@ -355,8 +355,8 @@
 					<commands>
 						<CommandConfig commandType="ABLETONDEVICE">
 							<param key="trackNumber" value="0" />
-							<param key="deviceNumber" value="0" />
-							<param key="parameterNumber" value="1" />
+							<param key="deviceNumber" value="4" />
+							<param key="parameterNumber" value="9" />
 						</CommandConfig>
 
 
@@ -383,17 +383,17 @@
 						<CommandConfig commandType="ABLETONDEVICE">
 							<param key="trackNumber" value="1" />
 							<param key="deviceNumber" value="1" />
-							<param key="parameterNumber" value="3" />
+							<param key="parameterNumber" value="9" />
 						</CommandConfig>
 
-						
+
 						<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="barrelRoll" />
 							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
 							<param key="trackNumber" value="1" />
 						</CommandConfig>
-						
+
 					</commands>
 
 				</eventConfig>
@@ -404,21 +404,24 @@
 
 
 
-		<!-- 9: Ball -->
+		<!-- 9: barrel -->
 		<objectConfig>
 			<mac>6C:B7:F4:AD:BE:BF</mac>
 			<events>
-				<eventConfig eventType="move">
+				<eventConfig eventType="rollChange">
+
 					<commands>
-						<CommandConfig commandType="ABLETONMASTERDEVICE">
-							<param key="deviceNumber" value="0" />
-							<param key="parameterNumber" value="9" />
+						<CommandConfig commandType="ABLETONDEVICE">
+							<param key="trackNumber" value="2" />
+							<param key="deviceNumber" value="2" />
+							<param key="parameterNumber" value="3" />
 						</CommandConfig>
+
 						<CommandConfig commandType="SENDSOCKETDATA">
-							<param key="command" value="ball" />
+							<param key="command" value="barrelRoll" />
 							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
-							<param key="trackNumber" value="1" />
+							<param key="trackNumber" value="2" />
 						</CommandConfig>
 					</commands>
 
@@ -426,7 +429,7 @@
 				</eventConfig>
 
 			</events>
-			<type>ball</type>
+			<type>barrel</type>
 		</objectConfig>
 	</objects>
 

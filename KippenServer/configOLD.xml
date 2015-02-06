@@ -355,8 +355,8 @@
 					<commands>
 						<CommandConfig commandType="ABLETONDEVICE">
 							<param key="trackNumber" value="0" />
-							<param key="deviceNumber" value="4" />
-							<param key="parameterNumber" value="9" />
+							<param key="deviceNumber" value="0" />
+							<param key="parameterNumber" value="1" />
 						</CommandConfig>
 
 
@@ -383,17 +383,17 @@
 						<CommandConfig commandType="ABLETONDEVICE">
 							<param key="trackNumber" value="1" />
 							<param key="deviceNumber" value="1" />
-							<param key="parameterNumber" value="9" />
+							<param key="parameterNumber" value="3" />
 						</CommandConfig>
 
-
+						
 						<CommandConfig commandType="SENDSOCKETDATA">
 							<param key="command" value="barrelRoll" />
 							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
 							<param key="trackNumber" value="1" />
 						</CommandConfig>
-
+						
 					</commands>
 
 				</eventConfig>
@@ -404,24 +404,21 @@
 
 
 
-		<!-- 9: barrel -->
+		<!-- 9: Ball -->
 		<objectConfig>
 			<mac>6C:B7:F4:AD:BE:BF</mac>
 			<events>
-				<eventConfig eventType="rollChange">
-
+				<eventConfig eventType="move">
 					<commands>
-						<CommandConfig commandType="ABLETONDEVICE">
-							<param key="trackNumber" value="2" />
-							<param key="deviceNumber" value="2" />
-							<param key="parameterNumber" value="3" />
+						<CommandConfig commandType="ABLETONMASTERDEVICE">
+							<param key="deviceNumber" value="0" />
+							<param key="parameterNumber" value="9" />
 						</CommandConfig>
-
 						<CommandConfig commandType="SENDSOCKETDATA">
-							<param key="command" value="barrelRoll" />
+							<param key="command" value="ball" />
 							<param key="destinationIP" value="localhost" />
 							<param key="destinationPort" value="9876" />
-							<param key="trackNumber" value="2" />
+							<param key="trackNumber" value="1" />
 						</CommandConfig>
 					</commands>
 
